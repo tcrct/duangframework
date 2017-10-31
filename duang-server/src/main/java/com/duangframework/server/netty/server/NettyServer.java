@@ -46,12 +46,12 @@ public class NettyServer extends AbstractNettyServer {
 
         serverBootstrap.group(bossGroup, workerGroup);
         allocator = new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
-        serverBootstrap.option(ChannelOption.SO_BACKLOG, NettyServerConfig.SO_BACKLOG)
+        serverBootstrap.option(ChannelOption.SO_BACKLOG, NettyServerConfig.SO_BACKLOG)  //连接数
                 .childOption(ChannelOption.ALLOCATOR, allocator)
                 .childOption(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT)
                 .childOption(ChannelOption.SO_REUSEADDR, true)
-                .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childOption(ChannelOption.TCP_NODELAY, true)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)  //开启Keep-Alive，长连接
+                .childOption(ChannelOption.TCP_NODELAY, true)  //不延迟，消息立即发送
                 .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
     }
 

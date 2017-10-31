@@ -24,12 +24,12 @@ public class NettyMainFilter {
         }
     }
 
-    public void doFilter(final ChannelHandlerContext context, final FullHttpRequest request, final FullHttpResponse response)  {
+    public void doFilter(final ChannelHandlerContext context, final FullHttpRequest request, final FullHttpResponse response) throws Exception {
         response.setStatus(HttpResponseStatus.OK);
-        byte[] body = request.content().array();
-        String bodyString = Unpooled.copiedBuffer(body).toString();
+        String bodyString = request.decoderResult().toString();
         logger.warn(bodyString);
-        ByteBuf buffer = Unpooled.copiedBuffer(body);
+
+        ByteBuf buffer = Unpooled.copiedBuffer(bodyString.getBytes("UTF-8"));
         response.content().writeBytes(buffer);
         context.writeAndFlush(response);
 
