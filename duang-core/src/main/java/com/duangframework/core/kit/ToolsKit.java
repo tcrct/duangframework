@@ -5,9 +5,12 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
 import com.duangframework.core.utils.DuangThreadLocal;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +21,11 @@ import java.util.Map;
  */
 public class ToolsKit {
 
+    private static Logger logger = LoggerFactory.getLogger(ToolsKit.class);
+
     private static SerializeConfig jsonConfig = new SerializeConfig();
+
+    private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     // 定义一个IdEntity安全线程类
     private static DuangThreadLocal<String> duangThreadLocal = new DuangThreadLocal<String>() {
@@ -126,6 +133,15 @@ public class ToolsKit {
 
     public static <T> List<T> jsonParseArray(String jsonText, Class<T> clazz) {
         return JSON.parseArray(jsonText, clazz);
+    }
+
+    public static String getCurrentDateString() {
+        try {
+            return SDF.format(new Date());
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+            return "";
+        }
     }
 
 }

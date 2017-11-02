@@ -16,6 +16,7 @@ import io.netty.handler.codec.http.multipart.HttpDataFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -97,6 +98,8 @@ public class HttpServiceHandler extends SimpleChannelInboundHandler<FullHttpRequ
         response.headers().setAll(httpHeaders);
         response.headers().set(CONTENT_TYPE, JSON); //设置默认的返回结果
         response.headers().set(TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
+        response.headers().set(HttpHeaderNames.DATE, ToolsKit.getCurrentDateString());
+        response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes()+"");
         HttpHeaderUtil.setKeepAlive(response, keepAlive);
         ChannelFuture channelFutureListener = ctx.writeAndFlush(response);
         //如果不支持keep-Alive，服务器端主动关闭请求
