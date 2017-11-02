@@ -62,6 +62,13 @@ public class HttpServiceHandler extends SimpleChannelInboundHandler<FullHttpRequ
             logger.warn("request uri length is 0 , so exit...");
             return;
         }
+
+        // 如果包含有.则视为静态文件访问
+        if(uri.contains(".")) {
+            logger.warn("not support static file access, so exit...");
+            return;
+        }
+
         Map<String,String> headerParmasMap = new ConcurrentHashMap<String,String>();
         HttpHeaders httpHeaders = request.headers();
         if(null != httpHeaders && !httpHeaders.isEmpty()) {
@@ -82,9 +89,6 @@ public class HttpServiceHandler extends SimpleChannelInboundHandler<FullHttpRequ
             resultString = ToolsKit.toJsonString(paramMap);
             System.out.println(resultString);
         }
-
-
-
 
         // 是否支持Keep-Alive
         boolean keepAlive = HttpHeaderUtil.isKeepAlive(request);
