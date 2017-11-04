@@ -35,14 +35,14 @@ public class ActionHandler extends AbstractHttpHandler implements Runnable{
 //        decoder(request);
     }
 
-    private Map<String,Object> decoder(FullHttpRequest request) {
-        try {
-            AbstractDecoder<Map<String, Object>> decoder = DecoderFactory.create(request.method().toString(), request.headers().get(CONTENT_TYPE)+"", request);
-            return decoder.decoder();
-        } catch (Exception e) {
-            throw new DecoderException(e.getMessage(), e);
-        }
-    }
+//    private Map<String,Object> decoder(FullHttpRequest request) {
+//        try {
+//            AbstractDecoder<Map<String, Object>> decoder = DecoderFactory.create(request.method().toString(), request.headers().get(CONTENT_TYPE)+"", request);
+//            return decoder.decoder();
+//        } catch (Exception e) {
+//            throw new DecoderException(e.getMessage(), e);
+//        }
+//    }
 
 
     @Override
