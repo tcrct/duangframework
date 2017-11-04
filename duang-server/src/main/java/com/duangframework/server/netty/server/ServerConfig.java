@@ -1,5 +1,7 @@
 package com.duangframework.server.netty.server;
 
+import io.netty.handler.codec.http.HttpConstants;
+
 /**
  * Created by laotang on 2017/10/30.
  */
@@ -17,5 +19,7 @@ public class ServerConfig {
     public static int SO_BACKLOG = 32768;
 
     public static int IDLE_TIME_SECONDS = 180;  //180秒
+
+    public static String DEFAULT_CHARSET = "UTF-8";
 
 }

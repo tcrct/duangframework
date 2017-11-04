@@ -19,8 +19,10 @@ public abstract class AbstractDecoder<T> {
 
     protected static HttpDataFactory HTTP_DATA_FACTORY = new DefaultHttpDataFactory(MINSIZE, HttpConstants.DEFAULT_CHARSET);
 
+    protected static String[] EMPTY_ARRAYS = {};
+
     protected FullHttpRequest request;
-    protected  Map<String,Object> paramsMap;
+    protected  Map<String,String[]> paramsMap;
 
     public AbstractDecoder(FullHttpRequest request) {
         this.request = request;

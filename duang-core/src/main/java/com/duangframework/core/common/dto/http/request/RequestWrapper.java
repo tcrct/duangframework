@@ -2,11 +2,10 @@ package com.duangframework.core.common.dto.http.request;
 
 import com.duangframework.core.exceptions.EmptyNullException;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
-import java.util.Map;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -16,23 +15,33 @@ import java.util.Map;
 public class RequestWrapper implements IRequest {
 
     private IRequest request;
+
+    private String endPoint;
+    private Charset charset;
     private String method;
     private String queryString;
     private String uri;
     private Map<String,String> headers;
+    private Map<String,String[]> params;
+    private byte[] content;
+    private Map<String,Object> attributes = new ConcurrentHashMap<>();
 
-    public RequestWrapper(String method, String uri, String queryString, Map<String,String> headers) {
-       this.method = method;
+    public RequestWrapper(String endPoint, Charset charset, String method, String uri, String queryString, Map<String,String> headers, Map<String,String[]> params, byte[] content) {
+        this.endPoint = endPoint;
+        this.charset = charset;
+        this.method = method;
        this.queryString = queryString;
        this.uri = uri;
        this.headers = headers;
+       this.params = params;
+       this.content = content;
     }
 
-    public IRequest getRequest() {
-        return this.request;
+    private RequestWrapper() {
+
     }
 
-    public void setRequest(IRequest request) {
+    public RequestWrapper(IRequest request) {
         if(request == null) {
             throw new EmptyNullException("HttpRequest cannot be null");
         } else {
@@ -40,59 +49,76 @@ public class RequestWrapper implements IRequest {
         }
     }
 
+//    public IRequest getRequest() {
+//        return this.request;
+//    }
+//
+//    public void setRequest(IRequest request) {
+//        if(request == null) {
+//            throw new EmptyNullException("HttpRequest cannot be null");
+//        } else {
+//            this.request = request;
+//        }
+//    }
+
+    @Override
+    public void setAttribute(String name, Object o) {
+        attributes.put(name, o);
+    }
+
     @Override
     public Object getAttribute() {
-        return null;
+        return attributes;
     }
 
     @Override
     public Enumeration<String> getAttributeNames() {
-        return null;
+        return  new Vector(attributes.keySet()).elements();
     }
 
     @Override
     public String getCharacterEncoding() {
-        return null;
+        return charset.name();
     }
 
     @Override
     public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
-
+        charset = Charset.forName(env);
     }
 
     @Override
     public long getContentLength() {
-        return 0;
+        return null == content ? 0 : content.length;
     }
 
     @Override
     public String getContentType() {
-        return null;
+        return headers.get("content-type");
     }
 
     @Override
     public InputStream getInputStream() throws IOException {
-        return null;
+        return new ByteArrayInputStream(content);
     }
 
     @Override
     public String getParameter(String name) {
-        return null;
+        return params.get(name)[0];
     }
 
     @Override
     public Enumeration<String> getParameterNames() {
-        return null;
+        return new Vector(params.keySet()).elements();
     }
 
     @Override
     public String[] getParameterValues(String name) {
-        return new String[0];
+        return params.get(name);
     }
 
     @Override
     public Map<String, String[]> getParameterMap() {
-        return null;
+        return params;
     }
 
     @Override
@@ -125,16 +151,14 @@ public class RequestWrapper implements IRequest {
         return null;
     }
 
-    @Override
-    public void setAttribute(String name, Object o) {
 
-    }
 
     @Override
     public void removeAttribute(String name) {
-
+        attributes.remove(name);
     }
 
+    // 是否开启SSL, 即HTTPS
     @Override
     public boolean isSecure() {
         return false;
@@ -142,12 +166,12 @@ public class RequestWrapper implements IRequest {
 
     @Override
     public String getHeader(String name) {
-        return null;
+        return headers.get(name);
     }
 
     @Override
     public Enumeration<String> getHeaderNames() {
-        return null;
+        return new Vector(headers.keySet()).elements();
     }
 
     @Override
@@ -167,6 +191,6 @@ public class RequestWrapper implements IRequest {
 
     @Override
     public StringBuffer getRequestURL() {
-        return null;
+        return new StringBuffer(endPoint);
     }
 }

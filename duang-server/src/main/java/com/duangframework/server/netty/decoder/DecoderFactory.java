@@ -32,10 +32,10 @@ public class DecoderFactory {
 
             }
             else if (ContentType.FORM.getValue().contains(contentType)) {
-                decoder = new PostDecoder(request);
+                decoder = new PostDecoder(request.copy());
             }
             else if (ContentType.MULTIPART.getValue().contains(contentType)) {
-                decoder = new MultiPartPostDecoder(request);
+                decoder = new MultiPartPostDecoder(request.copy());
             }
         }
 

@@ -8,24 +8,21 @@ import com.duangframework.core.kit.ToolsKit;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpConstants;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
  * @author laotang
  * @date 2017/10/31
  */
-public class JsonDecoder extends AbstractDecoder<Map<String, Object>> {
+public class JsonDecoder extends AbstractDecoder<Map<String, String[]>> {
 
     public JsonDecoder(FullHttpRequest request) {
         super(request);
     }
 
     @Override
-    public Map<String, Object> decoder() throws Exception {
+    public Map<String, String[]> decoder() throws Exception {
         String json = request.content().toString(HttpConstants.DEFAULT_CHARSET);
         if(ToolsKit.isMapJsonString(json)) {
             parseMap(JSON.parseObject(json, Map.class));
@@ -44,17 +41,29 @@ public class JsonDecoder extends AbstractDecoder<Map<String, Object>> {
         }
         String tokenid =  sourceMap.get(ReturnDto.TOKENID_FIELD)+"";
         if(ToolsKit.isNotEmpty(tokenid)) {
-            paramsMap.put(ReturnDto.TOKENID_FIELD, tokenid);
+            paramsMap.put(ReturnDto.TOKENID_FIELD, new String[]{tokenid});
         }
         JSONObject dataObj = (JSONObject) sourceMap.get(ReturnDto.DATA_FIELD);
+
         if (ToolsKit.isNotEmpty(dataObj)) {		//自定义格式的
-            for(Iterator<Map.Entry<String,Object>> entryIterator = dataObj.entrySet().iterator(); entryIterator.hasNext();){
-                Map.Entry<String,Object> entry = entryIterator.next();
-                Object value = entry.getValue();
-                if(ToolsKit.isNotEmpty(value)) {
-                    if (ToolsKit.isArray(value)) {
-                        JSONArray jsonArray = (JSONArray) entry.getValue();
-                        List<Object> valueList = new ArrayList(jsonArray.size());
+            paramsMap.putAll(parseMapValue(dataObj));
+        } else {
+            paramsMap.putAll(parseMapValue(sourceMap));
+        }
+    }
+
+    private Map<String, String[]> parseMapValue(Map<String, Object> dataObj) {
+        Map<String, String[]> params = new HashMap<>(dataObj.size());
+        for(Iterator<Map.Entry<String,Object>> entryIterator = dataObj.entrySet().iterator(); entryIterator.hasNext();){
+            Map.Entry<String,Object> entry = entryIterator.next();
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            if(ToolsKit.isNotEmpty(value)) {
+                if (ToolsKit.isArray(value)) {
+                    JSONArray jsonArray = (JSONArray) entry.getValue();
+                    List<String> valueList = jsonArray.toJavaList(String.class);
+                        /*
+                        List<String> valueList = new ArrayList(jsonArray.size());
                         for(Iterator<Object> iterator = jsonArray.iterator(); iterator.hasNext();) {
                             Object valueObj = iterator.next();
                             if( valueObj instanceof  String) {
@@ -63,20 +72,15 @@ public class JsonDecoder extends AbstractDecoder<Map<String, Object>> {
                                 valueList.add(valueObj);
                             }
                         }
-                        dataObj.put(entry.getKey(), valueList);
-                    }
+                        */
+                    params.put(key, valueList.toArray(EMPTY_ARRAYS));
+                } else {
+                    String[] valueArray = {value+""};
+                    params.put(key, valueArray);
                 }
             }
-            paramsMap.putAll(dataObj);
-        } else {
-            paramsMap.putAll(sourceMap);
         }
-    }
-
-    private void parseArray(ArrayList<Object> sourceList) {
-        if(ToolsKit.isNotEmpty(sourceList)) {
-            return;
-        }
+        return params;
 
     }
 
