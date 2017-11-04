@@ -1,4 +1,4 @@
-package com.duangframework.core.common.dto;
+package com.duangframework.core.common.dto.result;
 
 /**
  *	手机访问后返回的信息头,每一个dto对象须包含

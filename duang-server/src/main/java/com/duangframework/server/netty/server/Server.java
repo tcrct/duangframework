@@ -1,74 +1,59 @@
 package com.duangframework.server.netty.server;
 
+import com.duangframework.server.IServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultMessageSizeEstimator;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
-import io.netty.util.internal.PlatformDependent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
 
 /**
  * Created by laotang on 2017/10/30.
  */
-public class NettyServer extends AbstractNettyServer {
+public class Server implements IServer {
 
-    private static Logger logger = LoggerFactory.getLogger(NettyServer.class);
+    private static Logger logger = LoggerFactory.getLogger(Server.class);
 
     public EventLoopGroup bossGroup;
     public EventLoopGroup workerGroup;
     public ServerBootstrap serverBootstrap;
     protected volatile ByteBufAllocator allocator;
-    private String host;
-    private int port;
+    private BootStrap bootStrap;
 
-    public NettyServer(String host, int port) {
-        this.host = host;
-        this.port = port;
+    public Server(int port) {
+       this("0.0.0.0", port);
+    }
+
+    public Server(String host, int port) {
+        bootStrap = new BootStrap(host, port);
         init();//初始化
     }
 
     private void init() {
         serverBootstrap = new ServerBootstrap();
-        bossGroup = NettyServerFactory.builderBossLoopGroup();
-        workerGroup = NettyServerFactory.builderWorkerLoopGroup();
-
-        serverBootstrap.group(bossGroup, workerGroup);
-        allocator = new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
-        serverBootstrap.option(ChannelOption.SO_BACKLOG, NettyServerConfig.SO_BACKLOG)  //连接数
-                .childOption(ChannelOption.ALLOCATOR, allocator)
+        serverBootstrap.group(bootStrap.getBossGroup(), bootStrap.getWorkerGroup());
+        serverBootstrap.option(ChannelOption.SO_BACKLOG, bootStrap.getBockLog())  //连接数
+                .childOption(ChannelOption.ALLOCATOR, bootStrap.getAllocator())
                 .childOption(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT)
                 .childOption(ChannelOption.SO_REUSEADDR, true)
                 .childOption(ChannelOption.SO_KEEPALIVE, true)  //开启Keep-Alive，长连接
                 .childOption(ChannelOption.TCP_NODELAY, true)  //不延迟，消息立即发送
                 .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
+        serverBootstrap.channel(bootStrap.getDefaultChannel());
     }
 
     @Override
     public void start() {
-        if (isNative()) {
-            serverBootstrap.channel(EpollServerSocketChannel.class);
-        } else {
-            serverBootstrap.channel(NioServerSocketChannel.class);
-        }
-        InetSocketAddress httpSockerAddress = new InetSocketAddress(host, port);
-        serverBootstrap.localAddress(httpSockerAddress)
-                .handler(new LoggingHandler(LogLevel.WARN))
-                .childHandler(new HttpChannelInitializer());
-
+        serverBootstrap.localAddress(bootStrap.getSockerAddress())
+                .handler(bootStrap.getLoggingHandler())
+                .childHandler(new DuangChannelInitializer(bootStrap));
 //        InetSocketAddress rpcSockerAddress = new InetSocketAddress(host, port+10000);
-//        serverBootstrap.localAddress(rpcSockerAddress).childHandler(new HttpChannelInitializer());
+//        serverBootstrap.localAddress(rpcSockerAddress).childHandler(new DuangChannelInitializer());
 
         try {
             ChannelFuture future = serverBootstrap.bind().sync();
@@ -76,7 +61,7 @@ public class NettyServer extends AbstractNettyServer {
                 @Override
                 public void operationComplete(Future<Void> future) throws Exception {
                     if (future.isSuccess()) {
-                        logger.warn("netty server started on endpoint : " + host+":"+port);
+                        logger.warn("netty server started on endpoint : " + bootStrap.getSockerAddress().toString());
                     } else {
                         logger.warn("netty server started failed");
                     }
@@ -89,8 +74,7 @@ public class NettyServer extends AbstractNettyServer {
         } catch (InterruptedException e1) {
             throw new RuntimeException("this.serverBootstrap.bind().sync() InterruptedException", e1);
         } finally {
-            workerGroup.shutdownGracefully();
-            bossGroup.shutdownGracefully();
+            shutdown();
         }
 
     }
@@ -98,14 +82,9 @@ public class NettyServer extends AbstractNettyServer {
     @Override
     public void shutdown() {
         try {
-            if(null != workerGroup) {
-                workerGroup.shutdownGracefully();
-            }
-            if(null != bossGroup) {
-                bossGroup.shutdownGracefully();
-            }
+            bootStrap.close();
         } catch (Exception e) {
-            logger.warn("Netty Server shutdown exception: "+e.getMessage(), e);
+            logger.warn(e.getMessage(), e);
         }
     }
 }

@@ -3,7 +3,7 @@ package com.duangframework.server.netty.server;
 /**
  * Created by laotang on 2017/10/30.
  */
-public class NettyServerConfig {
+public class ServerConfig {
 
     //boss线程数，建议为1
     public static int MAX_BOSS_EXECUTORS_NUMBER = 1;
@@ -15,5 +15,7 @@ public class NettyServerConfig {
     public static int IO_RATIO_NUMBER = 100;
 
     public static int SO_BACKLOG = 32768;
+
+    public static int IDLE_TIME_SECONDS = 180;  //180秒
 
 }

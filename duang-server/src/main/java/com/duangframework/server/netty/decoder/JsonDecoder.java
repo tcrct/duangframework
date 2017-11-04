@@ -3,7 +3,7 @@ package com.duangframework.server.netty.decoder;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.duangframework.core.common.dto.ReturnDto;
+import com.duangframework.core.common.dto.result.ReturnDto;
 import com.duangframework.core.kit.ToolsKit;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpConstants;

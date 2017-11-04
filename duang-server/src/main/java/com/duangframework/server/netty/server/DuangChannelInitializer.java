@@ -1,6 +1,7 @@
 package com.duangframework.server.netty.server;
 
-import com.duangframework.server.netty.handler.HttpServiceHandler;
+import com.duangframework.server.netty.handler.HttpBaseHandler;
+import com.duangframework.server.netty.handler.RpcBaseHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -8,6 +9,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.ssl.SslContext;
 import io.netty.handler.stream.ChunkedWriteHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,13 +19,23 @@ import org.slf4j.LoggerFactory;
  * @author laotang
  * @date 2017/10/30
  */
-public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
+public class DuangChannelInitializer extends ChannelInitializer<SocketChannel> {
 
-    private static Logger logger = LoggerFactory.getLogger(HttpChannelInitializer.class);
+    private static Logger logger = LoggerFactory.getLogger(DuangChannelInitializer.class);
+
+    private BootStrap bootStrap;
+    private SslContext sslContext;
+
+    public DuangChannelInitializer(BootStrap bootStrap) {
+        this.bootStrap = bootStrap;
+    }
 
     @Override
     protected void initChannel(SocketChannel ch) throws Exception {
         ChannelPipeline p = ch.pipeline();
+        if(bootStrap.isSslEnabled()) {
+            sslContext = bootStrap.getSslContext();
+        }
         // HttpServerCodec包含了默认的HttpRequestDecoder(请求消息解码器)和HttpResponseEncoder(响应解码器)
         p.addLast(new HttpServerCodec());
         // 为http响应内容添加gizp压缩器
@@ -32,8 +44,10 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
         p.addLast(new HttpObjectAggregator(1048576));
         //目的是支持异步大文件传输
         p.addLast(new ChunkedWriteHandler());
-        // 真正处理用户业务逻辑的地方
-        p.addLast(new HttpServiceHandler());
+        // 真正处理RPC业务逻辑的地方
+        p.addLast(new RpcBaseHandler());
+        // 真正处理HTTP业务逻辑的地方
+        p.addLast(new HttpBaseHandler());
     }
 
     @Override

@@ -19,9 +19,6 @@ public class DecoderFactory {
         if(ToolsKit.isEmpty(method)) {
             throw new DecoderException("method is null");
         }
-        if(ToolsKit.isEmpty(contentType)) {
-            throw new DecoderException("contentType is null");
-        }
 
         AbstractDecoder decoder = null;
         if(HttpMethod.GET.name().equalsIgnoreCase(method)) {

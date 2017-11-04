@@ -1,4 +1,4 @@
-package com.duangframework.core.common.dto;
+package com.duangframework.core.common.dto.result;
 
 import java.util.Map;
 

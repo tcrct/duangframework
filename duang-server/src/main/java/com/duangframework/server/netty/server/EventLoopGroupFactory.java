@@ -11,26 +11,26 @@ import java.util.concurrent.*;
 /**
  * Created by laotang on 2017/10/30.
  */
-public class NettyServerFactory {
+public class EventLoopGroupFactory {
 
     public static EventLoopGroup builderBossLoopGroup() {
 
         Executor executor = builderThreadPoolExecutor(
-                NettyServerConfig.MAX_BOSS_EXECUTORS_NUMBER,
-                NettyServerConfig.MAX_BOSS_EXECUTORS_NUMBER,
-                NettyServerConfig.KEEP_ALIVETIME,
+                ServerConfig.MAX_BOSS_EXECUTORS_NUMBER,
+                ServerConfig.MAX_BOSS_EXECUTORS_NUMBER,
+                ServerConfig.KEEP_ALIVETIME,
                 TimeUnit.HOURS,
-                new ArrayBlockingQueue<Runnable>(NettyServerConfig.MAX_BOSS_EXECUTORS_NUMBER),
-                new NamedThreadFactory(NettyServerConfig.BOSSGROUP_POOLTHREAD_NAME));
+                new ArrayBlockingQueue<Runnable>(ServerConfig.MAX_BOSS_EXECUTORS_NUMBER),
+                new NamedThreadFactory(ServerConfig.BOSSGROUP_POOLTHREAD_NAME));
 
 
         if(NativeSupport.isSupportNative()) {
-            EpollEventLoopGroup bossLoopGroup = new EpollEventLoopGroup(NettyServerConfig.MAX_BOSS_EXECUTORS_NUMBER, executor);
-            bossLoopGroup.setIoRatio(NettyServerConfig.IO_RATIO_NUMBER);
+            EpollEventLoopGroup bossLoopGroup = new EpollEventLoopGroup(ServerConfig.MAX_BOSS_EXECUTORS_NUMBER, executor);
+            bossLoopGroup.setIoRatio(ServerConfig.IO_RATIO_NUMBER);
             return bossLoopGroup;
         } else {
-            NioEventLoopGroup bossLoopGroup = new NioEventLoopGroup(NettyServerConfig.MAX_BOSS_EXECUTORS_NUMBER, executor);
-            bossLoopGroup.setIoRatio(NettyServerConfig.IO_RATIO_NUMBER);
+            NioEventLoopGroup bossLoopGroup = new NioEventLoopGroup(ServerConfig.MAX_BOSS_EXECUTORS_NUMBER, executor);
+            bossLoopGroup.setIoRatio(ServerConfig.IO_RATIO_NUMBER);
             return bossLoopGroup;
         }
     }
@@ -42,18 +42,18 @@ public class NettyServerFactory {
         Executor executor = builderThreadPoolExecutor(
                 workerNum,
                 workerNum,
-                NettyServerConfig.KEEP_ALIVETIME,
+                ServerConfig.KEEP_ALIVETIME,
                 TimeUnit.HOURS,
                 new ArrayBlockingQueue<Runnable>(workerNum),
-                new NamedThreadFactory(NettyServerConfig.WORKERGROUP_POOLTHREAD_NAME));
+                new NamedThreadFactory(ServerConfig.WORKERGROUP_POOLTHREAD_NAME));
 
         if(NativeSupport.isSupportNative()) {
             EpollEventLoopGroup workerLoopGroup = new EpollEventLoopGroup(workerNum, executor);
-            workerLoopGroup.setIoRatio(NettyServerConfig.IO_RATIO_NUMBER);
+            workerLoopGroup.setIoRatio(ServerConfig.IO_RATIO_NUMBER);
             return workerLoopGroup;
         } else {
             NioEventLoopGroup workerLoopGroup = new NioEventLoopGroup(workerNum, executor);
-            workerLoopGroup.setIoRatio(NettyServerConfig.IO_RATIO_NUMBER);
+            workerLoopGroup.setIoRatio(ServerConfig.IO_RATIO_NUMBER);
             return workerLoopGroup;
         }
     }
