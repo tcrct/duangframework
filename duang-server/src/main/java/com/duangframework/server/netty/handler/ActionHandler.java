@@ -1,5 +1,6 @@
 package com.duangframework.server.netty.handler;
 
+import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.exceptions.DecoderException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.server.netty.decoder.AbstractDecoder;
@@ -7,6 +8,7 @@ import com.duangframework.server.netty.decoder.DecoderFactory;
 import com.duangframework.server.utils.RequestUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaderUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,12 +23,15 @@ import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 public class ActionHandler extends AbstractHttpHandler implements Runnable{
 
     private ChannelHandlerContext ctx;
-    private FullHttpRequest request;
+//    private FullHttpRequest request;
+    private IRequest request;
+    private boolean keepAlive; //是否支持Keep-Alive
 
     public ActionHandler(ChannelHandlerContext ctx, FullHttpRequest request){
         this.ctx = ctx;
-        RequestUtils.convertDuangRequest(request);
-        this.request = request.copy();
+        this.keepAlive = HttpHeaderUtil.isKeepAlive(request);
+        this.request = RequestUtils.convertDuangRequest(request);
+//        this.request = request.copy();
 //        decoder(request);
     }
 
@@ -43,15 +48,13 @@ public class ActionHandler extends AbstractHttpHandler implements Runnable{
     @Override
     public void run() {
         try {
-            AbstractDecoder<Map<String, Object>> decoder = DecoderFactory.create(request.method().toString(), request.headers().get(CONTENT_TYPE)+"", request);
-            Map<String, Object> paramMap = decoder.decoder();
             String body = "";
             Map<String, String > headers = new HashMap<>();
-            if(ToolsKit.isNotEmpty(paramMap)) {
-                body = ToolsKit.toJsonString(paramMap);
+            if(ToolsKit.isNotEmpty(request.getParameterMap())) {
+                body = ToolsKit.toJsonString(request.getParameterMap());
                 System.out.println(Thread.currentThread().getId() +"                "+body);
             }
-            response(ctx, request, body, headers);
+            response(ctx, keepAlive, body, headers);
         } catch (Exception e) {
             e.printStackTrace();
         }
