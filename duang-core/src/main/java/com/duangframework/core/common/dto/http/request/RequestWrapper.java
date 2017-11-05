@@ -1,11 +1,16 @@
 package com.duangframework.core.common.dto.http.request;
 
 import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.kit.ToolsKit;
+
 
 import java.io.*;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+
 
 /**
  *
@@ -14,27 +19,23 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RequestWrapper implements IRequest {
 
-    private IRequest request;
+    private final static String CONTENT_ENCODING = "content-encoding";
 
-    private String endPoint;
+    private IRequest request;
+    private URI remoteEndPoint;
+    private URI localEndPoint;
     private Charset charset;
-    private String method;
-    private String queryString;
-    private String uri;
     private Map<String,String> headers;
     private Map<String,String[]> params;
     private byte[] content;
     private Map<String,Object> attributes = new ConcurrentHashMap<>();
 
-    public RequestWrapper(String endPoint, Charset charset, String method, String uri, String queryString, Map<String,String> headers, Map<String,String[]> params, byte[] content) {
-        this.endPoint = endPoint;
-        this.charset = charset;
-        this.method = method;
-       this.queryString = queryString;
-       this.uri = uri;
-       this.headers = headers;
-       this.params = params;
-       this.content = content;
+    public RequestWrapper(URI remoteEndPoint, URI localEndPoint, Map<String,String> headers, Map<String,String[]> params, byte[] content) {
+        this.remoteEndPoint = remoteEndPoint;
+        this.localEndPoint = localEndPoint;
+        this.headers = headers;
+        this.params = params;
+        this.content = content;
     }
 
     private RequestWrapper() {
@@ -49,9 +50,9 @@ public class RequestWrapper implements IRequest {
         }
     }
 
-//    public IRequest getRequest() {
-//        return this.request;
-//    }
+    public IRequest getRequest() {
+        return this.request;
+    }
 //
 //    public void setRequest(IRequest request) {
 //        if(request == null) {
@@ -78,6 +79,14 @@ public class RequestWrapper implements IRequest {
 
     @Override
     public String getCharacterEncoding() {
+        if(null == charset) {
+            String contentEncodeing = headers.get(CONTENT_ENCODING) + "";
+            if (ToolsKit.isEmpty(contentEncodeing)) {
+                charset = Charset.defaultCharset();
+            } else {
+                charset = Charset.forName(contentEncodeing);
+            }
+        }
         return charset.name();
     }
 
@@ -123,32 +132,32 @@ public class RequestWrapper implements IRequest {
 
     @Override
     public String getProtocol() {
-        return null;
+        return remoteEndPoint.getScheme();
     }
 
     @Override
     public String getScheme() {
-        return null;
+        return remoteEndPoint.getScheme();
     }
 
     @Override
     public String getServerName() {
-        return null;
+        return remoteEndPoint.getHost();
     }
 
     @Override
     public int getServerPort() {
-        return 0;
+        return localEndPoint.getPort();
     }
 
     @Override
     public String getRemoteAddr() {
-        return null;
+        return remoteEndPoint.getHost();
     }
 
     @Override
     public String getRemoteHost() {
-        return null;
+        return remoteEndPoint.getHost();
     }
 
 
@@ -176,21 +185,25 @@ public class RequestWrapper implements IRequest {
 
     @Override
     public String getMethod() {
-        return method;
+        return headers.get("");
     }
 
     @Override
     public String getQueryString() {
-        return queryString;
+        return remoteEndPoint.getQuery();
     }
 
     @Override
     public String getRequestURI() {
-        return uri;
+        return remoteEndPoint.getHost();
     }
 
     @Override
     public StringBuffer getRequestURL() {
-        return new StringBuffer(endPoint);
+        try {
+            return new StringBuffer(remoteEndPoint.toURL().toString());
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

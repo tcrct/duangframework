@@ -10,5 +10,4 @@ public class HttpRequest extends RequestWrapper{
     public HttpRequest(IRequest request) {
         super(request);
     }
-
 }

@@ -22,4 +22,8 @@ public class ServerConfig {
 
     public static String DEFAULT_CHARSET = "UTF-8";
 
+    public static String HEADER_X_FORWARDED_FOR = "x-forwarded-for";
+
+    public static String UNKNOWN= "unknown";
+
 }

@@ -5,6 +5,8 @@ import io.netty.handler.codec.http.HttpConstants;
 import io.netty.handler.codec.http.multipart.DefaultHttpDataFactory;
 import io.netty.handler.codec.http.multipart.HttpDataFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -29,6 +31,15 @@ public abstract class AbstractDecoder<T> {
         paramsMap = new ConcurrentHashMap<>();
     }
 
+    protected void parseValue2List(Map<String,List<String>> params, String key, String value) {
+        if( params.containsKey(key) ) {
+            params.get(key).add(value);
+        } else {
+            List<String> valueList = new ArrayList<>();
+            valueList.add(value);
+            params.put(key, valueList);
+        }
+    }
 
     public abstract  T decoder() throws Exception;
 

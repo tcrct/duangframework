@@ -32,36 +32,6 @@ public abstract class AbstractHttpHandler {
 
     private static final String JSON = new AsciiString("application/json; charset=utf-8").toString();
 
-    /**
-     * 验证请求是否正确
-     * @return
-     */
-    protected void verificationRequest(FullHttpRequest request) {
-
-        // 保证解析结果正确,否则直接退出
-        if (!request.decoderResult().isSuccess()) {
-            throw new VerificationException("request decoder is not success, so exit...");
-        }
-
-        // 支持的的请求方式
-        String method = request.method().toString();
-        HttpMethod httpMethod = HttpMethod.valueOf(method);
-        if(ToolsKit.isEmpty(httpMethod)) {
-            throw new VerificationException("request method["+ httpMethod.toString() +"] is not support, so exit...");
-        }
-
-        // uri是有长度的
-        String uri = request.uri();
-        if (uri == null || uri.trim().length() == 0) {
-            throw new VerificationException("request uri length is 0 , so exit...");
-        }
-
-        // 如果包含有.则视为静态文件访问
-        if(uri.contains(".")) {
-            throw new VerificationException("not support static file access, so exit...");
-        }
-    }
-
     protected void response(ChannelHandlerContext ctx, boolean keepAlive, String body, Map<String, String> headers) throws Exception {
         // 是否支持Keep-Alive
 //        boolean keepAlive = HttpHeaderUtil.isKeepAlive(request);

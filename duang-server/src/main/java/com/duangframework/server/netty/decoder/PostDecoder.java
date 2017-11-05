@@ -30,13 +30,7 @@ public class PostDecoder extends AbstractDecoder<Map<String,String[]>> {
                 System.out.println("###########PostDecoder: "  + attribute.getHttpDataType().getClass().getName());
                 String key = attribute.getName();
                 String value = attribute.getValue();
-                if( params.containsKey(key) ) {
-                    params.get(key).add(value);
-                } else {
-                    List<String> valueList = new ArrayList<>();
-                    valueList.add(value);
-                    params.put(key, valueList);
-                }
+                parseValue2List(params, key, value);
                 paramsMap.put(key, params.get(key).toArray(EMPTY_ARRAYS));
             }
         }

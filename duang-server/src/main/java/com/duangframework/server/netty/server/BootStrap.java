@@ -37,11 +37,17 @@ public class BootStrap implements Closeable {
     private SslContext sslContext;
     private int idleTimeInSeconds = ServerConfig.IDLE_TIME_SECONDS;
     private int bockLog = ServerConfig.SO_BACKLOG;
+    private static BootStrap _bootStrap;
+
+    public static BootStrap getInstants() {
+        return _bootStrap;
+    }
 
     public BootStrap(String host, int port) {
         this.host = host;
         this.port = port;
         init();
+        _bootStrap = this;
     }
 
     private void init() {

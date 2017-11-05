@@ -2,6 +2,7 @@ package com.duangframework.server.netty.handler;
 
 import com.duangframework.core.exceptions.VerificationException;
 import com.duangframework.core.kit.ThreadPoolKit;
+import com.duangframework.server.utils.RequestUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -21,7 +22,12 @@ public class HttpBaseHandler extends SimpleChannelInboundHandler<FullHttpRequest
 
     @Override
     protected void messageReceived(final ChannelHandlerContext ctx, final FullHttpRequest request) throws Exception {
-
+        try {
+            RequestUtils.verificationRequest(request);
+        }catch (VerificationException ve) {
+            logger.warn(ve.getMessage());
+            return;
+        }
         // 再开线程执行后续操作，异步操作，提升效率
         ThreadPoolKit.execute(new ActionHandler(ctx, request));
 

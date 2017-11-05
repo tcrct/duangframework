@@ -28,6 +28,7 @@ public class GetDecoder extends AbstractDecoder<Map<String, String[]>> {
         Map<String,List<String>> map =  queryStringDecoder.parameters();
         if(ToolsKit.isNotEmpty(map)) {
             for(String key : map.keySet()) {
+//                System.out.println(key+"               "+map.get(key).toArray(EMPTY_ARRAYS).getClass());
                 paramsMap.put(key, map.get(key).toArray(EMPTY_ARRAYS));
             }
         }
