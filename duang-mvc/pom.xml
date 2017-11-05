@@ -16,11 +16,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <server.version>1.0-SNAPSHOT</server.version>
-
+        <core.version>1.0-SNAPSHOT</core.version>
     </properties>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.duangframework.core</groupId>
+            <artifactId>duang-core</artifactId>
+            <version>${core.version}</version>
+        </dependency>
     </dependencies>
 </project>
