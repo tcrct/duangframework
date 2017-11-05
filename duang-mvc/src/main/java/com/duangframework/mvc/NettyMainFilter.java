@@ -6,6 +6,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,7 @@ public class NettyMainFilter {
         String bodyString = request.decoderResult().toString();
         logger.warn(bodyString);
 
-        ByteBuf buffer = Unpooled.copiedBuffer(bodyString.getBytes("UTF-8"));
+        ByteBuf buffer = Unpooled.copiedBuffer(bodyString.getBytes(CharsetUtil.UTF_8));
         response.content().writeBytes(buffer);
         context.writeAndFlush(response);
 
