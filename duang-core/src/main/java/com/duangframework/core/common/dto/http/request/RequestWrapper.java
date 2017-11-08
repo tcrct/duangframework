@@ -53,14 +53,6 @@ public class RequestWrapper implements IRequest {
     public IRequest getRequest() {
         return this.request;
     }
-//
-//    public void setRequest(IRequest request) {
-//        if(request == null) {
-//            throw new EmptyNullException("HttpRequest cannot be null");
-//        } else {
-//            this.request = request;
-//        }
-//    }
 
     @Override
     public void setAttribute(String name, Object o) {
@@ -80,11 +72,11 @@ public class RequestWrapper implements IRequest {
     @Override
     public String getCharacterEncoding() {
         if(null == charset) {
-            String contentEncodeing = headers.get(CONTENT_ENCODING) + "";
-            if (ToolsKit.isEmpty(contentEncodeing)) {
+            String encodering = headers.get(CONTENT_ENCODING);
+            if (ToolsKit.isEmpty(encodering)) {
                 charset = Charset.defaultCharset();
             } else {
-                charset = Charset.forName(contentEncodeing);
+                charset = Charset.forName(encodering);
             }
         }
         return charset.name();
@@ -195,7 +187,7 @@ public class RequestWrapper implements IRequest {
 
     @Override
     public String getRequestURI() {
-        return remoteEndPoint.getHost();
+        return remoteEndPoint.getPath();
     }
 
     @Override

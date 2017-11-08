@@ -25,13 +25,12 @@ public class HttpBaseHandler extends SimpleChannelInboundHandler<FullHttpRequest
         try {
             RequestUtils.verificationRequest(request);
         }catch (VerificationException ve) {
+            //TODO 应该要有信息返回到客户端
             logger.warn(ve.getMessage());
             return;
         }
         // 再开线程执行后续操作，异步操作，提升效率
         ThreadPoolKit.execute(new ActionHandler(ctx, request));
-
-//        new NettyMainFilter(ctx, request, response);
     }
 
     @Override

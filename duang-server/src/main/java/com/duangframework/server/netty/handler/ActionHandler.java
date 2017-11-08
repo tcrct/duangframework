@@ -2,23 +2,15 @@ package com.duangframework.server.netty.handler;
 
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
-import com.duangframework.core.exceptions.DecoderException;
-import com.duangframework.core.exceptions.VerificationException;
-import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.mvc.filter.MainProcess;
-import com.duangframework.server.netty.decoder.AbstractDecoder;
-import com.duangframework.server.netty.decoder.DecoderFactory;
 import com.duangframework.server.utils.RequestUtils;
+import com.duangframework.server.utils.ResponseUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
 /**
  *
@@ -35,25 +27,24 @@ public class ActionHandler extends AbstractHttpHandler implements Runnable{
     private IResponse response;
     private boolean keepAlive; //是否支持Keep-Alive
 
-    public ActionHandler(ChannelHandlerContext ctx, FullHttpRequest request){
+    public ActionHandler(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest){
         this.ctx = ctx;
-        this.keepAlive = HttpHeaderUtil.isKeepAlive(request);
-        this.request = RequestUtils.convertDuangRequest(ctx, request);
-//        this.response = ResponseUtils.builder(request);
+        this.keepAlive = HttpHeaderUtil.isKeepAlive(fullHttpRequest);
+        this.request = RequestUtils.buildDuangRequest(ctx, fullHttpRequest);
+        this.response = ResponseUtils.buildDuangResponse(request);
     }
 
     @Override
     public void run() {
+        if (null == request || null == response) {
+            throw new EmptyNullException("build duang request or response is fail, exit...");
+        }
         try {
-            String body = "";
-            Map<String, String > headers = new HashMap<>();
-            if(ToolsKit.isNotEmpty(request.getParameterMap())) {
-                body = ToolsKit.toJsonString(request);
-            }
-
+            // TODO 调用MCV模块的主入口方法 如何变得更优雅一点呢？
+            // 调用MCV模块的主入口方法
             MainProcess.getInstantiation().doWork(request, response);
-
-            response(ctx, keepAlive, body, headers);
+            // 返回到客户端
+            response(ctx, keepAlive, response);
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
         }

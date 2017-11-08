@@ -2,6 +2,9 @@ package com.duangframework.core.common.dto.http.response;
 
 import com.duangframework.core.common.dto.result.ReturnDto;
 
+import java.util.Collection;
+import java.util.Map;
+
 /**
  *
  * @author laotang
@@ -17,6 +20,42 @@ public interface IResponse {
     void addHeader(String key, String value);
 
     /**
+     * 根据name返回头信息
+     * @param name          名称
+     */
+    String getHeader(String name);
+
+    /**
+     * 返回Header头所有名称
+     * @return
+     */
+    Collection<String> getHeaderNames();
+
+    /**
+     * 返回header对象
+     * @return
+     */
+    Map<String,String> getHeaders();
+
+    /**
+     * 取返回状态标识
+     * @return
+     */
+    int getStatus();
+
+    /**
+     * 设置编码格式
+     * @return
+     */
+    void setCharacterEncoding(String charset);
+
+    /**
+     * 返回编码格式名称
+     * @return
+     */
+    String getCharacterEncoding();
+
+    /**
      * 设置返回ContentType信息
      * @param contentType
      */
@@ -28,8 +67,7 @@ public interface IResponse {
      */
     void write(ReturnDto returnDto);
 
-    /**
-     * 关闭清除返回对象
-     */
-    void close();
+    @Override
+    String toString();
+
 }

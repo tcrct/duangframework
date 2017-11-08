@@ -44,17 +44,22 @@ public class RequestUtils {
      * @param request  FullHttpRequest对象
      * @return
      */
-    public static IRequest convertDuangRequest(ChannelHandlerContext ctx, FullHttpRequest request) {
-        // 装饰模式
-        RequestWrapper httpWrapper = new RequestWrapper(
-                getRemoteAddr(ctx.channel(), request),
-                getLocalAddr(request),
-                getHeaders(request),
-                decoder(request),
-//                Unpooled.copiedBuffer(request.content()).array()
-                Unpooled.wrappedBuffer(request.content()).array()
-                );
-        return new HttpRequest(httpWrapper).getRequest();
+    public static IRequest buildDuangRequest(ChannelHandlerContext ctx, FullHttpRequest request) {
+        try {
+            // 装饰模式
+            RequestWrapper httpWrapper = new RequestWrapper(
+                    getRemoteAddr(ctx.channel(), request),
+                    getLocalAddr(request),
+                    getHeaders(request),
+                    decoder(request),
+                    //Unpooled.wrappedBuffer(request.content()).array(),
+                Unpooled.copiedBuffer(request.content()).array()
+            );
+            return new HttpRequest(httpWrapper).getRequest();
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+            return null;
+        }
     }
 
     private static Map<String,String> getHeaders(FullHttpRequest request) {
@@ -114,7 +119,7 @@ public class RequestUtils {
      * @param request
      * @return
      */
-    private static URI getRemoteAddr(Channel channel, FullHttpRequest request) {
+    private static URI getRemoteAddr(Channel channel, FullHttpRequest request) throws Exception {
         String ipAddress = "";
         int paranPort = 80;     //PID
         try {
@@ -134,12 +139,7 @@ public class RequestUtils {
 
         String protocolStr = request.protocolVersion().protocolName().toString().toLowerCase();
         String endPoint = protocolStr + "://" + ipAddress + request.uri();
-        try {
-            return new URI(endPoint);
-        } catch (Exception e) {
-            logger.warn("getRemoteAddr new URI("+endPoint+") is fail: " + e.getMessage(), e);
-            return null;
-        }
+        return new URI(endPoint);
     }
 
     /**
@@ -147,15 +147,10 @@ public class RequestUtils {
      * @param request
      * @return
      */
-    private static URI getLocalAddr(FullHttpRequest request) {
+    private static URI getLocalAddr(FullHttpRequest request)  throws Exception {
         String protocolStr = request.protocolVersion().protocolName().toString().toLowerCase();
         InetSocketAddress inetSocketAddress = BootStrap.getInstants().getSockerAddress();
         String endPoint = protocolStr+"://"+inetSocketAddress.getHostString() + ":" + inetSocketAddress.getPort();
-        try {
-            return new URI(endPoint);
-        } catch (Exception e) {
-            logger.warn("getRemoteAddr new URI("+endPoint+") is fail: " + e.getMessage(), e);
-            return null;
-        }
+        return new URI(endPoint);
     }
 }

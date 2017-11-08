@@ -7,8 +7,6 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultMessageSizeEstimator;
 import io.netty.channel.EventLoopGroup;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.FutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,16 +55,7 @@ public class Server implements IServer {
 
         try {
             ChannelFuture future = serverBootstrap.bind().sync();
-            future.addListener(new FutureListener<Void>() {
-                @Override
-                public void operationComplete(Future<Void> future) throws Exception {
-                    if (future.isSuccess()) {
-                        logger.warn("netty server started on endpoint : " + bootStrap.getSockerAddress().toString());
-                    } else {
-                        logger.warn("netty server started failed");
-                    }
-                }
-            });
+            future.addListener(new DuangContextListener(bootStrap));
             // 等待或监听数据全部完成
             future.channel().closeFuture().awaitUninterruptibly();
             //成功绑定到端口之后,给channel增加一个 管道关闭的监听器并同步阻塞,直到channel关闭,线程才会往下执行,结束进程。

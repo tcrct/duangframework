@@ -11,5 +11,19 @@ import com.duangframework.mvc.core.IDuang;
 public class Duang implements IDuang {
 
 
+    /**
+     * 添加自定义处理器到框架，添加后，框架会对客户端的请求按顺序执行，发生异常时中断执行，并返回异常信息
+     */
+    @Override
+    public void addHandlers() {
+        System.out.println("addHandlers");
+    }
 
+    /**
+     * 添加自定义插件到框架
+     */
+    @Override
+    public void addPlugins() {
+        System.out.println("addPlugins");
+    }
 }

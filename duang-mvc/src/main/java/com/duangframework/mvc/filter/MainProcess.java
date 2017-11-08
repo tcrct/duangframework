@@ -2,12 +2,15 @@ package com.duangframework.mvc.filter;
 
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
+import com.duangframework.core.common.dto.result.HeadDto;
+import com.duangframework.core.common.dto.result.ReturnDto;
+import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.ServletException;
+import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.IProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -46,7 +49,25 @@ public class MainProcess implements IProcess {
     }
 
     @Override
-    public void doWork(IRequest request, IResponse response) throws IOException, ServletException {
+    public void doWork(final IRequest request, final IResponse response) throws Exception {
+        if(ToolsKit.isEmpty(request)) {  throw new EmptyNullException("request is null");}
+        if(ToolsKit.isEmpty(response)) {throw new EmptyNullException("response is null");}
+
+//        ThreadPoolKit.execute(new Callable<IResponse>() {
+//            @Override
+//            public IResponse call() throws Exception {
+//                return null;
+//            }
+//        });
+
+        String target = request.getRequestURI();
+        ReturnDto returnDto = new ReturnDto<>();
+        HeadDto head = new HeadDto();
+        head.setTimestamp(System.currentTimeMillis());
+        head.setUri(target);
+        returnDto.setHead(head);
+        returnDto.setData(request.getParameterMap());
+        response.write(returnDto);
 
     }
 
