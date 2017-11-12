@@ -42,7 +42,7 @@ public class ContextLoaderListener {
     // 扫描.class文件，并且将class实例化成bean对象，以供使用
     private  void initBean()  throws Exception {
         //扫描指定包路径下的类文件，类文件包含有指定的注解类或文件名以指定的字符串结尾的
-//        ClassKit.duang().annotation().packages().extname().list();
+//        ClassKit.duang().annotation().packages().jarname().extname().list();
     }
 
     // 初始化插件
