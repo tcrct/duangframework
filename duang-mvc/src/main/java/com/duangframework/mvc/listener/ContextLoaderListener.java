@@ -47,8 +47,8 @@ public class ContextLoaderListener {
     private  void initBean()  throws Exception {
         //扫描指定包路径下的类文件，类文件包含有指定的注解类或文件名以指定的字符串结尾的
         ClassScanKit.duang().annotation(Controller.class).annotation(Service.class)
-                .packages("")
-                .jarname("")
+//                .packages("")
+//                .jarname("")
                 .suffix(Const.CONTROLLER_ENDWITH_NAME).suffix(Const.SERVICE_ENDWITH_NAME)
                 .list();
     }
