@@ -1,5 +1,6 @@
 package com.duangframework.core.utils;
 
+import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,5 +16,28 @@ public class ClassUtils {
      */
     public static ClassLoader getClassLoader() {
         return Thread.currentThread().getContextClassLoader();
+    }
+
+
+    /**
+     * 加载类
+     */
+    public static Class<?> loadClass(String className, boolean isInitialized) {
+        if (ToolsKit.isEmpty(className)) {
+            return null;
+        }
+        Class<?> cls;
+        try {
+            logger.debug("\t>>{}", className);
+            if (isInitialized) {
+                cls = Class.forName(className, isInitialized, getClassLoader());
+            } else {
+                cls = getClassLoader().loadClass(className);
+            }
+        } catch (ClassNotFoundException e) {
+            logger.error("Load class is error:" + className, e);
+            throw new RuntimeException(e);
+        }
+        return cls;
     }
 }
