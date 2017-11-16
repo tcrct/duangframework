@@ -84,6 +84,7 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
     @Override
     public List<Class<?>> getList() throws Exception{
         List<Class<?>> classList = new ArrayList<>();
+        System.out.println("############: " + ClassUtils.getClassLoader().getResource("").getPath());
         for(String packageName : packageSet) {
             Enumeration<URL> urls = ClassUtils.getClassLoader().getResources(packageName.replace(".", "/"));
             while (urls.hasMoreElements()) {
@@ -92,6 +93,7 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
                     continue;
                 }
                 String protocol = url.getProtocol();
+                logger.debug(protocol +"                  "+url.getPath());
                 if ("file".equalsIgnoreCase(protocol)) {
                     String packagePath = url.getPath().replaceAll("%20", " ");
                     addClass(classList, packagePath, packageName);

@@ -40,15 +40,15 @@ public class ContextLoaderListener {
 
     // 初始化 IDuang
     private void initContext()  throws Exception {
-
+        System.out.println("###################:  initContext");
     }
 
     // 扫描.class文件，并且将class实例化成bean对象，以供使用
     private  void initBean()  throws Exception {
         //扫描指定包路径下的类文件，类文件包含有指定的注解类或文件名以指定的字符串结尾的
         ClassScanKit.duang().annotation(Controller.class).annotation(Service.class)
-                .packages("")
-                .jarname("")
+                .packages("com.syt.qingbean")
+                .jarname("qingbean")
                 .suffix(Const.CONTROLLER_ENDWITH_NAME).suffix(Const.SERVICE_ENDWITH_NAME)
                 .list();
     }
