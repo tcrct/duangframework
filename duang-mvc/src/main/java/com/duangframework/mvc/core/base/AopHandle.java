@@ -1,6 +1,7 @@
 package com.duangframework.mvc.core.base;
 
 import com.duangframework.core.annotation.aop.Proxy;
+import com.duangframework.core.interfaces.IProxy;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mvc.core.InstanceFactory;
@@ -22,7 +23,7 @@ public class AopHandle {
     private static Logger logger = LoggerFactory.getLogger(AopHandle.class);
 
     public static void duang() {
-        List<Object> proxyList = InstanceFactory.getAllBeanMap().get(Proxy.class.getSimpleName());
+        List<IProxy> proxyList = InstanceFactory.getAllBeanMap().get(Proxy.class.getSimpleName());
         if(ToolsKit.isEmpty(proxyList)) {
             return;
         }

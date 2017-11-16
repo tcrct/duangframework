@@ -47,8 +47,9 @@ public class IocHandle {
             for(Method method : methods) {
                 Annotation[] annotations = method.getDeclaredAnnotations();
                 if(ToolsKit.isNotEmpty(annotations)) {
-                    List<Object> proxyList = new ArrayList<>(annotations.length);
+                    List<IProxy> proxyList = new ArrayList<>(annotations.length);
                     for(Annotation aopAnnot : annotations) {
+                        String annotName = aopAnnot.getClass().getCanonicalName();
 
                     }
                 }
