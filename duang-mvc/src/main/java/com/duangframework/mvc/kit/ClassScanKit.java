@@ -7,10 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -63,6 +60,11 @@ public class ClassScanKit {
         return _classScanKit;
     }
 
+    public ClassScanKit annotations(Set<Class<? extends Annotation>> annotClassSet) {
+        annotationSet.addAll(annotClassSet);
+        return _classScanKit;
+    }
+
     /**
      * 添加要扫描类文件的包路径，若有多个时，重复调用
      * @return
@@ -107,6 +109,11 @@ public class ClassScanKit {
     private void checkClassTemplate() {
         if(ToolsKit.isEmpty(template)) {
             template = new DefaultClassTemplate(annotationSet, packageSet, jarNameSet, suffixSet);
+        }
+        if(!annotationSet.isEmpty()) {
+            for(Iterator<Class<? extends Annotation>> it = annotationSet.iterator(); it.hasNext();) {
+                suffixSet.add(it.next().getSimpleName());
+            }
         }
     }
 

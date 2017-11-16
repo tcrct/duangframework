@@ -1,8 +1,7 @@
 package com.duangframework.core.common.classes;
 
-import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.kit.PathKit;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.core.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +49,7 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
     /**
      * TODO  替换重复的包路径
      */
+    /*
     private void replaceDuplicatePackageName() {
         if (ToolsKit.isEmpty(packageSet) ) {
            throw new EmptyNullException("包路径为空，请指定包路径");
@@ -80,20 +80,27 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
             }
         }
     }
+    */
 
+    /**
+     * 取出所有指定包名及指定jar文件前缀的Class类
+     * @return
+     * @throws Exception
+     */
     @Override
     public List<Class<?>> getList() throws Exception{
         List<Class<?>> classList = new ArrayList<>();
-        System.out.println("############: " + ClassUtils.getClassLoader().getResource("").getPath());
+//        String classesRootPath = PathKit.duang().resource("").web();
+//        String libRootPath = PathKit.duang().resource("").lib();
         for(String packageName : packageSet) {
-            Enumeration<URL> urls = ClassUtils.getClassLoader().getResources(packageName.replace(".", "/"));
+            Enumeration<URL> urls = PathKit.duang().resource(packageName).paths();
             while (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
                 if (ToolsKit.isEmpty(url)) {
                     continue;
                 }
                 String protocol = url.getProtocol();
-                logger.debug(protocol +"                  "+url.getPath());
+//                logger.debug(protocol +"                  "+url.getPath());
                 if ("file".equalsIgnoreCase(protocol)) {
                     String packagePath = url.getPath().replaceAll("%20", " ");
                     addClass(classList, packagePath, packageName);
@@ -123,20 +130,22 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
         return classList;
     }
 
-
-
-
-
+    /**
+     * 添加类到List集合
+     * @param classList
+     * @param packagePath
+     * @param packageName
+     */
     private void addClass(List<Class<?>> classList, String packagePath, String packageName) {
         try {
             // 获取包名路径下的 文件或目录
             File[] files = new File(packagePath).listFiles(new FileFilter() {
                 @Override
                 public boolean accept(File pathname) {
-                    return pathname.isDirectory() || pathname.getName().indexOf(".") > 0;
+                    return pathname.isDirectory() || pathname.getName().contains(".");
                 }
             });
-            if (files != null) {
+            if (ToolsKit.isNotEmpty(files)) {
                 // 遍历文件或目录
                 for (File file : files) {
                     String fileName = file.getName();

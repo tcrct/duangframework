@@ -1,10 +1,9 @@
 package com.duangframework.mvc.listener;
 
-import com.duangframework.core.annotation.mvc.Controller;
-import com.duangframework.core.annotation.mvc.Service;
-import com.duangframework.core.common.Const;
 import com.duangframework.core.exceptions.ServletException;
-import com.duangframework.mvc.kit.ClassScanKit;
+import com.duangframework.mvc.core.base.AopHandle;
+import com.duangframework.mvc.core.base.BeanHandle;
+import com.duangframework.mvc.core.base.IocHandle;
 
 /**
  *
@@ -29,7 +28,10 @@ public class ContextLoaderListener {
     public void contextDestroyed() {
     }
 
-    // 初始化MVC框架，各方法的执行顺序不能变
+    /**
+     * 初始化MVC框架，各方法的执行顺序不能变
+     * @throws Exception
+     */
     public void contextInitialized() throws Exception {
         initContext();
         initBean();
@@ -38,34 +40,42 @@ public class ContextLoaderListener {
         initIoc();
     }
 
-    // 初始化 IDuang
+    /**
+     *  初始化 IDuang
+     * @throws Exception
+     */
     private void initContext()  throws Exception {
         System.out.println("###################:  initContext");
     }
 
-    // 扫描.class文件，并且将class实例化成bean对象，以供使用
+    /**
+     *  扫描.class文件，并且将class实例化成bean对象，以供使用
+     */
     private  void initBean()  throws Exception {
-        //扫描指定包路径下的类文件，类文件包含有指定的注解类或文件名以指定的字符串结尾的
-        ClassScanKit.duang().annotation(Controller.class).annotation(Service.class)
-                .packages("com.syt.qingbean")
-                .jarname("qingbean")
-                .suffix(Const.CONTROLLER_ENDWITH_NAME).suffix(Const.SERVICE_ENDWITH_NAME)
-                .list();
+        BeanHandle.duang();
     }
 
-    // 初始化插件
+    /**
+     *  初始化插件
+     */
     private void initPlugins()  throws Exception {
 
     }
 
-    // 初始化Aop
+    /**
+     *  初始化Aop
+     *  基于代理的实现
+     */
     private void initAop()  throws Exception {
-
+        AopHandle.duang();
     }
 
-    // 初始化Ioc
+    /**
+     * 初始化Ioc, 依赖注入
+     * 主要在Controller里注入Service类， Service里注入Service类
+     */
     private void initIoc()  throws Exception {
-
+        IocHandle.duang();
     }
 
 }

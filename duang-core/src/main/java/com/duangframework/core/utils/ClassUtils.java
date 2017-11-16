@@ -19,6 +19,9 @@ public class ClassUtils {
     }
 
 
+    public static Class<?> loadClass(Class<?> clazz, boolean isInitialized) {
+        return loadClass(clazz.getCanonicalName(), isInitialized);
+    }
     /**
      * 加载类
      */

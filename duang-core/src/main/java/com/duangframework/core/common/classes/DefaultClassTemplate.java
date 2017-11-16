@@ -1,7 +1,5 @@
 package com.duangframework.core.common.classes;
 
-import com.duangframework.core.annotation.mvc.Controller;
-import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 
@@ -14,16 +12,6 @@ import java.util.*;
  * @date 2017/11/12 0012
  */
 public class DefaultClassTemplate extends AbstractClassTemplate {
-
-    private static Set<Class<? extends Annotation>> annotationSet = new HashSet<>();
-    static {
-        annotationSet.add(Controller.class);
-        annotationSet.add(Service.class);
-    }
-
-    public DefaultClassTemplate() {
-        super(annotationSet);
-    }
 
     public DefaultClassTemplate(Set<Class<? extends Annotation>> annotationSet,
                                 Set<String> packageSet,
@@ -69,25 +57,38 @@ public class DefaultClassTemplate extends AbstractClassTemplate {
         Map<String, List<Class<?>>> classMap = new HashMap<>();
         for(Iterator<Class<?>> it = classList.iterator(); it.hasNext();) {
             Class<?> clazz = it.next();
-
-//            for(String suffix : suffixSet) {
-//                classMap
-//            }
-
             for(Class<? extends  Annotation> annotClass : annotationSet) {
+                String key = annotClass.getSimpleName();
                 if(clazz.isAnnotationPresent(annotClass)) {
-                    String key = annotClass.getName();
-                    if(classMap.containsKey(key) ) {
-                        classMap.get(key).add(clazz);
-                    } else {
-                        List<Class<?>> list = new ArrayList<>();
-                        list.add(clazz);
-                        classMap.put(key, list);
+                    addClass2Map4Key(classMap, key, clazz);
+                } else {
+                    if (suffixSet.contains(key)) {
+                        addClass2Map4Key(classMap, key, clazz);
                     }
                 }
             }
         }
         return classMap;
+    }
+
+    /**
+     * 添加类到Map集合中，根据key作区分
+     * @param classMap
+     * @param key
+     * @param clazz
+     */
+    private void addClass2Map4Key(Map<String, List<Class<?>>> classMap, String key, Class<?> clazz) {
+        List<Class<?>> list = null;
+        if(classMap.containsKey(key) ) {
+            list = classMap.get(key);
+            if (!list.contains(clazz)) {
+                list.add(clazz);
+            }
+        } else {
+            list = new ArrayList<>();
+            list.add(clazz);
+        }
+        classMap.put(key, list);
     }
 
 }
