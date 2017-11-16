@@ -22,7 +22,7 @@ public class AopHandle {
     private static Logger logger = LoggerFactory.getLogger(AopHandle.class);
 
     public static void duang() {
-        List<Class<?>> proxyList = InstanceFactory.getAllClassMap().get(Proxy.class.getSimpleName());
+        List<Object> proxyList = InstanceFactory.getAllBeanMap().get(Proxy.class.getSimpleName());
         if(ToolsKit.isEmpty(proxyList)) {
             return;
         }
@@ -32,7 +32,7 @@ public class AopHandle {
             Proxy proxy = proxyClass.getAnnotation(Proxy.class);
             String key = proxy.aop().getCanonicalName();
             Class<?> proxyBean = ClassUtils.loadClass(proxyClass, true);
-            proxyMap.put(key, proxyBean);
+            proxyMap.put(key, proxyBean.newInstance());
         }
         // 缓存到对象实例工厂
         InstanceFactory.setProxyMap(proxyMap);

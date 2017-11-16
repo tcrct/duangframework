@@ -3,6 +3,8 @@ package com.duangframework.mvc.core;
 import com.duangframework.core.IHandle;
 import com.duangframework.core.annotation.aop.Proxy;
 import com.duangframework.core.annotation.db.Entity;
+import com.duangframework.core.annotation.ioc.Import;
+import com.duangframework.core.annotation.ioc.ImportRpc;
 import com.duangframework.core.annotation.mvc.Controller;
 import com.duangframework.core.annotation.mvc.Monitor;
 import com.duangframework.core.annotation.mvc.Service;
@@ -21,13 +23,17 @@ public class InstanceFactory {
     /**
      * 注解类
      */
-    public static final Set<Class<? extends Annotation>> ANNOTATION_SET = new LinkedHashSet<>();
+    public static final Set<Class<? extends Annotation>> MVC_ANNOTATION_SET = new LinkedHashSet<>();
+    public static final Set<Class<? extends Annotation>> IOC_ANNOTATION_SET = new LinkedHashSet<>();
     static {
-        ANNOTATION_SET.add(Controller.class);
-        ANNOTATION_SET.add(Service.class);
-        ANNOTATION_SET.add(Monitor.class);
-        ANNOTATION_SET.add(Proxy.class);
-        ANNOTATION_SET.add(Entity.class);
+        MVC_ANNOTATION_SET.add(Controller.class);
+        MVC_ANNOTATION_SET.add(Service.class);
+        MVC_ANNOTATION_SET.add(Monitor.class);
+        MVC_ANNOTATION_SET.add(Proxy.class);
+        MVC_ANNOTATION_SET.add(Entity.class);
+
+        IOC_ANNOTATION_SET.add(Import.class);
+        IOC_ANNOTATION_SET.add(ImportRpc.class);
     }
 
 
@@ -55,15 +61,15 @@ public class InstanceFactory {
     }
 
     /**
-     * 所有Class集合， 这里的所有是指@DefaultClassTemplate扫描后的
-     * 即经过滤后的Class
+     * 所有Class Bean集合， 这里的所有是指@DefaultClassTemplate扫描后且实例化后的
+     * 即经过滤后的Class并Class.forName()
      */
-    private static Map<String, List<Class<?>>> allClassMap = new HashMap<>();
-    public static Map<String, List<Class<?>>> getAllClassMap() {
-        return allClassMap;
+    private static Map<String, Object> allBeanMap = new HashMap<>();
+    public static Map<String, Object> getAllBeanMap() {
+        return allBeanMap;
     }
-    public static void setAllClassMap(Map<String, List<Class<?>>> allClassMap) {
-        InstanceFactory.allClassMap.putAll(allClassMap);
+    public static void setAllBeanMap(Map<String, Object> allBeanMap) {
+        InstanceFactory.allBeanMap.putAll(allBeanMap);
     }
 
     /**
