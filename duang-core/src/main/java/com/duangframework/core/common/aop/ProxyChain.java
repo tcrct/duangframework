@@ -59,24 +59,27 @@ public class ProxyChain {
         return targetMethod;
     }
 
+    /**
+     * 执行代理链
+     * @return
+     */
     public Object doProxyChain() {
+        // 不执行Object类里的公共方法
+        if(excludedMethodName.contains(targetMethod.getName())) { return null; }
         Object methodResult = null;
         try {
-        	//如有多个，按顺序重复执行
-	        if (proxyIndex < proxyList.size()) {
-	            methodResult = proxyList.get(proxyIndex++).doProxy(this);
-	        } else {	           
-	        		// 不执行Object类里的公共方法
-	            	if(!excludedMethodName.contains(targetMethod.getName())) {			            		
-	        			methodResult = methodProxy.invokeSuper(targetObject, methodParams);
-	            	}			
-	        }
-        } catch (InvocationTargetException ite){
-        	Throwable t = ite.getTargetException();
-        	throw t instanceof RuntimeException ? (RuntimeException)t : new RuntimeException(ite);
+            //如有多个，按顺序重复执行
+            if (proxyIndex < proxyList.size()) {
+                methodResult = proxyList.get(proxyIndex++).doProxy(this);
+            } else {
+                methodResult = methodProxy.invokeSuper(targetObject, methodParams);
+            }
+        } catch (InvocationTargetException ite) {
+            Throwable t = ite.getTargetException();
+            throw t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(ite);
         } catch (Throwable e) {
-			throw new ServletException(e.getMessage(), e);
-		}
+            throw new ServletException(e.getMessage(), e);
+        }
         return methodResult;
     }
     
@@ -88,8 +91,8 @@ public class ProxyChain {
         			methodResult = methodProxy.invokeSuper(targetObject, params);
             	}
 			} catch (Throwable e) {
-				logger.print(e.getMessage(), e);
-				throw new ServiceException(e).setMessage(e.getMessage()).setCode(500);
+				logger.warn(e.getMessage(), e);
+				throw new ServletException(e.getMessage(), e);
 			}
         return methodResult;
     }

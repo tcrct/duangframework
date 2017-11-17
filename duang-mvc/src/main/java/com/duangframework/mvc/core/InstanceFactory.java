@@ -62,10 +62,28 @@ public class InstanceFactory {
 
     /**
      * 所有Class Bean集合， 这里的所有是指@DefaultClassTemplate扫描后且实例化后的
-     * 即经过滤后的Class并Class.forName()
+     * 经过滤后的Class并Class.forName()
+     * key为MVC_ANNOTATION_SET的每一个元素
+     * value为对应的Bean
+     * 当key为Controller时，具体内容为： Map<"BaseController", Map<ControllerName, ControllerBean>>
      */
-    private static Map<String, Object> allBeanMap = new HashMap<>();
-    public static Map<String, Object> getAllBeanMap() {
+    private static Map<String,Map<String,Object>> allBeanMaps = new HashMap<>();
+    public static Map<String,Map<String,Object>> getAllBeanMaps() {
+        return allBeanMaps;
+    }
+    public static void setAllBeanMaps(String key, Map<String, Object> allBeanMap) {
+        InstanceFactory.allBeanMaps.put(key ,allBeanMap);
+        InstanceFactory.setAllBeanMap(allBeanMap);
+    }
+
+    /**
+     * 所有Class Bean集合， 这里的所有是指@DefaultClassTemplate扫描后且实例化后的
+     * 经过滤后的Class并Class.forName()
+     * key为 className
+     * value为class的Bean
+     */
+    private static Map<String,Object> allBeanMap = new HashMap<>();
+    public static Map<String,Object> getAllBeanMap() {
         return allBeanMap;
     }
     public static void setAllBeanMap(Map<String, Object> allBeanMap) {
@@ -86,7 +104,15 @@ public class InstanceFactory {
     }
 
 
-
+    /**
+     * Action Map集合
+     * @return
+     */
+    private static Map<String, Action> actionMapping = new HashMap<>();
+    public static Map<String, Action> getActionMapping() { return actionMapping; }
+    public static void setActionMapping(Map<String, Action> actionMapping) {
+        InstanceFactory.actionMapping.putAll(actionMapping);
+    }
 
 
 

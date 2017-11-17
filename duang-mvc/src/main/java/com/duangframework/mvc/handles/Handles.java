@@ -21,7 +21,7 @@ public class Handles {
     public static void init() {
 //        InstanceFactory.getHandles().add(0, new InitHandle());
         // 添加ActionHandle，在其它的Handle后
-//        InstanceFactory.getHandles().add(new ActionHandle());
+        InstanceFactory.getHandles().add(new ActionHandle());
 
         printHandles();
     }

@@ -144,4 +144,18 @@ public class ToolsKit {
         }
     }
 
+    /**
+     * 关键字是否存在于map中, 如果存在返回true, 不存在返回false
+     *
+     * @param key
+     * @param map
+     * @return
+     */
+    public static boolean isExist(String key, Map map) {
+        if (map.containsKey(key)) {
+            return true;
+        }
+        return false;
+    }
+
 }

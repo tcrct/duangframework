@@ -57,13 +57,20 @@ public class DefaultClassTemplate extends AbstractClassTemplate {
         Map<String, List<Class<?>>> classMap = new HashMap<>();
         for(Iterator<Class<?>> it = classList.iterator(); it.hasNext();) {
             Class<?> clazz = it.next();
-            for(Class<? extends  Annotation> annotClass : annotationSet) {
-                String key = annotClass.getSimpleName();
-                if(clazz.isAnnotationPresent(annotClass)) {
-                    addClass2Map4Key(classMap, key, clazz);
-                } else {
-                    if (suffixSet.contains(key)) {
+            if(ToolsKit.isNotEmpty(annotationSet)) {
+                for(Class<? extends Annotation> annotationClass : annotationSet) {
+                    String key = annotationClass.getSimpleName();
+                    if (clazz.isAnnotationPresent(annotationClass)) {
                         addClass2Map4Key(classMap, key, clazz);
+                        break;
+                    }
+                }
+            } else if(ToolsKit.isEmpty(annotationSet) && ToolsKit.isNotEmpty(suffixSet)) {
+                for (Iterator<String> suffixIt = suffixSet.iterator(); suffixIt.hasNext();) {
+                    String key = clazz.getSimpleName();
+                    if(key.endsWith(suffixIt.next())) {
+                        addClass2Map4Key(classMap, key, clazz);
+                        break;
                     }
                 }
             }

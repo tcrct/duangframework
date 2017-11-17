@@ -43,7 +43,7 @@ public class ResponseWrapper implements IResponse {
     }
 
     public IResponse getResponse() {
-        return this.response;
+        return this;
     }
 
 

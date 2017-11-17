@@ -19,8 +19,13 @@ public class ClassUtils {
     }
 
 
-    public static Class<?> loadClass(Class<?> clazz, boolean isInitialized) {
-        return loadClass(clazz.getCanonicalName(), isInitialized);
+    public static <T> T newInstance(Class<?> clazz) {
+        try {
+            logger.debug("\t>>{}", clazz.getCanonicalName());
+            return (T)loadClass(clazz.getCanonicalName(), true).newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
     }
     /**
      * 加载类
@@ -31,7 +36,6 @@ public class ClassUtils {
         }
         Class<?> cls;
         try {
-            logger.debug("\t>>{}", className);
             if (isInitialized) {
                 cls = Class.forName(className, isInitialized, getClassLoader());
             } else {

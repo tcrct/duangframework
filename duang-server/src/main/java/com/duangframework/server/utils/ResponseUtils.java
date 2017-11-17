@@ -28,6 +28,6 @@ public class ResponseUtils {
             headers.put(name, value);
         }
         ResponseWrapper wrapper = new ResponseWrapper(headers, request.getCharacterEncoding(), request.getContentType());
-        return new HttpResponse(wrapper).getResponse();
+        return new HttpResponse(wrapper.getResponse()).getResponse();
     }
 }

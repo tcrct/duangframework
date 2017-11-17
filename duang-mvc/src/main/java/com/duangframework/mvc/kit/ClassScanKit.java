@@ -107,13 +107,14 @@ public class ClassScanKit {
     }
 
     private void checkClassTemplate() {
-        if(ToolsKit.isEmpty(template)) {
-            template = new DefaultClassTemplate(annotationSet, packageSet, jarNameSet, suffixSet);
-        }
+        // 兼容Duang3.0版前的规则
         if(!annotationSet.isEmpty()) {
             for(Iterator<Class<? extends Annotation>> it = annotationSet.iterator(); it.hasNext();) {
                 suffixSet.add(it.next().getSimpleName());
             }
+        }
+        if(ToolsKit.isEmpty(template)) {
+            template = new DefaultClassTemplate(annotationSet, packageSet, jarNameSet, suffixSet);
         }
     }
 

@@ -38,6 +38,7 @@ public class BootStrap implements Closeable {
     private int idleTimeInSeconds = ServerConfig.IDLE_TIME_SECONDS;
     private int bockLog = ServerConfig.SO_BACKLOG;
     private static BootStrap _bootStrap;
+    private long startTimeMillis = 0;
 
     public static BootStrap getInstants() {
         return _bootStrap;
@@ -46,6 +47,7 @@ public class BootStrap implements Closeable {
     public BootStrap(String host, int port) {
         this.host = host;
         this.port = port;
+        this.startTimeMillis = System.currentTimeMillis();
         init();
         _bootStrap = this;
     }
@@ -131,6 +133,10 @@ public class BootStrap implements Closeable {
         } else {
             return NioServerSocketChannel.class;
         }
+    }
+
+    public long getStartTimeMillis() {
+        return System.currentTimeMillis() - startTimeMillis;
     }
 
     public ChannelHandler getLoggingHandler() {

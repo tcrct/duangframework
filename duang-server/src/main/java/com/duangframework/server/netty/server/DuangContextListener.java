@@ -3,8 +3,9 @@ package com.duangframework.server.netty.server;
 import com.duangframework.mvc.listener.ContextLoaderListener;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -13,8 +14,8 @@ import org.slf4j.LoggerFactory;
  */
 public class DuangContextListener implements FutureListener<Void> {
 
-    private static Logger logger = LoggerFactory.getLogger(DuangContextListener.class);
     private BootStrap bootStrap;
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public DuangContextListener(BootStrap bootStrap) {
         this.bootStrap = bootStrap;
@@ -24,9 +25,9 @@ public class DuangContextListener implements FutureListener<Void> {
     public void operationComplete(Future<Void> future) throws Exception {
         if (future.isSuccess()) {
             startDuangContextListener();
-            logger.warn("netty server started on endpoint : " + bootStrap.getSockerAddress().toString());
+            System.out.println("INFO: "+sdf.format(new Date())+" Server["+bootStrap.getHost()+":"+bootStrap.getPort()+"] startup in "+bootStrap.getStartTimeMillis()+" ms, God bless no bugs!");
         } else {
-            logger.warn("netty server started failed");
+            System.out.println("INFO:  "+sdf.format(new Date())+" Server["+bootStrap.getHost()+":"+bootStrap.getPort()+"] startup failed");
         }
     }
 

@@ -15,5 +15,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Controller {
-
+    // 设置Controller是单例还是多例模式, singleton: 单例  prototype: 多例
+    String scope() default "singleton";
 }

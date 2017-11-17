@@ -2,7 +2,6 @@ package com.duangframework.server.utils;
 
 import com.duangframework.core.common.dto.http.request.HttpRequest;
 import com.duangframework.core.common.dto.http.request.IRequest;
-import com.duangframework.core.common.dto.http.request.RequestWrapper;
 import com.duangframework.core.exceptions.DecoderException;
 import com.duangframework.core.exceptions.VerificationException;
 import com.duangframework.core.kit.ToolsKit;
@@ -46,8 +45,7 @@ public class RequestUtils {
      */
     public static IRequest buildDuangRequest(ChannelHandlerContext ctx, FullHttpRequest request) {
         try {
-            // 装饰模式
-            RequestWrapper httpWrapper = new RequestWrapper(
+            HttpRequest httpRequest = new HttpRequest(
                     getRemoteAddr(ctx.channel(), request),
                     getLocalAddr(request),
                     getHeaders(request),
@@ -55,7 +53,7 @@ public class RequestUtils {
                     //Unpooled.wrappedBuffer(request.content()).array(),
                 Unpooled.copiedBuffer(request.content()).array()
             );
-            return new HttpRequest(httpWrapper).getRequest();
+            return httpRequest;
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
             return null;
