@@ -1,6 +1,6 @@
 package com.duangframework.mvc.core;
 
-import com.duangframework.core.IHandle;
+
 import com.duangframework.core.annotation.aop.Proxy;
 import com.duangframework.core.annotation.db.Entity;
 import com.duangframework.core.annotation.ioc.Import;
@@ -8,6 +8,7 @@ import com.duangframework.core.annotation.ioc.ImportRpc;
 import com.duangframework.core.annotation.mvc.Controller;
 import com.duangframework.core.annotation.mvc.Monitor;
 import com.duangframework.core.annotation.mvc.Service;
+import com.duangframework.core.interfaces.IHandle;
 import com.duangframework.core.interfaces.IPlugin;
 
 import java.lang.annotation.Annotation;

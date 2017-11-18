@@ -32,7 +32,7 @@ public class ResponseWrapper implements IResponse {
 
     public ResponseWrapper(IResponse response) {
         if(response == null) {
-            throw new EmptyNullException("HttpResponse cannot be null");
+            throw new EmptyNullException("HttpResponse2 cannot be null");
         } else {
             this.response = response;
         }

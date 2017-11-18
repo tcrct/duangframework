@@ -17,6 +17,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <core.version>1.0-SNAPSHOT</core.version>
+        <mongo.version>1.0-SNAPSHOT</mongo.version>
     </properties>
 
     <dependencies>
@@ -24,6 +25,11 @@
             <groupId>com.duangframework.core</groupId>
             <artifactId>duang-core</artifactId>
             <version>${core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.duangframework.mongodb</groupId>
+            <artifactId>duang-mongodb</artifactId>
+            <version>${mongo.version}</version>
         </dependency>
     </dependencies>
 </project>

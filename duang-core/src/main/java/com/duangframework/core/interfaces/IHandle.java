@@ -1,4 +1,4 @@
-package com.duangframework.core;
+package com.duangframework.core.interfaces;
 
 import com.duangframework.core.common.dto.http.request.HttpRequest;
 import com.duangframework.core.common.dto.http.response.HttpResponse;

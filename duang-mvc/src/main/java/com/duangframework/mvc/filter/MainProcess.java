@@ -58,26 +58,6 @@ public class MainProcess implements IProcess {
         if(ToolsKit.isEmpty(request)) {  throw new EmptyNullException("request is null");}
         if(ToolsKit.isEmpty(response)) {throw new EmptyNullException("response is null");}
 
-//        ThreadPoolKit.execute(new Callable<IResponse>() {
-//            @Override
-//            public IResponse call() throws Exception {
-//                return null;
-//            }
-//        });
-
-//        Object mainController = InstanceFactory.getAllBeanMap().get("com.syt.qingbean.controller.MainController");
-//        Method method = mainController.getClass().getMethod("main", null);
-//        method.invoke(mainController, null);
-//        System.out.println("MainController: " + mainController.hashCode());
-//        String target = request.getRequestURI();
-//        ReturnDto returnDto = new ReturnDto<>();
-//        HeadDto head = new HeadDto();
-//        head.setTimestamp(System.currentTimeMillis());
-//        head.setUri(target);
-//        returnDto.setHead(head);
-//        returnDto.setData(request.getParameterMap());
-//        response.write(returnDto);
-
         try {
             Handles.execute(request.getRequestURI().toString(), request, response);
         } catch (Exception e) {
