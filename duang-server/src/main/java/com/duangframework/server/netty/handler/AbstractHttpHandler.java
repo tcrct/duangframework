@@ -1,6 +1,6 @@
 package com.duangframework.server.netty.handler;
 
-import com.duangframework.core.common.dto.http.response.IResponse;
+import com.duangframework.core.common.dto.http.response.*;
 import com.duangframework.core.kit.ToolsKit;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
@@ -8,6 +8,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.AsciiString;
 import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,7 @@ public abstract class AbstractHttpHandler {
         // 是否支持Keep-Alive
 //        boolean keepAlive = HttpHeaderUtil.isKeepAlive(request);
         // 构建请求返回对象，并设置返回主体内容结果
+        // TODO 这里返回的OK状态码应该根据response这个来确定，待处理
         FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.copiedBuffer(response.toString(), HttpConstants.DEFAULT_CHARSET));
         builderResponseHeader(fullHttpResponse, response.getHeaders());
         HttpHeaderUtil.setKeepAlive(fullHttpResponse, keepAlive);
@@ -43,6 +45,14 @@ public abstract class AbstractHttpHandler {
             channelFutureListener.addListener(ChannelFutureListener.CLOSE);
         }
     }
+
+    // https://www.cnblogs.com/carl10086/p/6185095.html
+    private static void sendRedirect(ChannelHandlerContext ctx, String newUri) {
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.FOUND);
+        response.headers().set(HttpHeaderNames.LOCATION, newUri);
+        ctx.writeAndFlush(response).addListener(ChannelFutureListener.CLOSE);
+    }
+
 
     /**
      * 设置返回Header头信息
