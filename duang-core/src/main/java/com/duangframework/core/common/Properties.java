@@ -1,4 +1,4 @@
-package com.duangframework.core.annotation;
+package com.duangframework.core.common;
 
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ToolsKit;
@@ -11,9 +11,7 @@ import java.net.URL;
  * @author Created by laotang
  * @date on 2017/11/20.
  */
-public class Config {
-
-    private static String PROPERTIES_URL_PATH = "http://file.sythealth.com/config/5LiJ55uK5aCC/duang/properties/";
+public class Properties {
 
     private static Configuration configuration = null;
     public static final Configuration getConfiguration() {
@@ -23,10 +21,10 @@ public class Config {
                 //如果是布署到正式生产环境下的，则通过URL读取对应的配置文件
                 if(ToolsKit.isNotEmpty(configuration) && ToolsKit.isAliyunHost()) {
                     String productCode = configuration.getString("product.code");
-					String useEnv = configuration.getString("use.env");
+                    String url = configuration.getString("properties.url");
                     if(ToolsKit.isEmpty(productCode)) { throw new EmptyNullException("duang.properties[product.code] is null !!!"); }
                     configuration.clear();
-                    String urlString  = PROPERTIES_URL_PATH + ToolsKit.getUseEnv().toLowerCase() + "/";
+                    String urlString  = url + ToolsKit.getUseEnv().toLowerCase() + "/";
                     configuration =getConfigurationByUrl(urlString, productCode+".properties");
                 }
             }

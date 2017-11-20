@@ -169,7 +169,8 @@ public class ToolsKit {
     public static boolean isAliyunHost() {
         String  clientIp = IpUtils.getLocalHostIP(false).trim();
         if(isEmpty(clientIp)) throw new EmptyNullException("getLocalHostIP Fail: Ip is Empty!");
-        return  clientIp.startsWith("10") ? true : false;
+        String preFixIp = ConfigKit.duang().key("ip.prefix").defaultValue("10").asString();
+        return  clientIp.startsWith(preFixIp) ? true : false;
     }
 
 

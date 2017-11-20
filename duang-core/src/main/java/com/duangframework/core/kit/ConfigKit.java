@@ -1,6 +1,6 @@
 package com.duangframework.core.kit;
 
-import com.duangframework.core.annotation.Config;
+import com.duangframework.core.common.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ public class ConfigKit {
             try {
                 _configKitLock.lock();
                 _configKit = new ConfigKit();
-                _configuration = Config.getConfiguration();
+                _configuration = Properties.getConfiguration();
             } catch (Exception e) {
                 logger.warn(e.getMessage(), e);
             } finally {
