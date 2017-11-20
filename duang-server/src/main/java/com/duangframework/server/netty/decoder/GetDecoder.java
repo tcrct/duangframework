@@ -4,7 +4,10 @@ import com.duangframework.core.kit.ToolsKit;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpConstants;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import io.netty.util.CharsetUtil;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +26,8 @@ public class GetDecoder extends AbstractDecoder<Map<String, String[]>> {
     @Override
     public Map<String, String[]> decoder() throws Exception {
         String url = request.uri();
-        url = QueryStringDecoder.decodeComponent(url, HttpConstants.DEFAULT_CHARSET); //先解码
+        //先解码
+        url = QueryStringDecoder.decodeComponent(url, HttpConstants.DEFAULT_CHARSET);
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(url);
         Map<String,List<String>> map =  queryStringDecoder.parameters();
         if(ToolsKit.isNotEmpty(map)) {
@@ -33,5 +37,18 @@ public class GetDecoder extends AbstractDecoder<Map<String, String[]>> {
             }
         }
         return paramsMap;
+    }
+
+    private String sanitizeUri(String url) {
+        try {
+            url = URLDecoder.decode(url, CharsetUtil.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            try {
+                url = URLDecoder.decode(url, CharsetUtil.ISO_8859_1.name());
+            } catch (UnsupportedEncodingException e1) {
+                throw new RuntimeException(e1);
+            }
+        }
+        return url;
     }
 }
