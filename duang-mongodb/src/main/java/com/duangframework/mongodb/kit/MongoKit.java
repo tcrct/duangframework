@@ -54,8 +54,7 @@ public class MongoKit {
 
     public MongoKit connect(MongoConnect connect) {
         _mongoConnect = connect;
-        _options = MongoClientOptions.builder();
-        /*options = MongoClientOptions.builder().
+       _options = MongoClientOptions.builder()
                 .connectionsPerHost(500)									// 最大连接数
                 .minConnectionsPerHost(10)
                 .heartbeatFrequency(10000)
@@ -66,10 +65,8 @@ public class MongoKit {
                 .readPreference(ReadPreference.secondaryPreferred())		//优先在从节点中读数据,从节点有异常时再从主节点读数据
                 .connectTimeout(15000)
                 .maxWaitTime(120000)
-                .socketTimeout(0)
-                .threadsAllowedToBlockForConnectionMultiplier(50)			// 与connectionsPerHost相乘，变成一个线程变为可用的最大阻塞数
-                .build();
-                */
+                .socketTimeout(10000) //10S
+                .threadsAllowedToBlockForConnectionMultiplier(50);			// 与connectionsPerHost相乘，变成一个线程变为可用的最大阻塞数
         return this;
     }
 
