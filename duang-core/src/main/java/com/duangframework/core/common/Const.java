@@ -1,11 +1,5 @@
 package com.duangframework.core.common;
 
-import com.duangframework.core.annotation.aop.Proxy;
-import com.duangframework.core.annotation.db.Entity;
-import com.duangframework.core.annotation.mvc.Controller;
-import com.duangframework.core.annotation.mvc.Service;
-
-
 /**
  *  常量类
  * @author laotang
@@ -13,8 +7,18 @@ import com.duangframework.core.annotation.mvc.Service;
  */
 public class Const {
 
-    public final static String CONTROLLER_ENDWITH_NAME = Controller.class.getSimpleName();
-    public final static String SERVICE_ENDWITH_NAME = Service.class.getSimpleName();
-    public final static String PROXY_ENDWITH_NAME = Proxy.class.getSimpleName();
-    public final static String ENTITY_ENDWITH_NAME = Entity.class.getSimpleName();
+    /**
+     *数据库
+     */
+    public static final String HOST_FIELD = "host";
+    public static final String PORT_FIELD = "port";
+    public static final String DATABASE_FIELD = "database";
+    public static final String USERNAME_FIELD = "username";
+    public static final String PASSWORD_FIELD = "password";
+    public static final String REPLICASET_FIELD = "replicaset";
+
+    /**
+     * 使用环境
+     */
+    public static String USE_ENV = "local";
 }

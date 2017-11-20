@@ -4,7 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
+import com.duangframework.core.common.Const;
+import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.utils.DuangThreadLocal;
+import com.duangframework.core.utils.IpUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,6 +159,38 @@ public class ToolsKit {
             return true;
         }
         return false;
+    }
+
+
+    /**
+     * 如果是10开头的IP，统统默认为阿里云的机器
+     * @return
+     */
+    public static boolean isAliyunHost() {
+        String  clientIp = IpUtils.getLocalHostIP(false).trim();
+        if(isEmpty(clientIp)) throw new EmptyNullException("getLocalHostIP Fail: Ip is Empty!");
+        return  clientIp.startsWith("10") ? true : false;
+    }
+
+
+    /**
+     * 使用环境，分内测(local)，外测(obt)，正式(api)
+     * @return
+     */
+    public static String getUseEnv() {
+        if (ToolsKit.isEmpty(Const.USE_ENV)) {
+            String ip = IpUtils.getLocalHostIP();
+            if (ip.startsWith("192.168") || ip.startsWith("127")) {
+                Const.USE_ENV = "local";
+            } else if (ip.equals("42.96.139.238") || ip.equals("10.129.20.220")) {
+                Const.USE_ENV = "slb";
+            } else if (ip.equals("118.190.44.13") || ip.equals("10.29.179.13")) {
+                Const.USE_ENV = "obt";
+            } else {
+                Const.USE_ENV = "api";
+            }
+        }
+        return Const.USE_ENV;
     }
 
 }

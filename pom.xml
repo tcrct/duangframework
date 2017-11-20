@@ -16,7 +16,6 @@
         <fastjson.version>1.2.31</fastjson.version>
         <netty.version>5.0.0.Alpha2</netty.version>
         <cglib.version>3.1</cglib.version>
-
     </properties>
 
 
@@ -134,7 +133,6 @@
             <artifactId>fastjson</artifactId>
             <version>${fastjson.version}</version>
         </dependency>
-
     </dependencies>
 
 </project>
