@@ -86,10 +86,9 @@ public class MongoKit {
 
     private void hosts() {
         if( ToolsKit.isNotEmpty(_mongoConnect.getReplicaset()) ) {
-            String[] replicasetArray = _mongoConnect.getReplicaset().split(",");
-            for(String replicaset : replicasetArray) {
+            for(String replicaset : _mongoConnect.getReplicaset()) {
                 String[] replicasetItemArray = replicaset.split(":");
-                if(null == replicasetItemArray || replicasetItemArray.length != 2){
+                if(ToolsKit.isEmpty(replicasetItemArray) || replicasetItemArray.length != 2){
                     throw new RuntimeException("replicsSet is null or length != 2 ");
                 }
                 _hostList.add(new ServerAddress(replicasetItemArray[0], Integer.parseInt(replicasetItemArray[1])));

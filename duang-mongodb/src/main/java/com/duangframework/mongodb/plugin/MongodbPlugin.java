@@ -18,9 +18,9 @@ public class MongodbPlugin implements IPlugin {
                 ConfigKit.duang().key("mongodb.host").defaultValue("127.0.0.1").asString(),
                 ConfigKit.duang().key("mongodb.port").defaultValue("27017").asInt(),
                 ConfigKit.duang().key("mongodb.databasename").defaultValue("local").asString(),
-                ConfigKit.duang().key("mongodb.username").asString(),
+                ConfigKit.duang().key("mongodb.username").defaultValue("").asString(),
                 ConfigKit.duang().key("mongodb.password").defaultValue("").asString(),
-                ConfigKit.duang().key("mongodb.replicaset").asString()
+                ConfigKit.duang().key("mongodb.replicaset").asList()
         )).getClient();
     }
 

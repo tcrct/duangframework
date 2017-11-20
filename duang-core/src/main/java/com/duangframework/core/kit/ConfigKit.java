@@ -5,12 +5,13 @@ import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 解释duang.json文件
+ * 解释duang.properties文件
  * 用作整个系统的配置
  * @author laotang
  * @date 2017/11/16 0016
@@ -69,7 +70,7 @@ public class ConfigKit {
         try {
             return _configuration.getLong(_key, Long.parseLong(_defaultValue + ""));
         } catch (Exception e) {
-            return -1;
+            return -1L;
         }
     }
 
@@ -77,7 +78,7 @@ public class ConfigKit {
         try {
             return _configuration.getDouble(_key, Double.parseDouble(_defaultValue + ""));
         } catch (Exception e) {
-            return -1;
+            return -1d;
         }
     }
 
@@ -89,9 +90,14 @@ public class ConfigKit {
         }
     }
 
-    public List<Object> asList() {
+    public List<String> asList() {
         try {
-            return _configuration.getList(_key, (List<Object>)_defaultValue);
+            List<Object> objectList =  _configuration.getList(_key, new ArrayList());
+            List<String> resultList = new ArrayList<>(objectList.size());
+            for(Object object : objectList) {
+                resultList.add(object+"");
+            }
+            return resultList;
         } catch (Exception e) {
             return null;
         }

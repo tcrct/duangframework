@@ -1,5 +1,7 @@
 package com.duangframework.mongodb.common;
 
+import java.util.List;
+
 /**
  * @author Created by laotang
  * @date on 2017/11/20.
@@ -21,9 +23,9 @@ public class MongoConnect implements java.io.Serializable {
     private String dataBase;
     private String userName;
     private String passWord;
-    private String replicaset;
+    private List<String> replicaset;
 
-    public MongoConnect(String host, int port, String dataBase, String userName, String passWord, String replicaset) {
+    public MongoConnect(String host, int port, String dataBase, String userName, String passWord, List<String> replicaset) {
         this.host = host;
         this.port = port;
         this.dataBase = dataBase;
@@ -72,11 +74,11 @@ public class MongoConnect implements java.io.Serializable {
         this.passWord = passWord;
     }
 
-    public String getReplicaset() {
+    public List<String> getReplicaset() {
         return replicaset;
     }
 
-    public void setReplicaset(String replicaset) {
+    public void setReplicaset(List<String> replicaset) {
         this.replicaset = replicaset;
     }
 
