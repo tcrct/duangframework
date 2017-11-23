@@ -38,20 +38,10 @@
         </dependency>
 
         <dependency>
-            <groupId>com.duangframework.core</groupId>
-            <artifactId>duang-core</artifactId>
-            <version>${core.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.duangframework.mvc</groupId>
             <artifactId>duang-mvc</artifactId>
             <version>${mvc.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations-java5</artifactId>
-            <version>RELEASE</version>
-        </dependency>
+
     </dependencies>
 </project>

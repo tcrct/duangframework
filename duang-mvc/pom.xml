@@ -22,11 +22,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.duangframework.core</groupId>
-            <artifactId>duang-core</artifactId>
-            <version>${core.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.duangframework.mongodb</groupId>
             <artifactId>duang-mongodb</artifactId>
             <version>${mongo.version}</version>

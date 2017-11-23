@@ -6,12 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- *  数据实体类注解
- * @author Created by laotang
- * @date on 2017/11/16.
+ * java value注解
+ * @author laotang
+ *
  */
-@Target(ElementType.TYPE)
+@Target(value={ElementType.TYPE, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Entity {
-    public String name() default "";
+public @interface Vo {
+	 public String name() default "";
 }

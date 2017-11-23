@@ -5,6 +5,7 @@ import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
 import com.duangframework.core.common.Const;
+import com.duangframework.core.common.DuangId;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.utils.DuangThreadLocal;
 import com.duangframework.core.utils.IpUtils;
@@ -192,6 +193,44 @@ public class ToolsKit {
             }
         }
         return Const.USE_ENV;
+    }
+
+    public static DuangId message2DuangId(String id) {
+        boolean isObjectId = ToolsKit.isValidDuangId(id);
+        if (isObjectId) {
+            return new DuangId(id);
+        } else {
+            throw new IllegalArgumentException(id + " is not Vaild DuangId");
+        }
+    }
+
+    /**
+     * 验证是否为MongoDB 的ObjectId
+     *
+     * @param str
+     *            待验证字符串
+     * @return  如果是则返回true
+     */
+    public static boolean isValidDuangId(String str) {
+        if (ToolsKit.isEmpty(str)) {
+            return false;
+        }
+        int len = str.length();
+        if (len != 24) {
+            return false;
+        }
+        for (int i = 0; i < len; i++) {
+            char c = str.charAt(i);
+            if ((c < '0') || (c > '9')) {
+                if ((c < 'a') || (c > 'f')) {
+                    if ((c < 'A') || (c > 'F')) {
+                        logger.warn(str + " is not DuangId!!");
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
 }

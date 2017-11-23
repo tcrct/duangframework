@@ -1,8 +1,9 @@
 package com.duangframework.mvc.handles;
 
-import com.duangframework.core.IHandle;
+
 import com.duangframework.core.common.dto.http.request.HttpRequest;
-import com.duangframework.core.common.dto.http.response.HttpResponse2;
+import com.duangframework.core.common.dto.http.response.HttpResponse;
+import com.duangframework.core.interfaces.IHandle;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mvc.core.Action;
 import com.duangframework.mvc.core.BaseController;
@@ -20,7 +21,7 @@ public class ActionHandle implements IHandle {
     private static final Object[] NULL_ARGS = new Object[0];
 
     @Override
-    public void execute(String target, HttpRequest request, HttpResponse2 response) throws Exception {
+    public void execute(String target, HttpRequest request, HttpResponse response) throws Exception {
         // 请求的URL中如果包含有.  则全部当作是静态文件的请求处理，直接返回
         if (target.contains(".")) { return; }
         // 分号后的字符截断
@@ -58,4 +59,5 @@ public class ActionHandle implements IHandle {
         // 反射执行方法
         method.invoke(controller, NULL_ARGS);
     }
+
 }

@@ -1,8 +1,9 @@
 package com.duangframework.mvc.handles;
 
-import com.duangframework.core.IHandle;
+
 import com.duangframework.core.common.dto.http.request.HttpRequest;
 import com.duangframework.core.common.dto.http.response.HttpResponse;
+import com.duangframework.core.interfaces.IHandle;
 import com.duangframework.mvc.core.InstanceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

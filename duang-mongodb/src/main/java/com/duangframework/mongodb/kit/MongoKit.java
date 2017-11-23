@@ -1,15 +1,18 @@
 package com.duangframework.mongodb.kit;
 
-import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.common.MongoConnect;
-import com.mongodb.*;
+import com.duangframework.mongodb.common.MongoQuery;
+import com.duangframework.mongodb.utils.MongoUtils;
+import com.mongodb.DB;
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,11 +26,13 @@ public class MongoKit {
 
     private static MongoKit _mongoKit;
     private static Lock _mongoKitLock = new ReentrantLock();
-    private static MongoConnect _mongoConnect;
     private static MongoClient _mongoClient;
-    private static List<ServerAddress> _hostList = new ArrayList<ServerAddress>();
-    private static List<MongoCredential> _authList = new ArrayList<MongoCredential>();
-    private static MongoClientOptions.Builder _options;				// 连接参数使用默认值
+    private static MongoClientKit _mongoClientKit;
+    private static Class<?> _entityClass;
+    private static MongoDatabase _database;
+    private static MongoCollection _collection;
+    private static MongoQuery mongoQuery;
+    private static MongoClient mongoClient;
 
     public static MongoKit duang() {
         if(null == _mongoKit) {
@@ -45,74 +50,56 @@ public class MongoKit {
     }
 
     private static void clear() {
-        _hostList.clear();
-        _authList.clear();
+        mongoQuery = new MongoQuery();
     }
 
     private MongoKit() {
     }
 
-    public MongoKit connect(MongoConnect connect) {
-        _mongoConnect = connect;
-       _options = MongoClientOptions.builder()
-                .connectionsPerHost(500)									// 最大连接数
-                .minConnectionsPerHost(10)
-                .heartbeatFrequency(10000)
-                .minHeartbeatFrequency(500)
-                .heartbeatConnectTimeout(15000)
-                .heartbeatSocketTimeout(20000)
-                .localThreshold(15)
-                .readPreference(ReadPreference.secondaryPreferred())		//优先在从节点中读数据,从节点有异常时再从主节点读数据
-                .connectTimeout(15000)
-                .maxWaitTime(120000)
-                .socketTimeout(10000) //10S
-                .threadsAllowedToBlockForConnectionMultiplier(50);			// 与connectionsPerHost相乘，变成一个线程变为可用的最大阻塞数
+    public MongoKit client(MongoConnect connect) {
+        mongoClient = MongoClientKit.duang().connect(connect).getClient();
         return this;
     }
 
+    public MongoKit use(Class<?> clazz) {
+        _entityClass = clazz;
+        return this;
+    }
 
-    /*数据库授权*/
-    private void auth() {
-        if(ToolsKit.isNotEmpty(_mongoConnect.getUserName()) && ToolsKit.isNotEmpty(_mongoConnect.getPassWord()) ) {
-            _authList.add(MongoCredential.createScramSha1Credential(
-                    _mongoConnect.getUserName(),
-                    _mongoConnect.getDataBase(),
-                    _mongoConnect.getPassWord().toCharArray()));
+    public MongoKit eq(String key, Object value){
+        mongoQuery.eq(key, value);
+        return this;
+    }
+
+    public <T> T findOne() {
+        getClient();
+        MongoDao<T> dao = (MongoDao<T>)MongoUtils.getMongoDao(_entityClass);
+        try {
+            return dao.findOne(mongoQuery);
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+            return null;
         }
     }
 
-    private void hosts() {
-        if( ToolsKit.isNotEmpty(_mongoConnect.getReplicaset()) ) {
-            for(String replicaset : _mongoConnect.getReplicaset()) {
-                String[] replicasetItemArray = replicaset.split(":");
-                if(ToolsKit.isEmpty(replicasetItemArray) || replicasetItemArray.length != 2){
-                    throw new RuntimeException("replicsSet is null or length != 2 ");
-                }
-                _hostList.add(new ServerAddress(replicasetItemArray[0], Integer.parseInt(replicasetItemArray[1])));
-                logger.info("connect mongodb host: " + replicasetItemArray[0]+"           port: "+ replicasetItemArray[1]);
-            }
-        } else {
-            if(ToolsKit.isNotEmpty(_mongoConnect.getHost()) && _mongoConnect.getPort()>-1) {
-                _hostList.add(new ServerAddress(_mongoConnect.getHost(), _mongoConnect.getPort()));
-                logger.info("connect mongodb host: " + _mongoConnect.getHost()+"           port: "+ _mongoConnect.getPort());
+    private MongoClient getClient() {
+        if(ToolsKit.isEmpty(mongoClient)) {
+            //框架启动后会有值
+            mongoClient = MongoClientKit.duang().getClient();
+            if(ToolsKit.isEmpty(mongoClient)) {
+                // 取duang.properties指定的值
+                mongoClient = MongoClientKit.duang().connect(new MongoConnect()).getClient();
             }
         }
-        if(ToolsKit.isEmpty(_hostList)) {
-            throw new EmptyNullException("connect mongdb, host and port is null or empty");
-        }
+        return mongoClient;
     }
 
-    public MongoClient getClient() {
-        if(ToolsKit.isEmpty(_mongoClient)) {
-            try {
-                hosts();
-                auth();
-                _mongoClient = new MongoClient(_hostList, _authList, _options.build());
-             } catch (Exception e) {
-                throw new RuntimeException("Can't connect mongodb!");
-            }
-        }
-        return _mongoClient;
+    private DB getDB(String dbName) {
+        return getClient().getDB(dbName);
+    }
+
+    private MongoDatabase getMongoDatabase(String dbName) {
+        return getClient().getDatabase(dbName);
     }
 
 }

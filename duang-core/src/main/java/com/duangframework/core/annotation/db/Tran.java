@@ -5,13 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- *  数据实体类注解
- * @author Created by laotang
- * @date on 2017/11/16.
- */
-@Target(ElementType.TYPE)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Entity {
+public @interface Tran {
     public String name() default "";
+
 }
