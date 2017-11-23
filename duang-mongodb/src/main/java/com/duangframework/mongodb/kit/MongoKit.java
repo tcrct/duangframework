@@ -1,5 +1,7 @@
 package com.duangframework.mongodb.kit;
 
+import com.duangframework.core.common.IdEntity;
+import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mongodb.MongoDao;
@@ -33,6 +35,7 @@ public class MongoKit {
     private static MongoCollection _collection;
     private static MongoQuery mongoQuery;
     private static MongoClient mongoClient;
+    private static IdEntity _entityObj;
 
     public static MongoKit duang() {
         if(null == _mongoKit) {
@@ -71,16 +74,35 @@ public class MongoKit {
         return this;
     }
 
-    public <T> T findOne() {
+    public MongoKit entity(IdEntity entityObj) {
+        _entityObj = entityObj;
+        return this;
+    }
+
+    public boolean save() {
         getClient();
-        MongoDao<T> dao = (MongoDao<T>)MongoUtils.getMongoDao(_entityClass);
         try {
-            return dao.findOne(mongoQuery);
+            MongoDao dao = getMongoDao();
+            return dao.save(_entityObj);
         } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
-            return null;
+            throw new MongodbException(e.getMessage(), e);
         }
     }
+
+    public <T> T findOne() {
+        getClient();
+        try {
+            MongoDao<T> dao = getMongoDao();
+            return dao.findOne(mongoQuery);
+        } catch (Exception e) {
+            throw new MongodbException(e.getMessage(), e);
+        }
+    }
+
+    private <T> MongoDao<T> getMongoDao() {
+        return (MongoDao<T>)MongoUtils.getMongoDao(_entityClass);
+    }
+
 
     private MongoClient getClient() {
         if(ToolsKit.isEmpty(mongoClient)) {

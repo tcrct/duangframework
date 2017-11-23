@@ -90,6 +90,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		try {
 			if(ToolsKit.isEmpty(id)) {
 				collection.insertOne(document);
+				entity.setId(document.get(IdEntity.ID_FIELD)+"");
 			} else {
 				Document filterDoc = new Document();
 				filterDoc.put(IdEntity.ID_FIELD, new ObjectId(id));
