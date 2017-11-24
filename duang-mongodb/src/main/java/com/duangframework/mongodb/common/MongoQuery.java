@@ -9,7 +9,7 @@ import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -255,7 +255,7 @@ public class MongoQuery<T> {
 			throw new EmptyNullException("query key is null...");
 		}
 //		if(ToolsUtil.isEmpty(value)) throw new NullPointerException("query value is null...");
-		if(IdEntity.ID_FIELD.equals(key)){
+		if(IdEntity.ID_FIELD.equals(key) || IdEntity.ENTITY_ID_FIELD.equals(key)){
 			append(key, oper, MongoUtils.toObjectIds(value));
 		} else {
 			append(key, oper, value);
@@ -316,9 +316,10 @@ public class MongoQuery<T> {
         return this;
     }
 
-	public Document getQueryDoc() {
+	public Bson getQueryBson() {
 		logger.debug(" query: " + queryObj.toString());
-		return new Document(queryObj.toMap());
+//		return new Document(queryObj.toMap());
+		return (BasicDBObject)queryObj;
 	}
 
 	public DBObject getQueryObj() {
@@ -344,10 +345,6 @@ public class MongoQuery<T> {
 
 	public DBObject getHintDBObject() {
 		return hintDBObject;
-	}
-
-	public Document getHintDocument() {
-		return new Document(hintDBObject.toMap());
 	}
 
     private void checkSingle(DBObject orderDbo, Page<T> page ) {

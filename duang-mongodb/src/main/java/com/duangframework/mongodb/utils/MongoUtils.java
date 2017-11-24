@@ -2,8 +2,10 @@ package com.duangframework.mongodb.utils;
 
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
+import com.duangframework.core.utils.DataType;
 import com.duangframework.mongodb.MongoDao;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -36,19 +38,22 @@ public class MongoUtils {
      * @param values
      * @return
      */
-    public static List<Object> toObjectIds(Object... values) {
-        List<Object> idList = new ArrayList<Object>();
+    public static List<ObjectId> toObjectIds(Object... values) {
+        List<ObjectId> idList = new ArrayList<>();
         int len = values.length;
         for (int i = 0; i < len; i++) {
             if (values[i] != null) {
-                boolean isObjectId = ToolsKit.isValidDuangId(((String) values[i]));
-                if (isObjectId) {
-                    Object dbId = new ObjectId((String) values[i]);
-                    idList.add(dbId);
-                }
+                idList.add(toObjectId(values[i].toString()));
             }
         }
         return idList;
+    }
+
+    public static ObjectId toObjectId(String objId) {
+        if (ToolsKit.isEmpty(objId) || !ObjectId.isValid(objId)) {
+            throw new MongodbException("toObjectId is Fail: ["+objId+"] is not ObjectId or Empty");
+        }
+        return new ObjectId(objId);
     }
 
     /**
@@ -78,10 +83,16 @@ public class MongoUtils {
         return fieldsObj;
     }
 
-    public static Document toDocument(Object obj) {
+    public static <T> T toBson(Object obj) {
         if(null == obj) {
-            throw new EmptyNullException("toDocument is fail:  obj is null");
+            throw new EmptyNullException("toBson is fail:  obj is null");
         }
+
+        Class<? extends Object> type = obj.getClass();
+        if ( DataType.isBaseType(type) ) {
+            return (T)obj;
+        }
+
 
 //        Document document = Document.parse(ToolsKit.toJsonString(obj));
 //        String entityId = document.getString(IdEntity.ENTITY_ID_FIELD);
@@ -95,7 +106,12 @@ public class MongoUtils {
 //        for (Field field : fields) {
 //
 //        }
-        return Document.parse(ToolsKit.toJsonString(obj));
+
+        try {
+            return (T)Document.parse(ToolsKit.toJsonString(obj));
+        } catch (Exception e) {
+            throw new MongodbException("toBson is fail: " + e.getMessage(), e);
+        }
     }
 
 //    public static DBObject toDBObject(Object obj) {
@@ -141,6 +157,31 @@ public class MongoUtils {
         return document;
     }
 
+    /**
+     * 将id字段更改为_id
+     * @param document
+     * @return
+     */
+    public static Document convert2ObjectId(Document document) {
+        if(ToolsKit.isEmpty(document)) {
+            throw  new MongodbException("convert2ObjectId is fail: document is null");
+        }
+        String id = document.getString(IdEntity.ENTITY_ID_FIELD);
+        if (ToolsKit.isEmpty(id)) {
+            id = document.getString(IdEntity.ID_FIELD);
+        }
+        if (ToolsKit.isNotEmpty(id)) {
+            document.put(IdEntity.ID_FIELD, MongoUtils.toObjectId(id));
+        }
+        return document;
+    }
+
+    /**
+     * 根据Entity类取出MongoDao
+     * @param cls           继承了IdEntity的类
+     * @param <T>
+     * @return
+     */
     public static <T> MongoDao<T> getMongoDao(Class<T> cls){
         String key = ClassUtils.getEntityName(cls);
         MongoDao<?> dao = MONGODAO_MAP.get(key);

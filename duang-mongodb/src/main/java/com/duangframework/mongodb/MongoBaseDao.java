@@ -2,28 +2,33 @@ package com.duangframework.mongodb;
 
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.exceptions.MongodbException;
+import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mongodb.common.MongoQuery;
 import com.duangframework.mongodb.common.MongoUpdate;
+import com.duangframework.mongodb.common.Page;
+import com.duangframework.mongodb.enums.DataTypeEnum;
 import com.duangframework.mongodb.kit.MongoClientKit;
 import com.duangframework.mongodb.utils.MongoIndexUtils;
 import com.duangframework.mongodb.utils.MongoUtils;
-import com.mongodb.Block;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.*;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 public abstract class MongoBaseDao<T> implements IDao<T> {
 
@@ -85,10 +90,11 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	}
 	
 	private boolean doSaveOrUpdate(IdEntity entity) throws Exception {
-		Document document = MongoUtils.toDocument(entity);
+		Document document = MongoUtils.toBson(entity);
 		String id = entity.getId();
 		try {
 			if(ToolsKit.isEmpty(id)) {
+				document = MongoUtils.convert2ObjectId(document);
 				collection.insertOne(document);
 				entity.setId(document.get(IdEntity.ID_FIELD)+"");
 			} else {
@@ -105,19 +111,6 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		}
 	}
 
-
-	@Override
-	public long update(MongoQuery mongoQuery, MongoUpdate mongoUpdate) throws Exception {
-		Document queryDoc = mongoQuery.getQueryDoc();
-		Document updateDoc = mongoUpdate.getUpdateDoc();
-		if(ToolsKit.isEmpty(queryDoc) || ToolsKit.isEmpty(updateDoc)) {
-			throw new EmptyNullException("Mongodb Update is Fail: queryDoc or updateDoc is null");
-		}
-//		BsonDocument bsonDocument = document.toBsonDocument(cls, collection.getCodecRegistry());
-		UpdateResult updateResult = collection.updateOne(queryDoc, updateDoc);
-		return updateResult.isModifiedCountAvailable() ? updateResult.getModifiedCount() : 0L;
-	}
-
 	/**
 	 *
 	 * @param mongoQuery
@@ -126,10 +119,10 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 */
 	@Override
 	public T findOne(MongoQuery mongoQuery) throws Exception {
-		Document queryDoc = mongoQuery.getQueryDoc();
-		if(ToolsKit.isEmpty(queryDoc)) {
-			throw new EmptyNullException("Mongodb findOne is Fail: queryDoc or updateDoc is null");
+		if(null == mongoQuery) {
+			throw new EmptyNullException("Mongodb findOne is Fail: mongoQuery is null");
 		}
+		Bson queryDoc = mongoQuery.getQueryBson();
 		Document document = collection.find(queryDoc).first();
 		if(ToolsKit.isEmpty(document)) {
 			return null;
@@ -145,12 +138,11 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 */
 	@Override
 	public List<T> findList(MongoQuery mongoQuery) throws Exception {
-		Document queryDoc = mongoQuery.getQueryDoc();
-		if(ToolsKit.isEmpty(queryDoc)) {
-			throw new EmptyNullException("Mongodb findList is Fail: queryDoc is null");
+		if(null == mongoQuery) {
+			throw new EmptyNullException("Mongodb findList is Fail: mongoQuery is null");
 		}
-
-		FindIterable<Document> documents = collection.find(queryDoc);
+		Bson queryBson = mongoQuery.getQueryBson();
+		FindIterable<Document> documents = collection.find(queryBson);
 		if(ToolsKit.isEmpty(documents)) {
 			return null;
 		}
@@ -162,6 +154,365 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 			}
 		});
 		return resultList;
+	}
+
+	/**
+	 * 分页查找记录，按Page对象返回
+	 * @param mongoQuery		查询条件
+	 * @return
+	 * @throws Exception
+	 */
+	public Page<T> findPage(MongoQuery mongoQuery) throws Exception {
+		if(null == mongoQuery) {
+			throw new EmptyNullException("Mongodb findPage is Fail: mongoQuery is null");
+		}
+		Bson queryDoc = mongoQuery.getQueryBson();
+		Page<T> page = mongoQuery.getPage();
+		int pageNo = page.getPageNo();
+		int pageSize = page.getPageSize();
+		final List<T> resultList = new ArrayList<T>();
+		collection.find(queryDoc)
+				.projection((BasicDBObject)mongoQuery.getDBFields())
+				.sort((BasicDBObject)mongoQuery.getDBOrder())
+				.skip((pageNo-1)*pageSize)
+				.limit(pageSize)
+				.hint((BasicDBObject)mongoQuery.getHintDBObject())
+				.forEach(new Block<Document>() {
+					@Override
+					public void apply(Document document) {
+						resultList.add((T)MongoUtils.toEntity(document, cls));
+					}
+				});
+		page.setResult(resultList);
+		if(page.isAutoCount()){
+			page.setTotalCount(count(mongoQuery));
+		}
+		return page;
+	}
+
+
+	/**
+	 * 根据查询条件进行汇总
+	 * @param query		查询条件
+	 * @return
+	 */
+	public long count(MongoQuery query){
+		CountOptions options = new CountOptions();
+		if(ToolsKit.isNotEmpty(query.getHintDBObject())) {
+			options.hint((BasicDBObject) query.getHintDBObject());
+		}
+		return collection.count(query.getQueryBson(), options);
+	}
+
+
+	/**
+	 * 新增记录时，必须要保证有ID值
+	 * 即由外部指定ObjectId值再新增
+	 * @param entity
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean insert(IdEntity idEntity) throws Exception {
+		if(ToolsKit.isEmpty(idEntity.getId())) {
+			throw new MongodbException("index document is fail: id is null");
+		}
+		Document document = MongoUtils.toBson(idEntity);
+		if(ToolsKit.isNotEmpty(document)) {
+			document = MongoUtils.convert2ObjectId(document);
+		}
+		try {
+			collection.insertOne(document);
+			return true;
+		} catch (Exception e) {
+			throw new MongodbException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 *  根据ID字段值更新记录
+	 * @param id			要更新的记录ID
+	 * @param bson		更新内容
+	 * @return
+	 * @throws Exception
+	 */
+	private boolean update(String id, Bson bson) throws Exception {
+		if(!ObjectId.isValid(id)){
+			throw new IllegalArgumentException("id is not ObjectId!");
+		}
+		Document query = new Document(IdEntity.ID_FIELD, new ObjectId(id));
+		//查询记录不存在时，不新增记录
+		UpdateOptions options = new UpdateOptions();
+		options.upsert(false);
+		return collection.updateOne(query, bson, options).isModifiedCountAvailable();
+	}
+
+	@Override
+	public long update(MongoQuery mongoQuery, MongoUpdate mongoUpdate) throws Exception {
+		Bson queryBson = mongoQuery.getQueryBson();
+		Bson updateBson = mongoUpdate.getUpdateBson();
+		if(ToolsKit.isEmpty(queryBson) || ToolsKit.isEmpty(updateBson)) {
+			throw new EmptyNullException("Mongodb Update is Fail: queryBson or updateBson is null");
+		}
+//		BsonDocument bsonDocument = document.toBsonDocument(cls, collection.getCodecRegistry());
+		//查询记录不存在时，不新增记录
+		UpdateOptions options = new UpdateOptions();
+		options.upsert(false);
+		UpdateResult updateResult = collection.updateOne(queryBson, updateBson, options);
+		return updateResult.isModifiedCountAvailable() ? updateResult.getModifiedCount() : 0L;
+	}
+
+	/**
+	 * 求最大值
+	 * @param key			求最大值的字段
+	 * @param query			查询条件
+	 * @return
+	 */
+	@SuppressWarnings("static-access")
+	public double max(String key, MongoQuery query) {
+		List<Bson> pipeline = new ArrayList<>();
+		BasicDBObject matchDbo = new BasicDBObject(Operator.MATCH, query.getDBOrder());		//查询条件
+		BasicDBObject maxTmp = new BasicDBObject();
+		maxTmp.put("_id", null);
+		DBObject max = new BasicDBObject();
+		max.put(Operator.MAX, "$"+key);
+		maxTmp.put("_max",max);
+		BasicDBObject groupDbo = new BasicDBObject(Operator.GROUP, maxTmp);
+		pipeline.add(matchDbo);
+		pipeline.add(groupDbo);
+		AggregateIterable<Document> out = collection.aggregate(pipeline);
+		if(ToolsKit.isEmpty(out)) {
+			return 0d;
+		}
+		try{
+			Document result = out.iterator().next();
+			return Double.parseDouble(result.get("_max").toString());
+		}catch(Exception ex){
+			logger.error(ex.getMessage(), ex);
+			return 0d;
+		}
+	}
+
+	/**
+	 * 求最小值
+	 * @param key			求最大值的字段
+	 * @param query			查询条件
+	 * @return
+	 */
+	@SuppressWarnings("static-access")
+	public double min(String key, MongoQuery query) {
+		List<BasicDBObject> pipeline = new ArrayList<>();
+		BasicDBObject matchDbo = new BasicDBObject(Operator.MATCH, query.getDBOrder());		//查询条件
+		BasicDBObject minTmp = new BasicDBObject();
+		minTmp.put("_id", null);
+		DBObject min = new BasicDBObject();
+		min.put(Operator.MIN, "$"+key);
+		minTmp.put("_min",min);
+		BasicDBObject groupDbo = new BasicDBObject(Operator.GROUP, minTmp);
+		pipeline.add(matchDbo);
+		pipeline.add(groupDbo);
+		AggregateIterable<Document> out = collection.aggregate(pipeline);
+		try{
+			Document result = out.iterator().next();
+			return Double.parseDouble(result.get("_min").toString());
+		}catch(Exception ex){
+			logger.error(ex.getMessage(), ex);
+			return 0d;
+		}
+	}
+
+	/**
+	 * 分组查询(默认按降序排序)
+	 * @param key		要分组查询的字段
+	 * @param query		查询条件
+	 * @return
+	 */
+	public List<Map>  group(String key, MongoQuery query){
+		return group(key, query, "desc");
+	}
+	/**
+	 * 分组查询
+	 * @param key		要分组查询的字段
+	 * @param query		查询条件
+	 * @param sort		结果集排序方向
+	 * @return
+	 */
+	public List<Map>  group(String key, MongoQuery query, final String sort){
+		List<String> keys = new ArrayList<String>();
+		keys.add(key);
+		return group(keys, query, sort);
+	}
+
+	/**
+	 * 分组查询
+	 * @param keys		要分组查询的字段集合
+	 * @param query		查询条件
+	 * @param sort		结果集排序方向
+	 * @return
+	 */
+	@SuppressWarnings({ "unchecked", "static-access" })
+	public List<Map> group(List<String> keys, MongoQuery query, final String sort){
+		DBObject groupFields = new BasicDBObject();
+		for(String key : keys){groupFields.put(key, true);}
+		String reduce = "function(doc, aggr){aggr.count += 1;}";
+		DBObject dbo = null;
+		try{
+			dbo = coll.group(groupFields, query.getQueryObj(), new BasicDBObject("count", 0), reduce, "", coll.getReadPreference());
+		}catch (Exception ex){
+			logger.error(ex.getMessage(), ex);
+		}
+		if(null == dbo) return null;
+		java.util.List<Map> list = new ArrayList<Map>();
+		for(Iterator<String> it = dbo.keySet().iterator(); it.hasNext();){
+			String key = it.next();
+			DBObject dboTmp = (DBObject)dbo.get(key);
+			list.add(dboTmp.toMap());
+		}
+		java.util.Collections.sort(list, new Comparator(){
+			@Override
+			public int compare(Object dbo1, Object dbo2) {
+				double count1 = (Double)((Map)dbo1).get("count");
+				double count2 = (Double)((Map)dbo2).get("count");
+				if("desc".equals(sort)) {
+					return (count1 > count2) ? 0 : 1;
+				} else {
+					return (count1 > count2) ? 1 : 0;
+				}
+			}
+		});
+		return list;
+	}
+
+	/**
+	 *集合是否存在
+	 * @return	存在返回true
+	 */
+	public boolean isExist(){
+		return coll.getDB().collectionExists(coll.getName());
+	}
+
+	/**
+	 * 去重查询
+	 * @param key		去重关键字
+	 * @param query		查询条件
+	 * @return			去重关键字的集合
+	 */
+	@SuppressWarnings({ "unchecked", "static-access" })
+	public List<String> distinct(String key, MongoQuery query) {
+		final List<String> distinctList = new ArrayList<>();
+		collection.distinct(key, query.getQueryBson(), String.class).forEach(new Block<String>() {
+			@Override
+			public void apply(String s) {
+				distinctList.add(s);
+			}
+		});
+		return distinctList;
+	}
+
+	/**
+	 * 根据查询条件更新
+	 * @param query   查询对象
+	 * @param update  更新对象
+	 */
+	public void set(MongoQuery query, MongoUpdate update) {
+		coll.updateMulti(query.getQueryObj(), update.getUpdateObj());
+	}
+
+	/**
+	 * 向array/list/set添加值
+	 * @param query				查询对象
+	 * @param update			添加/更新对象
+	 */
+	@Deprecated
+	public void push(MongoQuery query, MongoUpdate update) {
+		coll.updateMulti(query.getQueryObj(), update.getUpdateObj());
+	}
+
+	/**
+	 * 向array/list/set删除值
+	 * @param query				查询对象
+	 * @param update			删除对象
+	 */
+	@Deprecated
+	public void pull(MongoQuery query, MongoUpdate update) {
+		coll.updateMulti(query.getQueryObj(), update.getUpdateObj());
+	}
+
+	/**
+	 * 根据查询条件及分组字段统计大小
+	 * @param key				要分组的字段
+	 * @param query			查询条件
+	 * @return
+	 */
+	@SuppressWarnings("static-access")
+	public int groupBySize(String key, MongoQuery query){
+		DBObject groupFields = new BasicDBObject();
+		groupFields.put(key, true);
+		String reduce = "function(doc, aggr){aggr.count += 1;}";
+		DBObject dbo = null;
+		try{
+			dbo = coll.group(groupFields, query.getQueryObj(), new BasicDBObject("count", 0), reduce, "", coll.getReadPreference().secondaryPreferred());
+		}catch (Exception ex){
+			logger.error(ex.getMessage(), ex);
+		}
+		if(null == dbo || null == dbo.keySet()) return 0;
+		return dbo.keySet().size();
+	}
+
+	public String type(final String fieldName) {
+		final DataTypeEnum[] typeEnums = DataTypeEnum.values();
+		StringBuilder typeStr = new StringBuilder();
+		for(final DataTypeEnum typeEnum : typeEnums){
+			typeStr.append(ThreadPoolKit.execute(new Callable<String>() {
+						@Override
+						public String call() throws Exception{
+							DBObject dbo = new BasicDBObject();
+							DBObject typeQuery = new BasicDBObject();
+							typeQuery.put("$type", typeEnum.getNumber());
+							dbo.put(fieldName, typeQuery);
+							long count = coll.count(dbo,coll.getReadPreference());
+							return (count > 0) ? typeEnum.getAlias() : "";
+						}
+					})
+			).append(",");
+		}
+		if(typeStr.length()>0) {
+			typeStr.deleteCharAt(typeStr.length()-1);
+		}
+		return typeStr.toString();
+	}
+
+
+	/**
+	 * 根据指定的ObjectId，删除指定的字段属性
+	 * @param keys			要删除的字段属性
+	 * @return						返回受影响的记录数
+	 */
+	public int unset(String id, String... keys){
+		if(ToolsKit.isEmpty(id)){throw new NullPointerException("id is null"); }
+		if(ToolsKit.isEmpty(keys)){ throw new NullPointerException("keys is null");}
+		MongoQuery query = new MongoQuery();
+		query.eq(IdEntity.ID_FIELD, id);
+		DBObject dbo = new BasicDBObject();
+		for(String key : keys){ dbo.put(key, 1);}
+		DBObject update = new BasicDBObject(Operator.UNSET, dbo);
+		WriteResult  result = coll.updateMulti(query.getQueryObj(), update);
+		return result.getN();
+	}
+	/**
+	 * 根据指定的ObjectId集合，批量删除指定的字段属性
+	 * @param keys			要删除的字段属性
+	 * @return						返回受影响的记录数
+	 */
+	public int unset(Set<String> ids, String... keys){
+		if(ToolsKit.isEmpty(ids)){ throw new NullPointerException("ids is null");}
+		if(ToolsKit.isEmpty(keys)){ throw new NullPointerException("keys is null");}
+		MongoQuery query = new MongoQuery();
+		query.in(IdEntity.ID_FIELD, ids.toArray());
+		DBObject dbo = new BasicDBObject();
+		for(String key : keys){ dbo.put(key, 1);}
+		DBObject update = new BasicDBObject(Operator.UNSET, dbo);
+		WriteResult  result = coll.updateMulti(query.getQueryObj(), update);
+		return result.getN();
 	}
 
 }

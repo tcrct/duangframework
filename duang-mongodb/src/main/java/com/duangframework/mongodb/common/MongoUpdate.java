@@ -2,10 +2,11 @@ package com.duangframework.mongodb.common;
 
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mongodb.Operator;
+import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,9 +36,9 @@ public class MongoUpdate<T> {
 		return updateObj;
 	}
 
-	public Document getUpdateDoc() {
+	public Bson getUpdateBson() {
 		logger.debug(" update: " + updateObj.toString());
-		return new Document(updateObj.toMap());
+		return (BasicDBObject)updateObj;
 	}
 	
 	
@@ -51,7 +52,7 @@ public class MongoUpdate<T> {
 		if(null ==value) {
 			throw new NullPointerException("value is null");
 		}
-//		append(key, Operator.SET, EncodeConvetor.converterDBObject(value));
+		append(key, Operator.SET, MongoUtils.toBson(value));
 		return this;
 	}
 	
@@ -65,7 +66,7 @@ public class MongoUpdate<T> {
 		if(null ==value) {
 			throw new NullPointerException("value is null");
 		}
-//		append(key, Operator.PUSH, EncodeConvetor.converterDBObject(value));
+		append(key, Operator.PUSH, MongoUtils.toBson(value));
 		return this;
 	}
 	
@@ -79,7 +80,7 @@ public class MongoUpdate<T> {
 		if(null ==value) {
 			throw new NullPointerException("value is null");
 		}
-//		append(key, Operator.PULL, EncodeConvetor.converterDBObject(value));
+		append(key, Operator.PULL, MongoUtils.toBson(value));
 		return this;
 	}
 	
@@ -95,7 +96,7 @@ public class MongoUpdate<T> {
 			 if (value instanceof DBObject || value instanceof BasicDBObject) {
 				 values.put(entry.getKey(),entry.getValue());
 			} else {
-//				values.put(entry.getKey(),EncodeConvetor.converterDBObject(value));
+				values.put(entry.getKey(), MongoUtils.toBson(value));
 			}
 		}		
 		DBObject dbo = new BasicDBObject(values);
@@ -110,7 +111,7 @@ public class MongoUpdate<T> {
 	 * @return
 	 */
 	public MongoUpdate<T> inc(String key, Object value) {
-//		append(key, Operator.INC, EncodeConvetor.converterDBObject(value));
+		append(key, Operator.INC, MongoUtils.toBson(value));
 		return this;
 	}
 	

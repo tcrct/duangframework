@@ -7,6 +7,8 @@ import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.common.MongoConnect;
 import com.duangframework.mongodb.common.MongoQuery;
+import com.duangframework.mongodb.common.MongoUpdate;
+import com.duangframework.mongodb.common.Page;
 import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
@@ -15,6 +17,7 @@ import com.mongodb.client.MongoDatabase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -34,6 +37,7 @@ public class MongoKit {
     private static MongoDatabase _database;
     private static MongoCollection _collection;
     private static MongoQuery mongoQuery;
+    private static MongoUpdate mongoUpdate;
     private static MongoClient mongoClient;
     private static IdEntity _entityObj;
 
@@ -54,31 +58,62 @@ public class MongoKit {
 
     private static void clear() {
         mongoQuery = new MongoQuery();
+        mongoUpdate = new MongoUpdate();
     }
 
     private MongoKit() {
     }
 
+    /**
+     * 根据connect对象取得MongoClient
+     * @param connect       @MongoConnect对象
+     * @return
+     */
     public MongoKit client(MongoConnect connect) {
         mongoClient = MongoClientKit.duang().connect(connect).getClient();
         return this;
     }
 
-    public MongoKit use(Class<?> clazz) {
+    /**
+     * 指定要操作的实体类
+     * @param clazz     继承IdEntity的实体类
+     * @return
+     */
+//    public MongoKit use(Class<?> clazz) {
+//        _entityClass = clazz;
+//        return this;
+//    }
+
+    public <T> MongoKit use(Class<T> clazz) {
         _entityClass = clazz;
         return this;
     }
 
-    public MongoKit eq(String key, Object value){
-        mongoQuery.eq(key, value);
+    public MongoKit querybson(MongoQuery query){
+        mongoQuery = query;
         return this;
     }
 
+    public MongoKit updatebson(MongoUpdate update){
+        mongoUpdate = update;
+        return this;
+    }
+
+    /**
+     * 要新增或更新且继承了IdEntity的实体类
+     * @param entityObj     实体类
+     * @return
+     */
     public MongoKit entity(IdEntity entityObj) {
         _entityObj = entityObj;
         return this;
     }
 
+    /**
+     * 保存记录
+     * 根据entity()方法里的entityObj里是否有id值来确定是新增还是更新，若id则视为更新
+     * @return  保存成功返回true
+     */
     public boolean save() {
         getClient();
         try {
@@ -89,7 +124,41 @@ public class MongoKit {
         }
     }
 
-    public <T> T findOne() {
+    /**
+     * 查找多条记录，以Page对象返回
+     * @param <T>       对象泛类
+     * @return                泛型对象集合
+     */
+    public long update() {
+        getClient();
+        try {
+            MongoDao dao = getMongoDao();
+            return dao.update(mongoQuery, mongoUpdate);
+        } catch (Exception e) {
+            throw new MongodbException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 新增记录时，必须要保证有ID值
+     * @return                泛型对象集合
+     */
+    public boolean insert() {
+        getClient();
+        try {
+            MongoDao dao = getMongoDao();
+            return dao.insert(_entityObj);
+        } catch (Exception e) {
+            throw new MongodbException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 查找一条记录
+     * @param <T>       对象泛类
+     * @return                泛型对象
+     */
+    public <T> T first() {
         getClient();
         try {
             MongoDao<T> dao = getMongoDao();
@@ -99,11 +168,52 @@ public class MongoKit {
         }
     }
 
+    /**
+     * 查找多条记录
+     * @param <T>       对象泛类
+     * @return                泛型对象集合
+     */
+    public <T> List<T> findList() {
+        getClient();
+        try {
+            MongoDao<T> dao = getMongoDao();
+            return dao.findList(mongoQuery);
+        } catch (Exception e) {
+            throw new MongodbException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 查找多条记录，以Page对象返回
+     * @param <T>       对象泛类
+     * @return                泛型对象集合
+     */
+    public <T> Page<T> findPage() {
+        getClient();
+        try {
+            MongoDao<T> dao = getMongoDao();
+            return dao.findPage(mongoQuery);
+        } catch (Exception e) {
+            throw new MongodbException(e.getMessage(), e);
+        }
+    }
+
+
+
+    /**
+     * 取MongoDao类
+     * @param <T>
+     * @return
+     */
     private <T> MongoDao<T> getMongoDao() {
         return (MongoDao<T>)MongoUtils.getMongoDao(_entityClass);
     }
 
 
+    /**
+     * 取MongoClient
+     * @return
+     */
     private MongoClient getClient() {
         if(ToolsKit.isEmpty(mongoClient)) {
             //框架启动后会有值
@@ -116,10 +226,20 @@ public class MongoKit {
         return mongoClient;
     }
 
+    /**
+     * 取Mongodb数据库， 3.x版前用
+     * @param dbName        数据库名称
+     * @return
+     */
     private DB getDB(String dbName) {
         return getClient().getDB(dbName);
     }
 
+    /**
+     * 取Mongodb数据库， 3.x版后用
+     * @param dbName        数据库名称
+     * @return
+     */
     private MongoDatabase getMongoDatabase(String dbName) {
         return getClient().getDatabase(dbName);
     }
