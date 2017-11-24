@@ -32,6 +32,7 @@ public class ContextLoaderListener {
      * 容器销毁时监听
      */
     public void contextDestroyed() {
+        PluginHelper.stop();
     }
 
     /**
