@@ -3,13 +3,12 @@ package com.duangframework.mvc.core;
 
 import com.duangframework.core.annotation.aop.Proxy;
 import com.duangframework.core.annotation.db.Entity;
-import com.duangframework.core.annotation.ioc.Import;
-import com.duangframework.core.annotation.ioc.ImportRpc;
 import com.duangframework.core.annotation.mvc.Controller;
 import com.duangframework.core.annotation.mvc.Monitor;
 import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.interfaces.IHandle;
 import com.duangframework.core.interfaces.IPlugin;
+import com.duangframework.core.utils.BeanUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -25,7 +24,6 @@ public class InstanceFactory {
      * 注解类
      */
     public static final Set<Class<? extends Annotation>> MVC_ANNOTATION_SET = new LinkedHashSet<>();
-    public static final Set<Class<? extends Annotation>> IOC_ANNOTATION_SET = new LinkedHashSet<>();
     static {
         MVC_ANNOTATION_SET.add(Controller.class);
         MVC_ANNOTATION_SET.add(Service.class);
@@ -33,8 +31,6 @@ public class InstanceFactory {
         MVC_ANNOTATION_SET.add(Proxy.class);
         MVC_ANNOTATION_SET.add(Entity.class);
 
-        IOC_ANNOTATION_SET.add(Import.class);
-        IOC_ANNOTATION_SET.add(ImportRpc.class);
     }
 
 
@@ -68,13 +64,12 @@ public class InstanceFactory {
      * value为对应的Bean
      * 当key为Controller时，具体内容为： Map<"BaseController", Map<ControllerName, ControllerBean>>
      */
-    private static Map<String,Map<String,Object>> allBeanMaps = new HashMap<>();
     public static Map<String,Map<String,Object>> getAllBeanMaps() {
-        return allBeanMaps;
+        return BeanUtils.getAllBeanMaps();
     }
     public static void setAllBeanMaps(String key, Map<String, Object> allBeanMap) {
-        InstanceFactory.allBeanMaps.put(key ,allBeanMap);
-        InstanceFactory.setAllBeanMap(allBeanMap);
+        BeanUtils.setAllBeanMaps(key ,allBeanMap);
+        setAllBeanMap(allBeanMap);
     }
 
     /**
@@ -83,12 +78,12 @@ public class InstanceFactory {
      * key为 className
      * value为class的Bean
      */
-    private static Map<String,Object> allBeanMap = new HashMap<>();
+
     public static Map<String,Object> getAllBeanMap() {
-        return allBeanMap;
+        return BeanUtils.getAllBeanMap();
     }
     public static void setAllBeanMap(Map<String, Object> allBeanMap) {
-        InstanceFactory.allBeanMap.putAll(allBeanMap);
+        BeanUtils.setAllBeanMap(allBeanMap);
     }
 
     /**

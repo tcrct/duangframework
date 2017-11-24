@@ -4,11 +4,12 @@ import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.client.MongoDatabase;
 
+/**
+ *	自定义MongoDao对象
+ *用于注入到Controller或Service等
+ * @param <T>
+ */
 public class MongoDao<T>  extends MongoBaseDao<T> {
-
-	public MongoDao() {
-
-	}
 
 	public MongoDao(Class<T> cls) {
 		super(cls);

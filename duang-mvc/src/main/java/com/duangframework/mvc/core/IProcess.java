@@ -2,7 +2,7 @@ package com.duangframework.mvc.core;
 
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
-import com.duangframework.core.exceptions.ServletException;
+import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.mvc.kit.MvcConfigKit;
 
 /**
@@ -13,9 +13,9 @@ public interface IProcess {
     /**
      * 初始化
      * @param mvcConfig
-     * @throws ServletException
+     * @throws DuangMvcException
      */
-    void init(MvcConfigKit mvcConfig) throws ServletException;
+    void init(MvcConfigKit mvcConfig) throws DuangMvcException;
 
     /**
      *

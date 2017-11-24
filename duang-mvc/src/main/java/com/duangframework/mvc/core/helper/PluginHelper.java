@@ -27,6 +27,7 @@ public class PluginHelper {
             IPlugin plugin = it.next();
             if(null != plugin){
                 try{
+                    plugin.init();
                     plugin.start();
                     logger.warn(plugin.getClass().getName() +" start success...");
                 }catch(Exception ex){

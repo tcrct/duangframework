@@ -23,22 +23,28 @@ public class ConfigKit {
     private static ConfigKit _configKit;
     private static Lock _configKitLock = new ReentrantLock();
     private static Configuration _configuration;
-    private String _key;
-    private Object _defaultValue;
+    private static String _key;
+    private static Object _defaultValue;
 
     public static ConfigKit duang() {
         if(null == _configKit) {
             try {
                 _configKitLock.lock();
                 _configKit = new ConfigKit();
-                _configuration = Properties.getConfiguration();
+                _configuration = Properties.init();
             } catch (Exception e) {
                 logger.warn(e.getMessage(), e);
             } finally {
                 _configKitLock.unlock();
             }
         }
+        clear();
         return _configKit;
+    }
+
+    private static void clear() {
+        _key = "";
+        _defaultValue = null;
     }
 
     private ConfigKit() {

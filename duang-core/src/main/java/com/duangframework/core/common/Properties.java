@@ -14,19 +14,27 @@ import java.net.URL;
 public class Properties {
 
     private static Configuration configuration = null;
+
+    public static final Configuration init() throws Exception {
+        if(null == configuration) {
+            configuration = new PropertiesConfiguration("duang.properties");
+        }
+        return configuration;
+    }
+
     public static final Configuration getConfiguration() {
         try {
             if(null == configuration){
-                configuration = new PropertiesConfiguration("duang.properties");
-                //如果是布署到正式生产环境下的，则通过URL读取对应的配置文件
-                if(ToolsKit.isNotEmpty(configuration) && ToolsKit.isAliyunHost()) {
-                    String productCode = configuration.getString("product.code");
-                    String url = configuration.getString("properties.url");
-                    if(ToolsKit.isEmpty(productCode)) { throw new EmptyNullException("duang.properties[product.code] is null !!!"); }
-                    configuration.clear();
-                    String urlString  = url + ToolsKit.getUseEnv().toLowerCase() + "/";
-                    configuration =getConfigurationByUrl(urlString, productCode+".properties");
-                }
+                init();
+            }
+            //如果是布署到正式生产环境下的，则通过URL读取对应的配置文件
+            if(ToolsKit.isNotEmpty(configuration) && ToolsKit.isAliyunHost()) {
+                String productCode = configuration.getString("product.code");
+                String url = configuration.getString("properties.url");
+                if(ToolsKit.isEmpty(productCode)) { throw new EmptyNullException("duang.properties[product.code] is null !!!"); }
+                configuration.clear();
+                String urlString  = url + ToolsKit.getUseEnv().toLowerCase() + "/";
+                configuration =getConfigurationByUrl(urlString, productCode+".properties");
             }
             return configuration;
         } catch (Exception e) {

@@ -1,6 +1,7 @@
 package com.duangframework.mvc.core.helper;
 
 import com.duangframework.core.exceptions.MvcStartUpException;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mvc.core.InstanceFactory;
@@ -26,8 +27,8 @@ public class BeanHelper {
         //扫描指定包路径下的类文件，类文件包含有指定的注解类或文件名以指定的字符串结尾的
         Map<String, List<Class<?>>> classMap =  ClassScanKit.duang()
                 .annotations(InstanceFactory.MVC_ANNOTATION_SET)
-                .packages("com.syt.qingbean")
-                .jarname("qingbean")
+                .packages(ConfigKit.duang().key("base.package.path").asString())
+                .jarname(ConfigKit.duang().key("jar.prefix").asString())
                 // 增加MVC固定扫描的包路径
                 .packages(AbstractProxy.class.getPackage().getName())
                 .map();

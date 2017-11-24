@@ -1,5 +1,10 @@
+/*
+ *该类为MongoClient的薄封装
+ * 将查询与更新条件分别封装成MongoQuery与MongoUpdate对象对外提供使用
+ *
+ * @see  https://github.com/tcrct/duangframework.git
+ */
 package com.duangframework.mongodb;
-
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.MongodbException;
@@ -30,6 +35,13 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+/**
+ 对MongoClient进行封装，以供使用者可以简单使用
+ * @author  Create by laotang
+ * @date	 2017-11-11
+ * @since  1.0
+ * @param <T>	Entity类泛型
+ */
 public abstract class MongoBaseDao<T> implements IDao<T> {
 
 	private final static Logger logger = LoggerFactory.getLogger(MongoBaseDao.class);
@@ -41,7 +53,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	protected MongoCollection<Document> collection;
 	protected DBObject keys;
 	
-	public MongoBaseDao(){
+	private MongoBaseDao(){
 	}
 	
 	public MongoBaseDao(Class<T> cls){
@@ -112,15 +124,15 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	}
 
 	/**
-	 *
-	 * @param mongoQuery
+	 * 根据条件查询记录
+	 * @param mongoQuery		查询条件对象
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
 	public T findOne(MongoQuery mongoQuery) throws Exception {
-		if(null == mongoQuery) {
-			throw new EmptyNullException("Mongodb findOne is Fail: mongoQuery is null");
+		if(ToolsKit.isEmpty(mongoQuery)) {
+			throw new MongodbException("Mongodb findOne is Fail: mongoQuery is null");
 		}
 		Bson queryDoc = mongoQuery.getQueryBson();
 		Document document = collection.find(queryDoc).first();
@@ -131,13 +143,36 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	}
 
 	/**
-	 *
-	 * @param mongoQuery
+	 * 根据查询条件查找记录
+	 * @param mongoQuery	查询条件
 	 * @return
 	 * @throws Exception
 	 */
 	@Override
 	public List<T> findList(MongoQuery mongoQuery) throws Exception {
+		if(ToolsKit.isEmpty(mongoQuery)) {
+			throw new EmptyNullException("Mongodb findList is Fail: mongoQuery is null");
+		}
+		return findAll(mongoQuery);
+	}
+
+	/**
+	 * 查找所有，数据量大时会导致性能问题，务必谨慎使用
+	 * @return
+	 * @throws Exception
+	 */
+	public List<T> findAll() throws Exception {
+		MongoQuery mongoQuery = new MongoQuery();
+		return findAll(mongoQuery);
+	}
+
+	/**
+	 * 查找所有
+	 * @param mongoQuery		查询条件
+	 * @return
+	 * @throws Exception
+	 */
+	private List<T> findAll(MongoQuery mongoQuery) throws Exception {
 		if(null == mongoQuery) {
 			throw new EmptyNullException("Mongodb findList is Fail: mongoQuery is null");
 		}
@@ -163,7 +198,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * @throws Exception
 	 */
 	public Page<T> findPage(MongoQuery mongoQuery) throws Exception {
-		if(null == mongoQuery) {
+		if(ToolsKit.isEmpty(mongoQuery)) {
 			throw new EmptyNullException("Mongodb findPage is Fail: mongoQuery is null");
 		}
 		Bson queryDoc = mongoQuery.getQueryBson();
@@ -190,7 +225,6 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		return page;
 	}
 
-
 	/**
 	 * 根据查询条件进行汇总
 	 * @param query		查询条件
@@ -203,7 +237,6 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		}
 		return collection.count(query.getQueryBson(), options);
 	}
-
 
 	/**
 	 * 新增记录时，必须要保证有ID值
@@ -237,7 +270,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 */
 	private boolean update(String id, Bson bson) throws Exception {
 		if(!ObjectId.isValid(id)){
-			throw new IllegalArgumentException("id is not ObjectId!");
+			throw new MongodbException("id is not ObjectId!");
 		}
 		Document query = new Document(IdEntity.ID_FIELD, new ObjectId(id));
 		//查询记录不存在时，不新增记录
@@ -246,12 +279,19 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		return collection.updateOne(query, bson, options).isModifiedCountAvailable();
 	}
 
+	/**
+	 * 根据条件更新记录
+	 * @param mongoQuery			查询条件
+	 * @param mongoUpdate		更新内容
+	 * @return		成功更新的记录数
+	 * @throws Exception
+	 */
 	@Override
 	public long update(MongoQuery mongoQuery, MongoUpdate mongoUpdate) throws Exception {
 		Bson queryBson = mongoQuery.getQueryBson();
 		Bson updateBson = mongoUpdate.getUpdateBson();
 		if(ToolsKit.isEmpty(queryBson) || ToolsKit.isEmpty(updateBson)) {
-			throw new EmptyNullException("Mongodb Update is Fail: queryBson or updateBson is null");
+			throw new MongodbException("Mongodb Update is Fail: queryBson or updateBson is null");
 		}
 //		BsonDocument bsonDocument = document.toBsonDocument(cls, collection.getCodecRegistry());
 		//查询记录不存在时，不新增记录
@@ -458,6 +498,11 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		return dbo.keySet().size();
 	}
 
+	/**
+	 * 根据类的字段属性类型查询Mongodb对应的类型
+	 * @param fieldName		类字段名
+	 * @return
+	 */
 	public String type(final String fieldName) {
 		final DataTypeEnum[] typeEnums = DataTypeEnum.values();
 		StringBuilder typeStr = new StringBuilder();
@@ -480,7 +525,6 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		}
 		return typeStr.toString();
 	}
-
 
 	/**
 	 * 根据指定的ObjectId，删除指定的字段属性

@@ -8,6 +8,12 @@ package com.duangframework.core.interfaces;
 public interface IPlugin {
 
     /**
+     * 插件初始化
+     * @throws Exception
+     */
+    void init() throws Exception;
+
+    /**
      * 插件启动
      * @throws Exception
      */

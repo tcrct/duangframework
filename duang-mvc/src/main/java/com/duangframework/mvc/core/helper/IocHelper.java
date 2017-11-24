@@ -1,10 +1,10 @@
 package com.duangframework.mvc.core.helper;
 
 import com.duangframework.core.annotation.aop.Proxy;
+import com.duangframework.core.annotation.ioc.Import;
 import com.duangframework.core.common.aop.ProxyManager;
 import com.duangframework.core.interfaces.IProxy;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mvc.core.InstanceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -73,34 +71,14 @@ public class IocHelper {
         Field[] fields = beanClass.getDeclaredFields();
         for(Field field : fields) {
             // 注入Server
-            for(Iterator<Class<? extends Annotation>> annotationIt =  InstanceFactory.IOC_ANNOTATION_SET.iterator(); annotationIt.hasNext();) {
-                Class<? extends Annotation> annotationClass = annotationIt.next();
-                if (field.isAnnotationPresent(annotationClass)) {
-
-//                    Class<?> fieldClass = field.getType();
-//                    Object iocObj = parse(fieldClass);
-
-
-                    Object iocObj = beanMap.get(field.getType().getCanonicalName());
-                    if(ToolsKit.isNotEmpty(iocObj)) {
-                        field.setAccessible(true);
-                        field.set(beanObj, iocObj);
-                    }
+            if (field.isAnnotationPresent(Import.class)) {
+                Object iocObj = beanMap.get(field.getType().getCanonicalName());
+                if(ToolsKit.isNotEmpty(iocObj)) {
+                    field.setAccessible(true);
+                    field.set(beanObj, iocObj);
                 }
             }
 
-        }
-    }
-
-    private static void parser(Field field) {
-        Class<?> fieldClass = field.getType();
-        if (MongoDao.class.equals(fieldClass)) {
-            ParameterizedType paramType = (ParameterizedType) field.getGenericType();
-            Type[] types = paramType.getActualTypeArguments();
-            if(ToolsKit.isNotEmpty(types)) {
-                Class<?> paramTypeClass = types[0].getClass();
-//                Mongo
-            }
         }
     }
 

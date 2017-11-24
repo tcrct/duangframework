@@ -5,7 +5,7 @@ import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.HttpResponse;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.exceptions.EmptyNullException;
-import com.duangframework.core.exceptions.ServletException;
+import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.IProcess;
 import com.duangframework.mvc.handles.Handles;
@@ -47,7 +47,7 @@ public class MainProcess implements IProcess {
     }
 
     @Override
-    public void init(MvcConfigKit mvcConfig) throws ServletException {
+    public void init(MvcConfigKit mvcConfig) throws DuangMvcException {
         Handles.init();
     }
 

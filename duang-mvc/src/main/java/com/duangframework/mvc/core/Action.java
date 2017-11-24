@@ -12,7 +12,6 @@ public class Action {
 	private String orderKey;
 	private Class<?> controllerClass;
 	private Method method;
-	private String beanKey;
 
 	public Action() {
 

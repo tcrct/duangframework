@@ -1,6 +1,6 @@
 package com.duangframework.core.common.aop;
 
-import com.duangframework.core.exceptions.ServletException;
+import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.interfaces.IProxy;
 import com.duangframework.core.kit.ObjectKit;
 import net.sf.cglib.proxy.MethodProxy;
@@ -78,7 +78,7 @@ public class ProxyChain {
             Throwable t = ite.getTargetException();
             throw t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(ite);
         } catch (Throwable e) {
-            throw new ServletException(e.getMessage(), e);
+            throw new DuangMvcException(e.getMessage(), e);
         }
         return methodResult;
     }
@@ -92,7 +92,7 @@ public class ProxyChain {
             	}
 			} catch (Throwable e) {
 				logger.warn(e.getMessage(), e);
-				throw new ServletException(e.getMessage(), e);
+				throw new DuangMvcException(e.getMessage(), e);
 			}
         return methodResult;
     }

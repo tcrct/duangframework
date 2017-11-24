@@ -1,6 +1,6 @@
 package com.duangframework.core.kit;
 
-import com.duangframework.core.exceptions.ServletException;
+import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +50,7 @@ public class PathKit {
         try {
             return new File(rootPath).getParentFile().getParentFile().getCanonicalPath();
         } catch (IOException e) {
-            throw new ServletException(e.getMessage(), e);
+            throw new DuangMvcException(e.getMessage(), e);
         }
     }
 
@@ -70,7 +70,7 @@ public class PathKit {
         try {
             return ClassUtils.getClassLoader().getResources(resourcePath.replace(".", "/"));
         } catch (Exception e) {
-            throw new ServletException(e.getMessage(), e);
+            throw new DuangMvcException(e.getMessage(), e);
         }
     }
 

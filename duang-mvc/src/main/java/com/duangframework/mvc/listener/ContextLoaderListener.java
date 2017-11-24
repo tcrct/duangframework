@@ -1,7 +1,13 @@
 package com.duangframework.mvc.listener;
 
-import com.duangframework.core.exceptions.ServletException;
+import com.duangframework.core.exceptions.MvcStartUpException;
+import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.ObjectKit;
+import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.mvc.core.IDuang;
 import com.duangframework.mvc.core.helper.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -10,13 +16,15 @@ import com.duangframework.mvc.core.helper.*;
  */
 public class ContextLoaderListener {
 
-    private String context;
+    private static final Logger logger = LoggerFactory.getLogger(ContextLoaderListener.class);
+
+    private static IDuang duangFrameword = null;
 
     public ContextLoaderListener() {
         try {
             contextInitialized();
         } catch (Exception e) {
-            throw new ServletException("ContextLoaderListener init is fail :  " + e.getMessage() + " ,exit...", e ) ;
+            throw new MvcStartUpException("ContextLoaderListener init is fail :  " + e.getMessage() + " ,exit...", e ) ;
         }
     }
 
@@ -49,6 +57,18 @@ public class ContextLoaderListener {
      * @throws Exception
      */
     private void initContext()  throws Exception {
-        System.out.println("###################:  initContext");
+        String configClass = ConfigKit.duang().key("mvc.config").asString();
+        if (ToolsKit.isEmpty(configClass)) {
+            throw new RuntimeException("IDuang子类路径不能为空!");
+        }
+        try {
+            duangFrameword = ObjectKit.newInstance(configClass);
+            duangFrameword.addHandlers();
+            duangFrameword.addPlugins();
+            logger.warn("initContext success");
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+            throw new RuntimeException("不能创建类: " + configClass, e);
+        }
     }
 }

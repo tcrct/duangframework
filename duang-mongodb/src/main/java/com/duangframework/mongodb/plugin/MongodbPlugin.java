@@ -1,9 +1,20 @@
 package com.duangframework.mongodb.plugin;
 
+import com.duangframework.core.annotation.ioc.Import;
 import com.duangframework.core.interfaces.IPlugin;
 import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.utils.BeanUtils;
+import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.common.MongoConnect;
 import com.duangframework.mongodb.kit.MongoClientKit;
+import com.duangframework.mongodb.utils.MongoUtils;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * MongoDB插件
@@ -12,6 +23,10 @@ import com.duangframework.mongodb.kit.MongoClientKit;
  */
 public class MongodbPlugin implements IPlugin {
 
+    @Override
+    public void init() throws Exception {
+        // 可以初始一些值，框架先执行init方法后再执行start
+    }
 
     @Override
     public void start() throws Exception {
@@ -23,12 +38,42 @@ public class MongodbPlugin implements IPlugin {
                 ConfigKit.duang().key("mongodb.password").defaultValue("").asString(),
                 ConfigKit.duang().key("mongodb.replicaset").asList()
         )).getClient();
+
+        importDao();
     }
 
     @Override
     public void stop() throws Exception {
         if(null != MongoClientKit.duang().getClient()) {
             MongoClientKit.duang().getClient().close();
+        }
+    }
+
+    /**
+     * IOC注入MongoDao
+     * @throws Exception
+     */
+    private void importDao() throws Exception {
+    // 取出所有类对象
+    Map<String, Object> beanMap = BeanUtils.getAllBeanMap();
+    for(Iterator<Map.Entry<String, Object>> it = beanMap.entrySet().iterator(); it.hasNext();) {
+        Map.Entry<String, Object> entry = it.next();
+        Object beanObj = entry.getValue();
+        Field[] fields = beanObj.getClass().getDeclaredFields();
+            for(Field field : fields) {
+                if (field.isAnnotationPresent(Import.class) && MongoDao.class.equals(field.getType())) {
+                ParameterizedType paramType = (ParameterizedType) field.getGenericType();
+                Type[] types = paramType.getActualTypeArguments();
+                    if(ToolsKit.isNotEmpty(types)) {
+                        // <>里的泛型类
+                        String paramTypeClassName = types[0].toString().substring(6).trim();
+                        Class<?> paramTypeClass = beanMap.get(paramTypeClassName).getClass();
+                        Object daoObj = MongoUtils.getMongoDao(paramTypeClass);
+                        field.setAccessible(true);
+                        field.set(beanObj, daoObj);
+                    }
+                }
+            }
         }
     }
 }
