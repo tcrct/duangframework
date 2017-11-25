@@ -53,9 +53,9 @@ public class MysqlUtils {
 
     public static DataSource getDataSource() {
         IConnect connect = new MySqlConnect(
-                ConfigKit.duang().key("").asString(),
-                ConfigKit.duang().key("").asInt(),
-                ConfigKit.duang().key("").asString()
+                ConfigKit.duang().key("mysql.host").defaultValue("127.0.0.1").asString(),
+                ConfigKit.duang().key("mysql.port").defaultValue("3306").asInt(),
+                ConfigKit.duang().key("mysql.jdbc.url").defaultValue("").asString()
         );
         return getDataSource(connect);
     }
@@ -63,7 +63,7 @@ public class MysqlUtils {
     public static DataSource getDataSource(IConnect connect) {
         if (ToolsKit.isNotEmpty(dataSource)) {
             IDataSourceFactory dsFactory = null;
-            String dataSourceFactoryClassName = ConfigKit.duang().key("sql.datasource").asString();
+            String dataSourceFactoryClassName = ConfigKit.duang().key("mysql.datasource").asString();
             if (ToolsKit.isEmpty(dataSourceFactoryClassName)) {
                 dsFactory = ObjectKit.newInstance(DruidDataSourceFactory.class);
             } else {
