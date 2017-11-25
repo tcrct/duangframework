@@ -6,6 +6,7 @@
  */
 package com.duangframework.mongodb;
 import com.duangframework.core.common.IdEntity;
+import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ThreadPoolKit;
@@ -13,7 +14,6 @@ import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mongodb.common.MongoQuery;
 import com.duangframework.mongodb.common.MongoUpdate;
-import com.duangframework.mongodb.common.Page;
 import com.duangframework.mongodb.enums.DataTypeEnum;
 import com.duangframework.mongodb.kit.MongoClientKit;
 import com.duangframework.mongodb.utils.MongoIndexUtils;
@@ -197,12 +197,12 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * @return
 	 * @throws Exception
 	 */
-	public Page<T> findPage(MongoQuery mongoQuery) throws Exception {
+	public PageDto<T> findPage(MongoQuery mongoQuery) throws Exception {
 		if(ToolsKit.isEmpty(mongoQuery)) {
 			throw new EmptyNullException("Mongodb findPage is Fail: mongoQuery is null");
 		}
 		Bson queryDoc = mongoQuery.getQueryBson();
-		Page<T> page = mongoQuery.getPage();
+		PageDto<T> page = mongoQuery.getPage();
 		int pageNo = page.getPageNo();
 		int pageSize = page.getPageSize();
 		final List<T> resultList = new ArrayList<T>();
@@ -490,11 +490,13 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		String reduce = "function(doc, aggr){aggr.count += 1;}";
 		DBObject dbo = null;
 		try{
-			dbo = coll.group(groupFields, query.getQueryObj(), new BasicDBObject("count", 0), reduce, "", coll.getReadPreference().secondaryPreferred());
+			dbo = coll.group(groupFields, query.getQueryObj(), new BasicDBObject("count", 0), reduce, "", coll.getReadPreference());
 		}catch (Exception ex){
 			logger.error(ex.getMessage(), ex);
 		}
-		if(null == dbo || null == dbo.keySet()) return 0;
+		if(null == dbo || null == dbo.keySet()){
+			return 0;
+		}
 		return dbo.keySet().size();
 	}
 

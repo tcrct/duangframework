@@ -1,9 +1,12 @@
-package com.duangframework.mongodb.common;
+package com.duangframework.core.common.dto.result;
 
 import java.util.Collections;
 import java.util.List;
 
-public class Page<T> implements java.io.Serializable {
+/**
+ * @author laotang
+ */
+public class PageDto<T> implements java.io.Serializable {
 	
 	//-- 分页参数 --//
 	protected int pageNo = 1;		//页数
@@ -13,11 +16,11 @@ public class Page<T> implements java.io.Serializable {
 	protected List<T> result = Collections.emptyList();
 	protected long totalCount = -1;
 	
-	public Page() {
+	public PageDto() {
 		
 	}
 	
-	public Page(int pageNo,int pageSize) {
+	public PageDto(int pageNo, int pageSize) {
 		setPageNo(pageNo);
 		setPageSize(pageSize);
 	}
@@ -40,7 +43,7 @@ public class Page<T> implements java.io.Serializable {
 			this.pageNo = 1;
 		}
 	}
-	public Page<T> pageNo(final int thePageNo) {
+	public PageDto<T> pageNo(final int thePageNo) {
 		setPageNo(thePageNo);
 		return this;
 	}
@@ -63,7 +66,7 @@ public class Page<T> implements java.io.Serializable {
 		}
 	}
 
-	public Page<T> pageSize(final int thePageSize) {
+	public PageDto<T> pageSize(final int thePageSize) {
 		setPageSize(thePageSize);
 		return this;
 	}
@@ -89,7 +92,7 @@ public class Page<T> implements java.io.Serializable {
 		this.autoCount = autoCount;
 	}
 	
-	public Page<T> autoCount(final boolean theAutoCount) {
+	public PageDto<T> autoCount(final boolean theAutoCount) {
 		setAutoCount(theAutoCount);
 		return this;
 	}

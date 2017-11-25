@@ -94,6 +94,7 @@
         <module>duang-core</module>
         <module>duang-mvc</module>
         <module>duang-web</module>
+        <module>duang-mysql</module>
     </modules>
 
     <dependencies>

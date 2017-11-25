@@ -1,6 +1,7 @@
 package com.duangframework.mongodb.common;
 
 import com.duangframework.core.common.IdEntity;
+import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ToolsKit;
@@ -31,7 +32,7 @@ public class MongoQuery<T> {
 	private DBObject queryObj;
 	private Order order;
 	private Field field;
-	private Page<T> page;
+	private PageDto<T> page;
 	
 	private DBCollection coll;
     private Class<T> clazz;
@@ -42,7 +43,7 @@ public class MongoQuery<T> {
 		queryObj = new BasicDBObject();
 		order = new Order();
 		field = new Field();
-		page = new Page<T>(0,1);
+		page = new PageDto<T>(0,1);
 	}
 	
 	public MongoQuery(DBCollection coll, Class<T> clazz, DBObject keys){
@@ -300,7 +301,7 @@ public class MongoQuery<T> {
 		return this;
 	}
 	
-	public MongoQuery<T> page(Page<T> page){
+	public MongoQuery<T> page(PageDto<T> page){
 		this.page = page;
 		return this;
 	}
@@ -339,7 +340,7 @@ public class MongoQuery<T> {
 		return fieldObj;
 	}
 	
-	public Page<T> getPage() {
+	public PageDto<T> getPage() {
 		return page;
 	}
 
@@ -347,7 +348,7 @@ public class MongoQuery<T> {
 		return hintDBObject;
 	}
 
-    private void checkSingle(DBObject orderDbo, Page<T> page ) {
+    private void checkSingle(DBObject orderDbo, PageDto<T> page ) {
     	
         if(ToolsKit.isNotEmpty(orderDbo) || page.getPageNo()!=0 || page.getPageSize()!=0){
         	logger.error("orderBy: " + orderDbo.toString() +"       pageNo: "+ page.getPageNo() + "          pageSize: "+page.getPageSize());
@@ -357,7 +358,7 @@ public class MongoQuery<T> {
     /*
     public T result(){
     	DBObject orderDbo = getDBOrder();
-    	Page<T> page = getPage();
+    	PageDto<T> page = getPage();
     	try {
     		checkSingle(orderDbo, page);
 		} catch (Exception e) {
@@ -395,7 +396,7 @@ public class MongoQuery<T> {
 			cursor.sort(orderDbo);
 		}
 
-		Page<T> page = getPage();
+		PageDto<T> page = getPage();
 		if (page.getPageNo() > 0 && page.getPageSize() > 1) {
 			cursor.skip((page.getPageNo() - 1) * page.getPageSize()).limit(page.getPageSize());
 		}

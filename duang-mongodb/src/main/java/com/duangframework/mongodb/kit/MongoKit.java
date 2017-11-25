@@ -1,6 +1,7 @@
 package com.duangframework.mongodb.kit;
 
 import com.duangframework.core.common.IdEntity;
+import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
@@ -8,7 +9,6 @@ import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.common.MongoConnect;
 import com.duangframework.mongodb.common.MongoQuery;
 import com.duangframework.mongodb.common.MongoUpdate;
-import com.duangframework.mongodb.common.Page;
 import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
@@ -188,7 +188,7 @@ public class MongoKit {
      * @param <T>       对象泛类
      * @return                泛型对象集合
      */
-    public <T> Page<T> findPage() {
+    public <T> PageDto<T> findPage() {
         getClient();
         try {
             MongoDao<T> dao = getMongoDao();

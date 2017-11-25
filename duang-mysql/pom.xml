@@ -1,0 +1,34 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>duangframework</artifactId>
+        <groupId>com.duangframework</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>duang-mysql</artifactId>
+    <packaging>jar</packaging>
+
+    <name>duang-mysql</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <code.version>1.0-SNAPSHOT</code.version>
+        <druid.version>1.0.15</druid.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.duangframework.core</groupId>
+            <artifactId>duang-core</artifactId>
+            <version>${code.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <version>${druid.version}</version>
+        </dependency>
+    </dependencies>
+</project>
