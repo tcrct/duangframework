@@ -1,6 +1,6 @@
 package com.duangframework.core.common.dto.http.response;
 
-import com.duangframework.core.common.dto.result.ReturnDto;
+import com.duangframework.core.common.dto.http.request.AsyncContext;
 
 import java.util.Collection;
 import java.util.Map;
@@ -18,6 +18,13 @@ public interface IResponse {
      * @param value         值
      */
     void addHeader(String key, String value);
+
+    /**
+     * 添加返回头信息
+     * @param key           名称
+     * @param value         值
+     */
+    void setHeader(String key, String value);
 
     /**
      * 根据name返回头信息
@@ -63,11 +70,17 @@ public interface IResponse {
 
     /**
      * 设置返回主体内容
-     * @param returnDto     返回主体对象
+     * @param returnObj     返回主体对象
      */
-    void write(ReturnDto returnDto);
+    void write(Object returnObj);
 
     @Override
     String toString();
+
+    /**
+     *
+     * @param asyncContext
+     */
+    void setAsyncContext(AsyncContext asyncContext);
 
 }

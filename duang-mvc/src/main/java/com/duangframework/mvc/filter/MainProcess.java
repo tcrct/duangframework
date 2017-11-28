@@ -1,11 +1,12 @@
 package com.duangframework.mvc.filter;
 
+import com.duangframework.core.common.dto.http.request.AsyncContext;
 import com.duangframework.core.common.dto.http.request.HttpRequest;
 import com.duangframework.core.common.dto.http.request.IRequest;
-import com.duangframework.core.common.dto.http.response.HttpResponse;
 import com.duangframework.core.common.dto.http.response.IResponse;
-import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.DuangMvcException;
+import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.IProcess;
 import com.duangframework.mvc.handles.Handles;
@@ -52,16 +53,28 @@ public class MainProcess implements IProcess {
     }
 
     @Override
-    public void doWork(final IRequest req, final IResponse res) throws Exception {
-        HttpRequest request = (HttpRequest)req;
-        HttpResponse response = (HttpResponse)res;
-        if(ToolsKit.isEmpty(request)) {  throw new EmptyNullException("request is null");}
-        if(ToolsKit.isEmpty(response)) {throw new EmptyNullException("response is null");}
+    public IResponse doWork(final IRequest req, final IResponse res) throws Exception {
+        final HttpRequest request = (HttpRequest)req;
+//        final HttpResponse response = (HttpResponse)res;
+        if(ToolsKit.isEmpty(req)) {  throw new EmptyNullException("request is null");}
+        if(ToolsKit.isEmpty(res)) {throw new EmptyNullException("response is null");}
 
+        final AsyncContext asyncContext = request.startAsync(req, res);
         try {
-            Handles.execute(request.getRequestURI().toString(), request, response);
+            ThreadPoolKit.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Handles.execute(request.getRequestURI().toString(), asyncContext.getAsyncRequest(), asyncContext.getAsyncResponse());
+                    } catch (Exception e) {
+                        throw new DuangMvcException(e.getMessage(), e);
+                    }
+                }
+            });
+            return asyncContext.complete();
         } catch (Exception e) {
             e.printStackTrace();
+            return null;
         }
 
     }

@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
  * @author laotang
  * @date 2017/11/2
  */
-public class ActionHandler extends AbstractHttpHandler {
+public class ActionThreadHandler extends AbstractHttpHandler implements Runnable{
 
-    private static Logger logger = LoggerFactory.getLogger(ActionHandler.class);
+    private static Logger logger = LoggerFactory.getLogger(ActionThreadHandler.class);
 
     private ChannelHandlerContext ctx;
 //    private FullHttpRequest request;
@@ -27,13 +27,14 @@ public class ActionHandler extends AbstractHttpHandler {
     private IResponse response;
     private boolean keepAlive; //是否支持Keep-Alive
 
-    public ActionHandler(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest){
+    public ActionThreadHandler(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest){
         this.ctx = ctx;
         this.keepAlive = HttpHeaderUtil.isKeepAlive(fullHttpRequest);
         this.request = RequestUtils.buildDuangRequest(ctx, fullHttpRequest);
         this.response = ResponseUtils.buildDuangResponse(request);
     }
 
+    @Override
     public void run() {
         if (null == request || null == response) {
             throw new EmptyNullException("build duang request or response is fail, exit...");
@@ -43,6 +44,7 @@ public class ActionHandler extends AbstractHttpHandler {
             // 调用MCV模块的主入口方法
             response = MainProcess.getInstantiation().doWork(request, response);
             // 返回到客户端
+            System.out.println("###########SSSSSSSSS###############");
             response(ctx, keepAlive, response);
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);

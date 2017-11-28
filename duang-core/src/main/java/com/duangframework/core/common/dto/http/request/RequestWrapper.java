@@ -60,8 +60,8 @@ public class RequestWrapper implements IRequest {
     }
 
     @Override
-    public Object getAttribute() {
-        return attributes;
+    public Object getAttribute(String name) {
+        return attributes.get(name);
     }
 
     @Override

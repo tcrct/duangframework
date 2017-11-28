@@ -18,7 +18,7 @@ public interface IRequest {
      *
      * @return
      */
-    Object getAttribute();
+    Object getAttribute(String name);
 
     Enumeration<String> getAttributeNames();
 

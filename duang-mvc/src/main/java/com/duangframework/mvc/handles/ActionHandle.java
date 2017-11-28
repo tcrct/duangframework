@@ -58,6 +58,8 @@ public class ActionHandle implements IHandle {
         method.setAccessible(true);
         // 反射执行方法
         method.invoke(controller, NULL_ARGS);
+        // 返回结果
+        controller.getRender().setContext(request, response).render();
     }
 
 }

@@ -21,4 +21,17 @@ public class Const {
      * 使用环境
      */
     public static String USE_ENV = "local";
+
+    public static final String DUANG_REQUEST_ID = "duang-request-id";
+    public static final String REMOTE_CLIENT_IP  = "duang-client-ip";
+    public static final String REMOTE_SERVICE_IP  = "duang-service-ip";
+    public static final String RENDER_TYPE_FILED  = "duang-render-type";
+    public static final String OWNER_FILED  = "duang-x-owenr";
+    public static final String OWNER  = "duangframework";
+
+    /**
+     * 请求超时默认时间，3秒
+     */
+    public static final long REQUEST_TIMEOUT = 3000L;
+
 }

@@ -1,7 +1,6 @@
 package com.duangframework.server.netty.handler;
 
 import com.duangframework.core.exceptions.VerificationException;
-import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.server.utils.RequestUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -30,7 +29,11 @@ public class HttpBaseHandler extends SimpleChannelInboundHandler<FullHttpRequest
             return;
         }
         // 再开线程执行后续操作，异步操作，提升效率
-        ThreadPoolKit.execute(new ActionHandler(ctx, request));
+//        ThreadPoolKit.execute(new ActionHandler(ctx, request));
+
+        //不开线程，因为netty本身就是NIO方式
+        new ActionHandler(ctx, request).run();
+
     }
 
     @Override

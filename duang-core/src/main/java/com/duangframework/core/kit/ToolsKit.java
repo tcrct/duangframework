@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -231,6 +232,38 @@ public class ToolsKit {
             }
         }
         return true;
+    }
+
+    /**
+     * 根据format字段，格式化日期
+     * @param date          日期
+     * @param format        格式化字段
+     * @return
+     */
+    public static String formatDate(Date date, String format) {
+        try {
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(format);
+            return sdf.format(date);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return "";
+        }
+    }
+
+    /**
+     *  将字符串日期根据format格式化字段转换成日期类型
+     * @param stringDate    字符串日期
+     * @param format           格式化日期
+     * @return
+     */
+    public static Date parseDate(String stringDate, String format) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(format);
+        try {
+            return sdf.parse(stringDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

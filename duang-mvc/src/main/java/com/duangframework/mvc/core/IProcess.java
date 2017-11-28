@@ -20,7 +20,7 @@ public interface IProcess {
     /**
      *
      */
-    void doWork(IRequest request, IResponse response) throws Exception;
+    IResponse doWork(IRequest request, IResponse response) throws Exception;
 
     /**
      *

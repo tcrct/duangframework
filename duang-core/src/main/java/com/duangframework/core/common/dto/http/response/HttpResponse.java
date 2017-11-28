@@ -1,6 +1,6 @@
 package com.duangframework.core.common.dto.http.response;
 
-import com.duangframework.core.common.dto.result.ReturnDto;
+import com.duangframework.core.common.dto.http.request.AsyncContext;
 import com.duangframework.core.kit.ToolsKit;
 
 import java.util.Collection;
@@ -16,7 +16,7 @@ public class HttpResponse implements IResponse {
     private Map<String,String> headers;
     private String charset;
     private String contentType;
-    private ReturnDto returnDto;
+    private Object returnObj;
 
 
 
@@ -24,7 +24,6 @@ public class HttpResponse implements IResponse {
         this.headers = headers;
         this.charset = charset;
         this.contentType = contentType;
-        this.returnDto = new ReturnDto();
     }
 
     private HttpResponse() {
@@ -33,6 +32,11 @@ public class HttpResponse implements IResponse {
 
     @Override
     public void addHeader(String key, String value) {
+        headers.put(key, value);
+    }
+
+    @Override
+    public void setHeader(String key, String value) {
         headers.put(key, value);
     }
 
@@ -72,13 +76,27 @@ public class HttpResponse implements IResponse {
     }
 
     @Override
-    public void write(ReturnDto returnDto) {
-        this.returnDto = returnDto;
+    public void write(Object returnObj) {
+        this.returnObj = returnObj;
+        // 请求超时会是null值
+        if(null != _asyncContext) {
+            _asyncContext.write(this);
+        }
     }
 
     @Override
     public String toString() {
-        return ToolsKit.toJsonString(returnDto);
+        return ToolsKit.toJsonString(returnObj);
+    }
+
+
+    /**
+     *
+     */
+    private AsyncContext _asyncContext;
+    @Override
+    public void setAsyncContext(AsyncContext asyncContext) {
+        this._asyncContext = asyncContext;
     }
 
 }

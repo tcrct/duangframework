@@ -6,6 +6,7 @@ package com.duangframework.core.common.dto.http.request;
  * @date 2017/11/4
  */
 
+import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.kit.ToolsKit;
 
 import java.io.ByteArrayInputStream;
@@ -56,8 +57,8 @@ public class HttpRequest implements IRequest {
     }
 
     @Override
-    public Object getAttribute() {
-        return attributes;
+    public Object getAttribute(String name) {
+        return attributes.get(name);
     }
 
     @Override
@@ -194,5 +195,13 @@ public class HttpRequest implements IRequest {
             return null;
         }
     }
+
+
+    public AsyncContext startAsync(IRequest request, IResponse response) throws IllegalStateException {
+        AsyncContext asyncContext = new AsyncContextImpl(request, response);
+        response.setAsyncContext(asyncContext);
+        return asyncContext;
+    }
+
 }
 
