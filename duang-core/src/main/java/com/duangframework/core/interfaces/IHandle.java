@@ -1,7 +1,7 @@
 package com.duangframework.core.interfaces;
 
-import com.duangframework.core.common.dto.http.request.HttpRequest;
-import com.duangframework.core.common.dto.http.response.HttpResponse;
+import com.duangframework.core.common.dto.http.request.IRequest;
+import com.duangframework.core.common.dto.http.response.IResponse;
 
 /**
  * 处理器接口
@@ -10,6 +10,6 @@ import com.duangframework.core.common.dto.http.response.HttpResponse;
  */
 public interface IHandle {
 
-	void execute(String target, HttpRequest request, HttpResponse response) throws Exception;
+	void execute(String target, IRequest request, IResponse response) throws Exception;
 
 }

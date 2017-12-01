@@ -1,6 +1,6 @@
 //package com.duangframework.core.common.dto.http.response;
 //
-//import com.duangframework.core.common.dto.http.request.AsyncContextImpl;
+//import com.duangframework.core.common.dto.http.request.AsyncContextQueueImpl;
 //import com.duangframework.core.common.dto.result.ReturnDto;
 //import com.duangframework.core.exceptions.EmptyNullException;
 //import com.duangframework.core.kit.ToolsKit;
@@ -99,7 +99,7 @@
 //    }
 //
 //    @Override
-//    public void setAsyncContext(AsyncContextImpl asyncContext) {
+//    public void setAsyncContext(AsyncContextQueueImpl asyncContext) {
 //
 //    }
 //

@@ -4,7 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.duangframework.core.common.dto.http.head.HttpHeaders;
 import com.duangframework.core.common.dto.http.request.HttpRequest;
+import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.HttpResponse;
+import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.common.dto.result.ReturnDto;
 import com.duangframework.core.exceptions.DuangMvcException;
@@ -28,22 +30,22 @@ public abstract class BaseController {
 
     private static Logger logger = LoggerFactory.getLogger(BaseController.class);
 
-    private HttpRequest request;
-    private HttpResponse response;
+    private IRequest request;
+    private IResponse response;
     private Render render;
 
-    public void init(HttpRequest request, HttpResponse response) {
+    public void init(IRequest request, IResponse response) {
         this.request = request;
         this.response = response;
         logger.warn(ToolsKit.toJsonString(request.getParameterMap()));
     }
 
     public HttpRequest getRequest() {
-        return request;
+        return (HttpRequest) request;
     }
 
     public HttpResponse getResponse() {
-        return response;
+        return (HttpResponse) response;
     }
 
     private void printRequest() {

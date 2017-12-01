@@ -2,13 +2,11 @@ package com.duangframework.mvc.core;
 
 
 import com.duangframework.core.annotation.aop.Proxy;
-import com.duangframework.core.annotation.db.Entity;
 import com.duangframework.core.annotation.mvc.Controller;
 import com.duangframework.core.annotation.mvc.Monitor;
 import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.interfaces.IHandle;
 import com.duangframework.core.interfaces.IPlugin;
-import com.duangframework.core.utils.BeanUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -29,7 +27,7 @@ public class InstanceFactory {
         MVC_ANNOTATION_SET.add(Service.class);
         MVC_ANNOTATION_SET.add(Monitor.class);
         MVC_ANNOTATION_SET.add(Proxy.class);
-        MVC_ANNOTATION_SET.add(Entity.class);
+//        MVC_ANNOTATION_SET.add(Entity.class);
 
     }
 
@@ -56,49 +54,6 @@ public class InstanceFactory {
     public static void setPlugin(IPlugin plugin) {
         InstanceFactory.plugins.add(plugin);
     }
-
-    /**
-     * 所有Class Bean集合， 这里的所有是指@DefaultClassTemplate扫描后且实例化后的
-     * 经过滤后的Class并Class.forName()
-     * key为MVC_ANNOTATION_SET的每一个元素
-     * value为对应的Bean
-     * 当key为Controller时，具体内容为： Map<"BaseController", Map<ControllerName, ControllerBean>>
-     */
-    public static Map<String,Map<String,Object>> getAllBeanMaps() {
-        return BeanUtils.getAllBeanMaps();
-    }
-    public static void setAllBeanMaps(String key, Map<String, Object> allBeanMap) {
-        BeanUtils.setAllBeanMaps(key ,allBeanMap);
-        setAllBeanMap(allBeanMap);
-    }
-
-    /**
-     * 所有Class Bean集合， 这里的所有是指@DefaultClassTemplate扫描后且实例化后的
-     * 经过滤后的Class并Class.forName()
-     * key为 className
-     * value为class的Bean
-     */
-
-    public static Map<String,Object> getAllBeanMap() {
-        return BeanUtils.getAllBeanMap();
-    }
-    public static void setAllBeanMap(Map<String, Object> allBeanMap) {
-        BeanUtils.setAllBeanMap(allBeanMap);
-    }
-
-    /**
-     * 代理类集合
-     * key为Service方法添加的注解类名称
-     * value为代理类实例对象
-     */
-    private static Map<String, Class<?>> proxyMap = new HashMap<>();
-    public static Map<String, Class<?>> getProxyMap() {
-        return proxyMap;
-    }
-    public static void setProxyMap(Map<String, Class<?>> proxyMap) {
-        InstanceFactory.proxyMap.putAll(proxyMap);
-    }
-
 
     /**
      * Action Map集合

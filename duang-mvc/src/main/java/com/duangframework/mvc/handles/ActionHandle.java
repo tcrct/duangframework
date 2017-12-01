@@ -1,9 +1,10 @@
 package com.duangframework.mvc.handles;
 
 
-import com.duangframework.core.common.dto.http.request.HttpRequest;
-import com.duangframework.core.common.dto.http.response.HttpResponse;
+import com.duangframework.core.common.dto.http.request.IRequest;
+import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.interfaces.IHandle;
+import com.duangframework.core.utils.BeanUtils;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mvc.core.Action;
 import com.duangframework.mvc.core.BaseController;
@@ -21,7 +22,7 @@ public class ActionHandle implements IHandle {
     private static final Object[] NULL_ARGS = new Object[0];
 
     @Override
-    public void execute(String target, HttpRequest request, HttpResponse response) throws Exception {
+    public void execute(String target, IRequest request, IResponse response) throws Exception {
         // 请求的URL中如果包含有.  则全部当作是静态文件的请求处理，直接返回
         if (target.contains(".")) { return; }
         // 分号后的字符截断
@@ -43,12 +44,12 @@ public class ActionHandle implements IHandle {
         BaseController controller = null;
         //是否单例
         if(action.isSingleton()){
-            controller = (BaseController) InstanceFactory.getAllBeanMap().get(action.getBeanKey());
+            controller = (BaseController) BeanUtils.getBean(action.getControllerClass(), controllerClass);
         } else {
             // 如果不是设置为单例模式的话就每次请求都创建一个新的Controller对象
             controller = ClassUtils.newInstance(controllerClass);
             // 还要重新执行Ioc注入
-            IocHelper.ioc(controller);
+            IocHelper.ioc(controller.getClass());
         }
         // 传入request, response到Controller
         controller.init(request, response);

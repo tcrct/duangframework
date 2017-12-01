@@ -5,6 +5,7 @@ import com.duangframework.core.interfaces.IPlugin;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
+import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.common.MongoConnect;
 import com.duangframework.mongodb.kit.MongoClientKit;
@@ -55,25 +56,30 @@ public class MongodbPlugin implements IPlugin {
      */
     private void importDao() throws Exception {
     // 取出所有类对象
-    Map<String, Object> beanMap = BeanUtils.getAllBeanMap();
-    for(Iterator<Map.Entry<String, Object>> it = beanMap.entrySet().iterator(); it.hasNext();) {
-        Map.Entry<String, Object> entry = it.next();
+    Map<Class<?>, Object> allBeanMap = BeanUtils.getAllBeanMap();
+    for(Iterator<Map.Entry<Class<?>, Object>> it = allBeanMap.entrySet().iterator(); it.hasNext();) {
+        Map.Entry<Class<?>, Object> entry = it.next();
+        Class<?> beanClass = entry.getKey();
+        Field[] fields = beanClass.getDeclaredFields();
         Object beanObj = entry.getValue();
-        Field[] fields = beanObj.getClass().getDeclaredFields();
             for(Field field : fields) {
                 if (field.isAnnotationPresent(Import.class) && MongoDao.class.equals(field.getType())) {
-                ParameterizedType paramType = (ParameterizedType) field.getGenericType();
-                Type[] types = paramType.getActualTypeArguments();
+                    ParameterizedType paramType = (ParameterizedType) field.getGenericType();
+                    Type[] types = paramType.getActualTypeArguments();
                     if(ToolsKit.isNotEmpty(types)) {
                         // <>里的泛型类
                         String paramTypeClassName = types[0].toString().substring(6).trim();
-                        Class<?> paramTypeClass = beanMap.get(paramTypeClassName).getClass();
+                        Class<?> paramTypeClass  = ClassUtils.loadClass(paramTypeClassName, false);
                         Object daoObj = MongoUtils.getMongoDao(paramTypeClass);
+//                        BeanUtils.setBean2Map(paramTypeClass, daoObj);
                         field.setAccessible(true);
                         field.set(beanObj, daoObj);
                     }
                 }
+//                BeanUtils.setBean2Map(beanClass, beanObj);
             }
+//        System.out.println(beanClass.getCanonicalName()+"         $$$$$$$$$         "+beanObj.getClass().getSimpleName());
+//
         }
     }
 }

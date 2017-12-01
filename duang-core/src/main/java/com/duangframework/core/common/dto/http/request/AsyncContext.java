@@ -1,6 +1,5 @@
 package com.duangframework.core.common.dto.http.request;
 
-import com.duangframework.core.common.dto.http.response.HttpResponse;
 import com.duangframework.core.common.dto.http.response.IResponse;
 
 /**
@@ -15,8 +14,8 @@ public interface AsyncContext {
 
     IResponse complete();
 
-    HttpRequest getAsyncRequest();
+    IRequest getAsyncRequest();
 
-    HttpResponse getAsyncResponse();
+    IResponse getAsyncResponse();
 
 }

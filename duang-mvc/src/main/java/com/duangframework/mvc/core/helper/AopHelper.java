@@ -2,7 +2,7 @@ package com.duangframework.mvc.core.helper;
 
 import com.duangframework.core.annotation.aop.Proxy;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.mvc.core.InstanceFactory;
+import com.duangframework.core.utils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,22 +23,22 @@ public class AopHelper {
 
     public static void duang() {
         String key = Proxy.class.getSimpleName();
-        Map<String, Object> proxyMap = InstanceFactory.getAllBeanMaps().get(key);
+        Map<Class<?>, Object> proxyMap = BeanUtils.getAllBeanMaps().get(key);
         if(ToolsKit.isEmpty(proxyMap)) { return; }
-        Map<String, Object> proxyMapNew = new HashMap<>(proxyMap.size());
-        for(Iterator<Map.Entry<String,Object>> it = proxyMap.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<String,Object> entry = it.next();
-            Object proxyObj = entry.getValue();
-            Proxy proxy = proxyObj.getClass().getAnnotation(Proxy.class);
-            String aopKey = proxy.aop().getCanonicalName();
+        Map<Class<?>, Object> proxyMapNew = new HashMap<>(proxyMap.size());
+        for(Iterator<Map.Entry<Class<?>, Object>> it = proxyMap.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class<?>, Object> entry = it.next();
+            Class<?> proxyClass = entry.getKey();
+            Proxy proxy = proxyClass.getAnnotation(Proxy.class);
+            Class<?> aopClass = proxy.aop();
             // 以Proxy注解里的aop字段值作为key, 以供在IocHelper里，执行AOP代理时，根据方法上的注解名称取回对应的代理对象
-            proxyMapNew.put(aopKey, proxyObj);
+            proxyMapNew.put(aopClass, entry.getValue());
         }
         if (ToolsKit.isNotEmpty(proxyMapNew)) {
             // 将原来的删除掉
-            InstanceFactory.getAllBeanMaps().remove(key);
-            // 缓存到对象实例工厂
-            InstanceFactory.setAllBeanMaps(key, proxyMapNew);
+            BeanUtils.getAllBeanMaps().remove(key);
+            // 重新缓存
+            BeanUtils.setAllBeanMaps(key, proxyMapNew);
         }
 
         // DB??

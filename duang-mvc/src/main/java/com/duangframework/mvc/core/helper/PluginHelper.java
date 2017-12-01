@@ -31,6 +31,7 @@ public class PluginHelper {
                     plugin.start();
                     logger.warn(plugin.getClass().getName() +" start success...");
                 }catch(Exception ex){
+                    ex.printStackTrace();
                     logger.warn(plugin.getClass().getName() +" start fail: " + ex.getMessage());
                 }
             }

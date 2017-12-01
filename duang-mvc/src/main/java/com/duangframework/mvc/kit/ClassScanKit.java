@@ -1,5 +1,6 @@
 package com.duangframework.mvc.kit;
 
+import com.duangframework.core.annotation.aop.Proxy;
 import com.duangframework.core.common.classes.DefaultClassTemplate;
 import com.duangframework.core.common.classes.IClassTemplate;
 import com.duangframework.core.kit.ToolsKit;
@@ -110,7 +111,12 @@ public class ClassScanKit {
         // 兼容Duang3.0版前的规则
         if(!annotationSet.isEmpty()) {
             for(Iterator<Class<? extends Annotation>> it = annotationSet.iterator(); it.hasNext();) {
-                suffixSet.add(it.next().getSimpleName());
+                Class<? extends Annotation> annotationClass = it.next();
+                //过滤代理类以Proxy结尾的类
+                if(annotationClass.equals(Proxy.class)) {
+                    continue;
+                }
+                suffixSet.add(annotationClass.getSimpleName());
             }
         }
         if(ToolsKit.isEmpty(template)) {

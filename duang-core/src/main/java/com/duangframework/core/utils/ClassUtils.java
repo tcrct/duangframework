@@ -8,7 +8,9 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -32,6 +34,7 @@ public class ClassUtils {
     public static <T> T newInstance(Class<?> clazz) {
         try {
             logger.debug("\t>>{}", clazz.getCanonicalName());
+            System.out.println(clazz.getCanonicalName());
             return (T)loadClass(clazz.getCanonicalName(), true).newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
@@ -172,5 +175,34 @@ public class ClassUtils {
             }
         }
         return result;
+    }
+
+
+    /**
+     * 所有Class Bean集合， 这里的所有是指@DefaultClassTemplate扫描后且实例化后的
+     * key为MVC_ANNOTATION_SET的每一个元素
+     * value为对应的Class
+     * 当key为Controller时，具体内容为： Map<"Controller", Map<ControllerName, ControllerClass>>
+     */
+    private static Map<String,Map<String,Class<?>>> allClassMaps = new HashMap<>();
+    public static Map<String,Map<String,Class<?>>> getAllClassMaps() {
+        return allClassMaps;
+    }
+    public static void setAllClassMaps(String key, Map<String, Class<?>> allBeanMap) {
+        allClassMaps.put(key ,allBeanMap);
+        setAllClassMap(allBeanMap);
+    }
+
+    /**
+     * 所有Class 集合， 这里的所有是指@DefaultClassTemplate扫描后的
+     * key为 className
+     * value为class
+     */
+    private static Map<String,Class<?>> allClassMap = new HashMap<>();
+    public static Map<String,Class<?>> getAllClassMap() {
+        return allClassMap;
+    }
+    public static void setAllClassMap(Map<String, Class<?>> allBeanMap) {
+        allClassMap.putAll(allBeanMap);
     }
 }

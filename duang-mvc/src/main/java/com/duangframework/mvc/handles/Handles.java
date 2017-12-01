@@ -1,8 +1,8 @@
 package com.duangframework.mvc.handles;
 
 
-import com.duangframework.core.common.dto.http.request.HttpRequest;
-import com.duangframework.core.common.dto.http.response.HttpResponse;
+import com.duangframework.core.common.dto.http.request.IRequest;
+import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.interfaces.IHandle;
 import com.duangframework.mvc.core.InstanceFactory;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class Handles {
      * @param response        返回对象
      * @throws Exception
      */
-    public static void execute(String target, HttpRequest request, HttpResponse response) throws Exception {
+    public static void execute(String target, IRequest request, IResponse response) throws Exception {
         for (Iterator<IHandle> it = InstanceFactory.getHandles().iterator(); it.hasNext();) {
             it.next().execute(target, request, response);
         }

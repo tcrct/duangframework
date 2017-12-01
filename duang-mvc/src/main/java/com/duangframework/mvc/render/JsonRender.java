@@ -61,12 +61,9 @@ public class JsonRender extends Render {
 		this.obj = obj;
 		this.fieldFilterSet = fieldFilterSet;
 	}
-	
-	
-	
+
 	@Override
 	public void render() {
-		System.out.println("render: " + response.hashCode());
 		if(null == request || null == response) {
 			logger.warn("request or response is null");
 			return;

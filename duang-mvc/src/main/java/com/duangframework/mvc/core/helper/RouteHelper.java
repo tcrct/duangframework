@@ -5,6 +5,7 @@ import com.duangframework.core.annotation.mvc.Mapping;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.utils.BeanUtils;
 import com.duangframework.mvc.core.Action;
 import com.duangframework.mvc.core.InstanceFactory;
 import org.slf4j.Logger;
@@ -25,15 +26,15 @@ public class RouteHelper {
     private static Map<String, Action> actionMapping = new HashMap<String, Action>();
 
     public static void duang() {
-        Map<String, Object> controllerMap = InstanceFactory.getAllBeanMaps().get(CONTROLLER_ENDWITH_NAME);
+        Map<Class<?>, Object> controllerMap = BeanUtils.getAllBeanMaps().get(CONTROLLER_ENDWITH_NAME);
         if(ToolsKit.isEmpty(controllerMap)) {
             throw new EmptyNullException("mvc controller is null");
         }
         Set<String> excludedMethodName = ObjectKit.buildExcludedMethodName();
         // 遍历所有Controller对象，取出Mapping注解，生成路由集合
-        for(Iterator<Map.Entry<String, Object>> it = controllerMap.entrySet().iterator(); it.hasNext();) {
-            Map.Entry<String, Object> entry = it.next();
-            Class<?> controllerClass = entry.getValue().getClass();
+        for(Iterator<Map.Entry<Class<?>, Object>> it = controllerMap.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<Class<?>, Object> entry = it.next();
+            Class<?> controllerClass = entry.getKey();
             Mapping controllerMapping = controllerClass.getAnnotation(Mapping.class);
 //            String controllerKey = ToolsKit.isEmpty(controllerMapping) ? buildMappingKey(controllerClass.getSimpleName()) : controllerMapping.value().toLowerCase();
             String controllerKey = buildMappingKey(controllerMapping, controllerClass.getSimpleName());

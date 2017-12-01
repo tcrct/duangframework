@@ -1,5 +1,6 @@
 package com.duangframework.core.kit;
 
+import com.duangframework.core.exceptions.ExecutorServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +14,17 @@ public class ThreadPoolKit {
 	private static long KEEP_ALIVE_TIME = 30L;			// KeepAlive时间,默认30分钟
 	private static int MIN_POOL_NUMBER = 10;			// 最小线程数
 	private static int MAX_POOL_NUMBER = 100;		// 最大线程数
+	/**
+	 * 　corePoolSize - 池中所保存的线程数，包括空闲线程。
 
+	 　　maximumPoolSize - 池中允许的最大线程数。
+
+	 　　keepAliveTime - 当线程数大于核心时，此为终止前多余的空闲线程等待新任务的最长时间。
+
+	 　　unit - keepAliveTime 参数的时间单位。
+
+	 　　workQueue - 执行前用于保持任务的队列。此队列仅保持由 execute 方法提交的 Runnable 任务。
+	 */
 	private static final ExecutorService es = new ThreadPoolExecutor(
 			MIN_POOL_NUMBER, MAX_POOL_NUMBER,
 			KEEP_ALIVE_TIME,
@@ -57,6 +68,20 @@ public class ThreadPoolKit {
 	public static <T> FutureTask<T> execute(Callable<T> futureTask) {
 		try{
 			return (FutureTask)es.submit(futureTask);
+		} catch (Exception e) {
+			logger.warn("ThreadPoolKit execute is error: "+ e.getMessage(), e);
+			throw new ExecutorServiceException(e.getMessage(), e);
+		}
+	}
+
+	/**
+	 * 执行任务
+	 * @param futureTask	线程任务
+	 * @return
+	 */
+	public static <T> FutureTask<T> run(Thread thread) {
+		try{
+			return (FutureTask)es.submit(thread);
 		} catch (Exception e) {
 			logger.warn("ThreadPoolKit execute is error: "+ e.getMessage(), e);
 			return null;

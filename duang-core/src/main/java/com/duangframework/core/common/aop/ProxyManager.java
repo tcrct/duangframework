@@ -21,7 +21,7 @@ public class ProxyManager {
 	 * 创建代理实例
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T createProxy(final Class<?> targetClass, final List<IProxy> proxyList) {
+	public static <T> T createProxy(final Class<?> targetClass, final List<IProxy> proxyList) throws Exception {
 		return (T) Enhancer.create(targetClass, new MethodInterceptor() {
 			@Override
 			public Object intercept(Object targetObject, Method targetMethod, Object[] methodParams,

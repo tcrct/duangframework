@@ -29,9 +29,7 @@ public class DefaultClassTemplate extends AbstractClassTemplate {
      */
     @Override
     public void doLoadClass(List<Class<?>> filelist, String packageName, String fileName, String suffix) {
-
         Class<?> clazz = ClassUtils.loadClass(packageName+"."+fileName, false);
-
         for (Iterator<String> it = suffixSet.iterator(); it.hasNext();) {
             String suffixStr = it.next();
             if(fileName.endsWith(suffixStr)) {
@@ -57,20 +55,23 @@ public class DefaultClassTemplate extends AbstractClassTemplate {
         Map<String, List<Class<?>>> classMap = new HashMap<>();
         for(Iterator<Class<?>> it = classList.iterator(); it.hasNext();) {
             Class<?> clazz = it.next();
-            if(ToolsKit.isNotEmpty(annotationSet)) {
+            if(ToolsKit.isNotEmpty(clazz.getAnnotations())) {
                 for(Class<? extends Annotation> annotationClass : annotationSet) {
-                    String key = annotationClass.getSimpleName();
-                    if (clazz.isAnnotationPresent(annotationClass)) {
+                    if(clazz.isAnnotationPresent(annotationClass)) {
+                        String key = annotationClass.getSimpleName();
                         addClass2Map4Key(classMap, key, clazz);
                         break;
                     }
                 }
-            } else if(ToolsKit.isEmpty(annotationSet) && ToolsKit.isNotEmpty(suffixSet)) {
-                for (Iterator<String> suffixIt = suffixSet.iterator(); suffixIt.hasNext();) {
-                    String key = clazz.getSimpleName();
-                    if(key.endsWith(suffixIt.next())) {
-                        addClass2Map4Key(classMap, key, clazz);
-                        break;
+            } else {
+                if(ToolsKit.isNotEmpty(suffixSet)) {
+                    for (Iterator<String> suffixIt = suffixSet.iterator(); suffixIt.hasNext(); ) {
+                        String key = clazz.getSimpleName();
+                        String suffix = suffixIt.next();
+                        if (key.endsWith(suffix)) {
+                            addClass2Map4Key(classMap, suffix, clazz);
+                            break;
+                        }
                     }
                 }
             }

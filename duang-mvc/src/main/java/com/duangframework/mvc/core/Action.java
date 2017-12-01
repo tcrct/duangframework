@@ -51,6 +51,10 @@ public class Action {
 		return orderKey;
 	}
 
+	/**
+	 * 默认是单例的
+	 * @return
+	 */
 	public boolean isSingleton() {
 		com.duangframework.core.annotation.mvc.Controller controllerAnnotation = getControllerClass().getAnnotation(com.duangframework.core.annotation.mvc.Controller.class);
 		if(ToolsKit.isNotEmpty(controllerAnnotation) &&

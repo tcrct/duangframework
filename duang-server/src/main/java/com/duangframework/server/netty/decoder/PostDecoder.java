@@ -5,7 +5,6 @@ import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ public class PostDecoder extends AbstractDecoder<Map<String,String[]>> {
             Map<String, List<String>> params = new HashMap<>();
             for (InterfaceHttpData httpData : paramsList) {
                 Attribute attribute = (Attribute) httpData;
-                System.out.println("###########PostDecoder: "  + attribute.getHttpDataType().getClass().getName());
                 String key = attribute.getName();
                 String value = attribute.getValue();
                 parseValue2List(params, key, value);
