@@ -63,7 +63,7 @@ public class RouteHelper {
         }
 
         List<String> keyList = getAllActionKeys();
-        logger.warn("**************** All BaseController Mapper Key ****************");
+        logger.warn("**************** Controller Mapper Key ****************");
         for (String key : keyList) {
             logger.warn(key);
         }

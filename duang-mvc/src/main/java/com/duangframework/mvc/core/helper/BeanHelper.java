@@ -38,11 +38,12 @@ public class BeanHelper {
                 // 增加MVC固定扫描的包路径
                 .packages(AbstractProxy.class.getPackage().getName())
                 .map();
-        // 将扫描后的Class进行实例化并缓存
-        if(ToolsKit.isNotEmpty(classMap)) {
 
+        if(ToolsKit.isNotEmpty(classMap)) {
+            String proxyKey = Proxy.class.getSimpleName();
+            // 找出所有代理类进行实例化并缓存
             Map<Class<? extends Annotation>, IProxy> annotationMap = new HashMap<>();
-            List<Class<?>> proxyList = classMap.get(Proxy.class.getSimpleName());
+            List<Class<?>> proxyList = classMap.get(proxyKey);
             for(Class<?> proxyClass : proxyList) {
                 Proxy proxy = proxyClass.getAnnotation(Proxy.class);
                 if(ToolsKit.isNotEmpty(proxy)) {
@@ -51,11 +52,14 @@ public class BeanHelper {
                     annotationMap.put(aopClass, proxyObj);
                 }
             }
-
+            // 将扫描后的Class进行实例化并缓存(Proxy除外)
             try {
                 for(Iterator<Map.Entry<String, List<Class<?>>>> it = classMap.entrySet().iterator(); it.hasNext();) {
                     Map.Entry<String, List<Class<?>>> entry = it.next();
                     String key = entry.getKey();
+                    if(proxyKey.equals(key)) {
+                        continue;
+                    }
                     List<Class<?>> classList = entry.getValue();
                     if(ToolsKit.isEmpty(classList)) { continue; }
                     Map<Class<?>, Object> subBeanMap = BeanUtils.getAllBeanMaps().get(key);

@@ -43,8 +43,6 @@ public class ContextLoaderListener {
         initContext();
         // 扫描.class文件
         BeanHelper.duang();
-        // 初始化Aop, 基于代理的实现
-//        AopHelper.duang();
         // 初始化插件
         PluginHelper.duang();
          // 初始化Ioc, 依赖注入, 主要在Controller里注入Service类， Service里注入Service类
