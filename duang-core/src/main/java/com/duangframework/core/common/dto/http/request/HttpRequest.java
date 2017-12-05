@@ -100,7 +100,7 @@ public class HttpRequest implements IRequest {
 
     @Override
     public String getParameter(String name) {
-        return params.get(name)[0];
+        return null ==params.get(name) ? null : params.get(name)[0];
     }
 
     @Override

@@ -97,6 +97,9 @@ public abstract class BaseController {
     }
 
     public Render getRender() {
+        if(null == render) {
+            render = new TextRender("request is not set render");
+        }
         return render;
     }
 

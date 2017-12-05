@@ -34,7 +34,6 @@ public class ClassUtils {
     public static <T> T newInstance(Class<?> clazz) {
         try {
             logger.debug("\t>>{}", clazz.getCanonicalName());
-            System.out.println(clazz.getCanonicalName());
             return (T)loadClass(clazz.getCanonicalName(), true).newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

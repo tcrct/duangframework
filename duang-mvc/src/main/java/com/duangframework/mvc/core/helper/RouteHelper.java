@@ -7,6 +7,7 @@ import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
 import com.duangframework.mvc.core.Action;
+import com.duangframework.mvc.core.BaseController;
 import com.duangframework.mvc.core.InstanceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ public class RouteHelper {
 
     public final static String CONTROLLER_ENDWITH_NAME = Controller.class.getSimpleName();
     private static Map<String, Action> actionMapping = new HashMap<String, Action>();
+    private static Map<String, Action> restfulActionMapping = new HashMap<String, Action>();
 
     public static void duang() {
         Map<Class<?>, Object> controllerMap = BeanUtils.getAllBeanMaps().get(CONTROLLER_ENDWITH_NAME);
@@ -31,6 +33,10 @@ public class RouteHelper {
             throw new EmptyNullException("mvc controller is null");
         }
         Set<String> excludedMethodName = ObjectKit.buildExcludedMethodName();
+        Method[] baseControllerMethods = BaseController.class.getMethods();
+        for(Method method : baseControllerMethods) {
+            excludedMethodName.add(method.getName());
+        }
         // 遍历所有Controller对象，取出Mapping注解，生成路由集合
         for(Iterator<Map.Entry<Class<?>, Object>> it = controllerMap.entrySet().iterator(); it.hasNext();) {
             Map.Entry<Class<?>, Object> entry = it.next();
@@ -45,6 +51,10 @@ public class RouteHelper {
                 if(!excludedMethodName.contains(methodName) && method.getParameterTypes().length ==0 ) {
                     Action action = buildAction(controllerClass, controllerKey, methodMapping, method);
                     String actionKey = action.getActionKey();
+                    if (actionKey.contains("{") && actionKey.contains("}")) {
+                        action.setRestfulKey(actionKey);
+                        restfulActionMapping.put(actionKey, action);
+                    }
                     if(!ToolsKit.isExist(actionKey, actionMapping)){
                         actionMapping.put(actionKey, action);
                     }
@@ -60,6 +70,9 @@ public class RouteHelper {
         if(!actionMapping.isEmpty()){
             InstanceFactory.setActionMapping(actionMapping);
         }
+        if(!restfulActionMapping.isEmpty()){
+            InstanceFactory.setRestfulActionMapping(restfulActionMapping);
+        }
         logger.warn("RouteHelper Success...");
     }
 
@@ -68,7 +81,7 @@ public class RouteHelper {
         String methodKey = buildMappingKey(mapping, methodName);
         String actionKey = methodKey;
         if(!controllerKey.equalsIgnoreCase(methodKey)) {
-            actionKey = controllerKey +"/"+ methodKey;
+            actionKey = controllerKey + (methodKey.startsWith("/") ? methodKey : "/"+ methodKey);
         }
         actionKey = actionKey.startsWith("/") ? actionKey : "/"+actionKey;
         String descKey = methodName, levelKey = "", orderKey = "";

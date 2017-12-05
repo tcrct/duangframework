@@ -27,10 +27,7 @@ public class InstanceFactory {
         MVC_ANNOTATION_SET.add(Service.class);
         MVC_ANNOTATION_SET.add(Monitor.class);
         MVC_ANNOTATION_SET.add(Proxy.class);
-//        MVC_ANNOTATION_SET.add(Entity.class);
-
     }
-
 
 
     /**
@@ -65,30 +62,15 @@ public class InstanceFactory {
         InstanceFactory.actionMapping.putAll(actionMapping);
     }
 
-
-
     /**
-     *  所有Controller Class集合
-     *  key 为Class的全名，包括包路径
+     * Restful Action Map集合
+     * @return
      */
-    private static Map<String, Class<?>> controllerClassMap= new HashMap<>();
-    public static Map<String, Class<?>> getControllerClassMap() {
-        return controllerClassMap;
-    }
-    public static void addControllerClass2Map(Class<?> controllerClass) {
-        InstanceFactory.controllerClassMap.put(controllerClass.getCanonicalName().trim(), controllerClass);
+    private static Map<String, Action> restfulMapping = new HashMap<>();
+    public static Map<String, Action> getRestfulActionMapping() { return restfulMapping; }
+    public static void setRestfulActionMapping(Map<String, Action> restfulMapping) {
+        InstanceFactory.restfulMapping.putAll(restfulMapping);
     }
 
-    /**
-     * 所有Service Class集合
-     * key 为Class的全名，包括包路径
-     */
-    private static Map<String, Class<?>> serviceClassMap = new HashMap<>();
-    public static Map<String, Class<?>> getServiceClassMap() {
-        return serviceClassMap;
-    }
-    public static void addServiceClass2Map(Class<?> serviceClass) {
-        InstanceFactory.serviceClassMap.put(serviceClass.getCanonicalName().trim(), serviceClass);
-    }
 
 }

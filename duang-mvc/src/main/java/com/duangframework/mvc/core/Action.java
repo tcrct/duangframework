@@ -4,6 +4,11 @@ import com.duangframework.core.kit.ToolsKit;
 
 import java.lang.reflect.Method;
 
+/**
+ *
+ * @author laotang
+ * @
+ */
 public class Action {
 
 	private String actionKey;
@@ -12,6 +17,7 @@ public class Action {
 	private String orderKey;
 	private Class<?> controllerClass;
 	private Method method;
+	private String restfulKey;  //restful风格URI
 
 	public Action() {
 
@@ -66,5 +72,13 @@ public class Action {
 
 	public String getBeanKey() {
 		return getControllerClass().getCanonicalName();
+	}
+
+	public String getRestfulKey() {
+		return restfulKey;
+	}
+
+	public void setRestfulKey(String restfulKey) {
+		this.restfulKey = restfulKey;
 	}
 }
