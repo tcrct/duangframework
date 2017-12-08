@@ -1,14 +1,13 @@
 package com.duangframework.server.netty.handler;
 
-import com.duangframework.core.common.dto.http.response.*;
+import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.kit.ToolsKit;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.AsciiString;
 import io.netty.handler.codec.http.*;
-import io.netty.handler.codec.http.HttpResponse;
+import io.netty.util.AsciiString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +31,11 @@ public abstract class AbstractHttpHandler {
     private static final String JSON = new AsciiString("application/json; charset=utf-8").toString();
 
     protected void response(ChannelHandlerContext ctx, boolean keepAlive, IResponse response) throws Exception {
-        // 是否支持Keep-Alive
-//        boolean keepAlive = HttpHeaderUtil.isKeepAlive(request);
         // 构建请求返回对象，并设置返回主体内容结果
         // TODO 这里返回的OK状态码应该根据response这个来确定，待处理
         FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.copiedBuffer(response.toString(), HttpConstants.DEFAULT_CHARSET));
         builderResponseHeader(fullHttpResponse, response.getHeaders());
-        HttpHeaderUtil.setKeepAlive(fullHttpResponse, keepAlive);
+        HttpHeaders.setKeepAlive(fullHttpResponse, keepAlive);
         ChannelFuture channelFutureListener = ctx.channel().writeAndFlush(fullHttpResponse);
         //如果不支持keep-Alive，服务器端主动关闭请求
         if(!keepAlive) {

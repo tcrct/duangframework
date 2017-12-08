@@ -8,7 +8,7 @@ import com.duangframework.server.utils.RequestUtils;
 import com.duangframework.server.utils.ResponseUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.HttpHeaderUtil;
+import io.netty.handler.codec.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class ActionHandler extends AbstractHttpHandler {
 
     public ActionHandler(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest){
         this.ctx = ctx;
-        this.keepAlive = HttpHeaderUtil.isKeepAlive(fullHttpRequest);
+        this.keepAlive = HttpHeaders.isKeepAlive(fullHttpRequest);
         this.request = RequestUtils.buildDuangRequest(ctx, fullHttpRequest);
         this.response = ResponseUtils.buildDuangResponse(request);
     }

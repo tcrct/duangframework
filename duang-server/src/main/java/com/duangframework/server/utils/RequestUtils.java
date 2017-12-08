@@ -64,7 +64,7 @@ public class RequestUtils {
         HttpHeaders headers = request.headers();
         if(ToolsKit.isNotEmpty(headers)) {
             headerMap = new HashMap<>(headers.size());
-            for(Iterator<Map.Entry<String,String>> it = headers.iteratorConverted(); it.hasNext();) {
+            for(Iterator<Map.Entry<String,String>> it = headers.iteratorAsString(); it.hasNext();) {
                 Map.Entry<String,String> entry = it.next();
                 headerMap.put(entry.getKey(), entry.getValue());
             }

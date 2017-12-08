@@ -1,7 +1,7 @@
-package com.duangframework.server.netty.server;
+package com.duangframework.mvc.server;
 
 import com.duangframework.server.netty.handler.HttpBaseHandler;
-import com.duangframework.server.netty.handler.RpcBaseHandler;
+import com.duangframework.server.netty.server.BootStrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -19,14 +19,14 @@ import org.slf4j.LoggerFactory;
  * @author laotang
  * @date 2017/10/30
  */
-public class DuangChannelInitializer extends ChannelInitializer<SocketChannel> {
+public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
 
-    private static Logger logger = LoggerFactory.getLogger(DuangChannelInitializer.class);
+    private static Logger logger = LoggerFactory.getLogger(HttpChannelInitializer.class);
 
     private BootStrap bootStrap;
     private SslContext sslContext;
 
-    public DuangChannelInitializer(BootStrap bootStrap) {
+    public HttpChannelInitializer(BootStrap bootStrap) {
         this.bootStrap = bootStrap;
     }
 
@@ -44,8 +44,6 @@ public class DuangChannelInitializer extends ChannelInitializer<SocketChannel> {
         p.addLast(new HttpObjectAggregator(1048576));
         //目的是支持异步大文件传输
         p.addLast(new ChunkedWriteHandler());
-        // 真正处理RPC业务逻辑的地方
-        p.addLast(new RpcBaseHandler());
         // 真正处理HTTP业务逻辑的地方
         p.addLast(new HttpBaseHandler());
     }

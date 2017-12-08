@@ -58,7 +58,7 @@ public class ContextLoaderListener {
     private void initContext()  throws Exception {
         String configClass = ConfigKit.duang().key("mvc.config").asString();
         if (ToolsKit.isEmpty(configClass)) {
-            throw new RuntimeException("IDuang子类路径不能为空!");
+            throw new MvcStartUpException("IDuang子类路径不能为空!");
         }
         try {
             duangFrameword = ObjectKit.newInstance(configClass);
@@ -67,7 +67,7 @@ public class ContextLoaderListener {
             logger.warn("initContext success");
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
-            throw new RuntimeException("不能创建类: " + configClass, e);
+            throw new MvcStartUpException("不能创建类: " + configClass, e);
         }
     }
 }

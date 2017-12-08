@@ -17,10 +17,8 @@ public class HttpBaseHandler extends SimpleChannelInboundHandler<FullHttpRequest
 
     private static Logger logger = LoggerFactory.getLogger(HttpBaseHandler.class);
 
-
-
     @Override
-    protected void messageReceived(final ChannelHandlerContext ctx, final FullHttpRequest request) throws Exception {
+    public void channelRead0(final ChannelHandlerContext ctx, final FullHttpRequest request) throws Exception {
         try {
             RequestUtils.verificationRequest(request);
         }catch (VerificationException ve) {
@@ -35,14 +33,4 @@ public class HttpBaseHandler extends SimpleChannelInboundHandler<FullHttpRequest
         new ActionHandler(ctx, request).run();
 
     }
-
-    @Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        if(cause instanceof VerificationException) {
-            logger.warn("Verification Exception: " + cause.getMessage(), cause);
-        }
-        ctx.fireExceptionCaught(cause);
-    }
-
-
 }

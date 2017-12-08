@@ -1,12 +1,11 @@
 package com.duangframework.server.netty.server;
 
 import com.duangframework.server.IServer;
-import com.duangframework.server.utils.NativeSupport;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-
-import java.util.concurrent.Executor;
+import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.DefaultMessageSizeEstimator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -15,17 +14,40 @@ import java.util.concurrent.Executor;
  */
 public abstract class AbstractNettyServer implements IServer {
 
-    /**
-     * 创建线程池组
-     * @param workers       工作线程数
-     * @param executor      线程池
-     * @return
-     */
-    public EventLoopGroup initEventLoopGroup(int workers, Executor executor) {
-        return isNative() ? new EpollEventLoopGroup(workers, executor) : new NioEventLoopGroup(workers, executor);
+    private static Logger logger = LoggerFactory.getLogger(AbstractNettyServer.class);
+
+    protected ServerBootstrap serverBootstrap;
+    protected BootStrap bootStrap;
+
+    public AbstractNettyServer(String host, int port) {
+        bootStrap = new BootStrap(host, port);
+        init();//初始化
     }
 
-    public boolean isNative() {
-        return NativeSupport.isSupportNative();
+    private void init() {
+        serverBootstrap = new ServerBootstrap();
+        serverBootstrap.group(bootStrap.getBossGroup(), bootStrap.getWorkerGroup());
+        serverBootstrap.option(ChannelOption.SO_BACKLOG, bootStrap.getBockLog())  //连接数
+                .childOption(ChannelOption.ALLOCATOR, bootStrap.getAllocator())
+                .childOption(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT)
+                .childOption(ChannelOption.SO_RCVBUF, 65536)
+                .childOption(ChannelOption.SO_SNDBUF, 65536)
+                .childOption(ChannelOption.SO_REUSEADDR, true)//重用地址
+                .childOption(ChannelOption.SO_KEEPALIVE, true)  //开启Keep-Alive，长连接
+                .childOption(ChannelOption.TCP_NODELAY, true)  //不延迟，消息立即发送
+                .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
+        serverBootstrap.channel(bootStrap.getDefaultChannel());
+    }
+
+    @Override
+    public abstract void start();
+
+    @Override
+    public void shutdown() {
+        try {
+            bootStrap.close();
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+        }
     }
 }

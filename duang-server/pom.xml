@@ -16,28 +16,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netty.version>5.0.0.Alpha2</netty.version>
-        <!--<netty.version>4.1.17.Final</netty.version>-->
-        <slf4j.version>1.7.13</slf4j.version>
-        <logback.version>1.1.3</logback.version>
         <core.version>1.0-SNAPSHOT</core.version>
-        <mvc.version>1.0-SNAPSHOT</mvc.version>
     </properties>
 
     <dependencies>
-
-        <!-- netty -->
         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>${netty.version}</version>
+            <groupId>com.duangframework.core</groupId>
+            <artifactId>duang-core</artifactId>
+            <version>${core.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>com.duangframework.mvc</groupId>
-            <artifactId>duang-mvc</artifactId>
-            <version>${mvc.version}</version>
-        </dependency>
-
     </dependencies>
 </project>
