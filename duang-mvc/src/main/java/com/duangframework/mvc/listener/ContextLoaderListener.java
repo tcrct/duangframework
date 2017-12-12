@@ -7,8 +7,12 @@ import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.IDuang;
 import com.duangframework.mvc.core.helper.*;
+import com.duangframework.mvc.filter.MainProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *
@@ -18,8 +22,28 @@ import org.slf4j.LoggerFactory;
 public class ContextLoaderListener implements IContextLoaderListener{
 
     private static final Logger logger = LoggerFactory.getLogger(ContextLoaderListener.class);
+    private static Lock _lock = new ReentrantLock();
+    private static ContextLoaderListener _contextLoaderListener;
 
     private static IDuang duangFrameword = null;
+
+    public static ContextLoaderListener getInstantiation() {
+        if(null == _contextLoaderListener) {
+            try {
+                _lock.lock();
+                _contextLoaderListener = new ContextLoaderListener();
+            } catch (Exception e) {
+                logger.warn(e.getMessage(), e);
+            } finally {
+                _lock.unlock();
+            }
+        }
+        return _contextLoaderListener;
+    }
+
+    private ContextLoaderListener() {
+
+    }
 
     @Override
     public void start() {
