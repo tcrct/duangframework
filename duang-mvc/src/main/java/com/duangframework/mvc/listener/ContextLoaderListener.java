@@ -1,6 +1,7 @@
 package com.duangframework.mvc.listener;
 
 import com.duangframework.core.exceptions.MvcStartUpException;
+import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
@@ -14,13 +15,14 @@ import org.slf4j.LoggerFactory;
  * @author laotang
  * @date 2017/11/5
  */
-public class ContextLoaderListener {
+public class ContextLoaderListener implements IContextLoaderListener{
 
     private static final Logger logger = LoggerFactory.getLogger(ContextLoaderListener.class);
 
     private static IDuang duangFrameword = null;
 
-    public ContextLoaderListener() {
+    @Override
+    public void start() {
         try {
             contextInitialized();
         } catch (Exception e) {

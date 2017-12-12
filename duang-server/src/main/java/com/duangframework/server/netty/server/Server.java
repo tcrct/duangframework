@@ -1,10 +1,10 @@
-package com.duangframework.mvc;
+package com.duangframework.server.netty.server;
 
 
 import com.duangframework.core.exceptions.ServerStartUpException;
 import com.duangframework.core.kit.ThreadPoolKit;
-import com.duangframework.mvc.server.HttpServer;
-import com.duangframework.rpc.server.RpcServer;
+
+//import com.duangframework.rpc.server.RpcServer;
 import com.duangframework.server.IServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ public class Server implements IServer {
     private int httpPort;
     private int rpcPort;
     private HttpServer httpServer;
-    private RpcServer rpcServer;
+//    private RpcServer rpcServer;
 
     public Server(int port) {
         this("0.0.0.0", port);
@@ -50,18 +50,18 @@ public class Server implements IServer {
             }
         });
 
-        ThreadPoolKit.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    rpcServer = new RpcServer(host, rpcPort);
-                    rpcServer.start();
-                } catch (Exception e) {
-                    logger.warn(e.getMessage(), e);
-                    throw new ServerStartUpException(e.getMessage());
-                }
-            }
-        });
+//        ThreadPoolKit.execute(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    rpcServer = new RpcServer(host, rpcPort);
+//                    rpcServer.start();
+//                } catch (Exception e) {
+//                    logger.warn(e.getMessage(), e);
+//                    throw new ServerStartUpException(e.getMessage());
+//                }
+//            }
+//        });
 
     }
 
@@ -70,9 +70,9 @@ public class Server implements IServer {
         if(null != httpServer) {
             httpServer.shutdown();
         }
-        if(null != rpcServer) {
-            rpcServer.shutdown();
-        }
+//        if(null != rpcServer) {
+//            rpcServer.shutdown();
+//        }
     }
 
 }

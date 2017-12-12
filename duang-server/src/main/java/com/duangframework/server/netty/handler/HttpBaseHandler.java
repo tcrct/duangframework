@@ -1,6 +1,7 @@
 package com.duangframework.server.netty.handler;
 
 import com.duangframework.core.exceptions.VerificationException;
+import com.duangframework.server.netty.server.BootStrap;
 import com.duangframework.server.utils.RequestUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -16,6 +17,11 @@ import org.slf4j.LoggerFactory;
 public class HttpBaseHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private static Logger logger = LoggerFactory.getLogger(HttpBaseHandler.class);
+    private BootStrap bootStrap;
+
+    public  HttpBaseHandler(BootStrap bootStrap) {
+        this.bootStrap = bootStrap;
+    }
 
     @Override
     public void channelRead0(final ChannelHandlerContext ctx, final FullHttpRequest request) throws Exception {
@@ -30,7 +36,7 @@ public class HttpBaseHandler extends SimpleChannelInboundHandler<FullHttpRequest
 //        ThreadPoolKit.execute(new ActionHandler(ctx, request));
 
         //不开线程，因为netty本身就是NIO方式
-        new ActionHandler(ctx, request).run();
+        new ActionHandler(bootStrap, ctx, request).run();
 
     }
 }

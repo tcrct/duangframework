@@ -1,6 +1,7 @@
-package com.duangframework.mvc.server;
+package com.duangframework.server.netty.server;
 
-import com.duangframework.server.netty.server.AbstractNettyServer;
+import com.duangframework.core.interfaces.IContextLoaderListener;
+import com.duangframework.core.interfaces.IProcess;
 import io.netty.channel.ChannelFuture;
 
 /**
@@ -15,6 +16,10 @@ public class HttpServer extends AbstractNettyServer {
 
     public HttpServer(String host, int port) {
         super(host, port);
+    }
+
+    public HttpServer(String host, int port, IContextLoaderListener listenerCls, IProcess mainProcessCls) {
+        super(host, port, listenerCls, mainProcessCls);
     }
 
     @Override

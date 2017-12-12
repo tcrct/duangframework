@@ -9,7 +9,7 @@ import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.mvc.core.IProcess;
+import com.duangframework.core.interfaces.IProcess;
 import com.duangframework.mvc.core.helper.PluginHelper;
 import com.duangframework.mvc.handles.Handles;
 import com.duangframework.mvc.kit.MvcConfigKit;
@@ -35,7 +35,7 @@ public class MainProcess implements IProcess {
             try {
                 _lock.lock();
                 _mainProcess = new MainProcess();
-                _mainProcess.init(null);
+                _mainProcess.init();
             } catch (Exception e) {
                 logger.warn(e.getMessage(), e);
             } finally {
@@ -50,8 +50,7 @@ public class MainProcess implements IProcess {
     }
 
     @Override
-    public void init(MvcConfigKit mvcConfig) throws DuangMvcException {
-        Handles.init();
+    public void init() throws DuangMvcException {
     }
 
     @Override

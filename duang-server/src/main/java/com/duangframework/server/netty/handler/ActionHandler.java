@@ -3,7 +3,8 @@ package com.duangframework.server.netty.handler;
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.exceptions.EmptyNullException;
-import com.duangframework.mvc.filter.MainProcess;
+//import com.duangframework.mvc.filter.MainProcess;
+import com.duangframework.server.netty.server.BootStrap;
 import com.duangframework.server.utils.RequestUtils;
 import com.duangframework.server.utils.ResponseUtils;
 import io.netty.channel.ChannelHandlerContext;
@@ -26,9 +27,11 @@ public class ActionHandler extends AbstractHttpHandler {
     private IRequest request;
     private IResponse response;
     private boolean keepAlive; //是否支持Keep-Alive
+    private BootStrap bootStrap;
 
-    public ActionHandler(ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest){
+    public ActionHandler(BootStrap bootStrap, ChannelHandlerContext ctx, FullHttpRequest fullHttpRequest){
         this.ctx = ctx;
+        this.bootStrap= bootStrap;
         this.keepAlive = HttpHeaders.isKeepAlive(fullHttpRequest);
         this.request = RequestUtils.buildDuangRequest(ctx, fullHttpRequest);
         this.response = ResponseUtils.buildDuangResponse(request);
@@ -39,9 +42,9 @@ public class ActionHandler extends AbstractHttpHandler {
             throw new EmptyNullException("build duang request or response is fail, exit...");
         }
         try {
-            // TODO 调用MCV模块的主入口方法 如何变得更优雅一点呢？
             // 调用MCV模块的主入口方法
-            response = MainProcess.getInstantiation().doWork(request, response);
+            response = bootStrap.getMainProcess().doWork(request, response);
+//            response = MainProcess.getInstantiation().doWork(request, response);
             // 返回到客户端
             response(ctx, keepAlive, response);
         } catch (Exception e) {

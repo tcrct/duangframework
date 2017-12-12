@@ -1,6 +1,9 @@
 package com.duangframework.server.netty.server;
 
 import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.interfaces.IContextLoaderListener;
+import com.duangframework.core.interfaces.IProcess;
+import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.server.utils.NativeSupport;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -39,6 +42,8 @@ public class BootStrap implements Closeable {
     private int bockLog = ServerConfig.SO_BACKLOG;
     private static BootStrap _bootStrap;
     private long startTimeMillis = 0;
+    private IProcess mainProcess;
+    private IContextLoaderListener iContextLoaderListener;
 
     public static BootStrap getInstants() {
         return _bootStrap;
@@ -152,5 +157,21 @@ public class BootStrap implements Closeable {
         if(null != bossGroup) {
             bossGroup.shutdownGracefully();
         }
+    }
+
+    public void setStartContextListener(IContextLoaderListener listener) {
+        iContextLoaderListener = listener;
+    }
+
+    public void startContextListener() {
+        iContextLoaderListener.start();
+    }
+
+    public IProcess getMainProcess() {
+        return mainProcess;
+    }
+
+    public void setMainProcess(IProcess mainProcess) {
+        this.mainProcess = mainProcess;
     }
 }

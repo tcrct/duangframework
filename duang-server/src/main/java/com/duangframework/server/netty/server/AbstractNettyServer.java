@@ -1,5 +1,7 @@
 package com.duangframework.server.netty.server;
 
+import com.duangframework.core.interfaces.IContextLoaderListener;
+import com.duangframework.core.interfaces.IProcess;
 import com.duangframework.server.IServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
@@ -21,6 +23,13 @@ public abstract class AbstractNettyServer implements IServer {
 
     public AbstractNettyServer(String host, int port) {
         bootStrap = new BootStrap(host, port);
+        init();//初始化
+    }
+
+    public AbstractNettyServer(String host, int port, IContextLoaderListener listener, IProcess mainProcess) {
+        bootStrap = new BootStrap(host, port);
+        bootStrap.setStartContextListener(listener);
+        bootStrap.setMainProcess(mainProcess);
         init();//初始化
     }
 

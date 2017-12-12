@@ -1,7 +1,6 @@
-package com.duangframework.mvc.server;
+package com.duangframework.server.netty.server;
 
 import com.duangframework.server.netty.handler.HttpBaseHandler;
-import com.duangframework.server.netty.server.BootStrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -45,7 +44,7 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
         //目的是支持异步大文件传输
         p.addLast(new ChunkedWriteHandler());
         // 真正处理HTTP业务逻辑的地方
-        p.addLast(new HttpBaseHandler());
+        p.addLast(new HttpBaseHandler(bootStrap));
     }
 
     @Override
