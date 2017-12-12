@@ -4,7 +4,6 @@ import com.duangframework.core.interfaces.IPlugin;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.rpc.server.RpcServer;
-import jdk.nashorn.internal.runtime.regexp.joni.Config;
 
 /**
  * @author Created by laotang
