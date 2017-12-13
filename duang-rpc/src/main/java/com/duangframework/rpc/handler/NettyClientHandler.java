@@ -1,7 +1,8 @@
 package com.duangframework.rpc.handler;
 
-import com.duangframework.core.common.dto.rpc.MessageHolder;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.rpc.common.MessageHolder;
+import com.duangframework.rpc.common.RpcResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.util.ReferenceCountUtil;
@@ -12,16 +13,12 @@ import org.slf4j.LoggerFactory;
  * duang-rpc client netty 处理器
  * 
  * */
-public class NettyClientHandler extends SimpleChannelInboundHandler<MessageHolder> {
+public class NettyClientHandler extends SimpleChannelInboundHandler<MessageHolder<RpcResponse>> {
 
 	private static final Logger logger = LoggerFactory.getLogger(NettyClientHandler.class);
 
-	public NettyClientHandler(Class<? extends MessageHolder> holderClass) {
-		super(holderClass);
-	}
-
 	@Override
-	protected void channelRead0(ChannelHandlerContext ctx, MessageHolder holder) throws Exception {
+	protected void channelRead0(ChannelHandlerContext ctx, MessageHolder<RpcResponse> holder) throws Exception {
 		try{
 			System.out.println("############NettyClientHandler messageReceived:  "+ ToolsKit.toJsonString(holder));
 //			NettyEncoder encoder = new NettyEncoder();
@@ -47,11 +44,6 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageHolde
 		if(ctx.channel().isOpen()){
 			ctx.close();
 		}
-	}
-
-	@Override
-	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
-		System.out.println("##################channelRegistered: " + ctx.channel().id());
 	}
 
 	/**

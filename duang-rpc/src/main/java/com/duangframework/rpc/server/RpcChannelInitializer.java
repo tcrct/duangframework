@@ -1,7 +1,7 @@
 package com.duangframework.rpc.server;
 
-import com.duangframework.core.common.dto.rpc.coder.NettyDecoder;
-import com.duangframework.core.common.dto.rpc.coder.NettyEncoder;
+import com.duangframework.rpc.common.NettyDecoder;
+import com.duangframework.rpc.common.NettyEncoder;
 import com.duangframework.rpc.handler.NettyServiceHandler;
 import com.duangframework.server.netty.server.BootStrap;
 import io.netty.channel.ChannelHandlerContext;

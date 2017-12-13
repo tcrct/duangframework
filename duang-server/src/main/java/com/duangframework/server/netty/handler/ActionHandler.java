@@ -44,7 +44,6 @@ public class ActionHandler extends AbstractHttpHandler {
         try {
             // 调用MCV模块的主入口方法
             response = bootStrap.getMainProcess().doWork(request, response);
-//            response = MainProcess.getInstantiation().doWork(request, response);
             // 返回到客户端
             response(ctx, keepAlive, response);
         } catch (Exception e) {

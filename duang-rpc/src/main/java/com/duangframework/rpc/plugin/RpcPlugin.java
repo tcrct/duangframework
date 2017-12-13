@@ -1,9 +1,22 @@
 package com.duangframework.rpc.plugin;
 
+import com.duangframework.core.annotation.ioc.Import;
+import com.duangframework.core.annotation.mvc.Controller;
+import com.duangframework.core.annotation.mvc.Service;
+import com.duangframework.core.annotation.rpc.Rpc;
 import com.duangframework.core.interfaces.IPlugin;
-import com.duangframework.core.kit.ConfigKit;
-import com.duangframework.core.kit.ThreadPoolKit;
-import com.duangframework.rpc.server.RpcServer;
+import com.duangframework.core.kit.ObjectKit;
+import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.utils.BeanUtils;
+import com.duangframework.rpc.core.RpcFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Created by laotang
@@ -11,33 +24,49 @@ import com.duangframework.rpc.server.RpcServer;
  */
 public class RpcPlugin implements IPlugin {
 
-    private static RpcServer rpcServer;
+    private static final Logger logger = LoggerFactory.getLogger(RpcPlugin.class);
 
     @Override
     public void init() throws Exception {
-        ThreadPoolKit.execute(new Runnable() {
-            @Override
-            public void run() {
-                String host = ConfigKit.duang().key("rpc.host").defaultValue("0.0.0.0").asString();
-                int port = ConfigKit.duang().key("rpc.port").defaultValue(9091).asInt();
-                rpcServer = new RpcServer(host, port);
-                try {
-                    rpcServer.start();
-                } catch (Exception e) {
-                    rpcServer.shutdown();
-                }
-            }
-        });
-
     }
 
     @Override
     public void start() throws Exception {
+        Map<Class<?>, Object> controllerMap = BeanUtils.getAllBeanMaps().get(Controller.class.getSimpleName());
+        Map<Class<?>, Object> serviceMap = BeanUtils.getAllBeanMaps().get(Service.class.getSimpleName());
+        Map<Class<?>, Object> rpcServiceMap = BeanUtils.getAllBeanMaps().get(Rpc.class.getSimpleName());
+        if(ToolsKit.isEmpty(rpcServiceMap)) {
+            logger.warn("RpcPlugin start:  rpcServiceMap is null, so return..."  );
+            return;
+        }
+        Set<Class<?>> rpcClassSet = new HashSet<>();
+        if(ToolsKit.isNotEmpty(controllerMap)) {rpcClassSet.addAll(controllerMap.keySet());}
+        if(ToolsKit.isNotEmpty(serviceMap)) {rpcClassSet.addAll(serviceMap.keySet());}
+        Set<String> excludeMethodNameSet = ObjectKit.buildExcludedMethodName();
+        Set<Class<?>> rpcServiceSet = rpcServiceMap.keySet();       // 生产者，需要发布到注册中心
+        Set<Class<?>> rpcClientSet = new HashSet<>();
+        for(Iterator<Class<?>> iterator = rpcClassSet.iterator(); iterator.hasNext();) {
+            Class<?> cls = iterator.next();
+            // 遍历类属性，确定消费者
+            Field[] fields = cls.getDeclaredFields();
+            for(Field field : fields) {
+                if(excludeMethodNameSet.contains(field.getName())) {
+                    continue;
+                }
+                // 如果是import注解且是RpcService集合是有的，则认为是消费者
+                if(field.isAnnotationPresent(Import.class) && rpcServiceSet.contains(field.getType())) {
+                    rpcClientSet.add(field.getType());
+                }
+            }
+        }
+
+        RpcFactory.initService(rpcServiceSet);
+        RpcFactory.initClient(rpcClientSet);
 
     }
 
     @Override
     public void stop() throws Exception {
-        rpcServer.shutdown();
+        RpcFactory.getRpcServer().shutdown();
     }
 }

@@ -128,6 +128,10 @@ public class ToolsKit {
         return JSON.toJSONString(obj, jsonConfig, SerializerFeature.DisableCircularReferenceDetect);
     }
 
+    public static byte[] toJsonBytes(Object obj) {
+        return JSON.toJSONBytes(obj, jsonConfig, SerializerFeature.DisableCircularReferenceDetect);
+    }
+
     public static <T> T jsonParseObject(String jsonText, Class<T> clazz) {
         return JSON.parseObject(jsonText, clazz);
     }
@@ -138,6 +142,10 @@ public class ToolsKit {
 
     public static <T> List<T> jsonParseArray(String jsonText, Class<T> clazz) {
         return JSON.parseArray(jsonText, clazz);
+    }
+
+    public static <T> T jsonParseObject(byte[] bytes, Class<T> clazz) {
+        return JSON.parseObject(bytes, clazz);
     }
 
     public static String getCurrentDateString() {

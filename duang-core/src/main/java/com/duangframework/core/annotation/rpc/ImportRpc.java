@@ -1,4 +1,4 @@
-package com.duangframework.core.annotation.ioc;
+package com.duangframework.core.annotation.rpc;
 
 import java.lang.annotation.*;
 

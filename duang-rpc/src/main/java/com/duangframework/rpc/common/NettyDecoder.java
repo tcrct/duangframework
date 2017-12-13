@@ -1,10 +1,8 @@
 package com.duangframework.rpc.common;
 
 
-import com.duangframework.core.common.dto.rpc.MessageHolder;
-import com.duangframework.core.common.dto.rpc.Protocol;
-import com.duangframework.core.serializable.HessianSerializableUtil;
-import com.duangframework.core.serializable.JdkSerializableUtil;
+import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.rpc.serializable.JdkSerializableUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -39,19 +37,6 @@ public class NettyDecoder extends ByteToMessageDecoder {
 			return;
 		}
 
-
-		if (in.readableBytes() < Protocol.HEADER_LENGTH) {
-			logger.warn("数据包长度小于协议头长度");
-			return;
-		}
-		in.markReaderIndex();
-
-		if (in.readShort() != Protocol.MAGIC) {
-			// Magic不一致，表明不是自己的数据
-			logger.warn("Magic不一致");
-			return;
-		}
-
 		// 开始解码
 		byte sign = in.readByte();
 		byte status = in.readByte();
@@ -74,7 +59,8 @@ public class NettyDecoder extends ByteToMessageDecoder {
 //			obj = org.apache.commons.lang3.SerializationUtils.deserialize(data);
 //			obj = SerializableUtilsProtostruff.deserialize(data, genericClass);
 //			obj = JdkSerializableUtil.deserialize(data);
-			obj = HessianSerializableUtil.deserialize(data);
+//			obj = HessianSerializableUtil.deserialize(data);
+			obj = ToolsKit.jsonParseObject(data, RpcRequest.class);
 		} catch (Exception e) {
 			logger.warn("Hessian反序列化时出错： " + e.getMessage(), e);
 			logger.warn("用jdk反序列化");
@@ -88,10 +74,10 @@ public class NettyDecoder extends ByteToMessageDecoder {
 			throw new NullPointerException("hessian or jdk decoder is fail");
 		}
 
-		MessageHolder messageHolder = new MessageHolder();
+		MessageHolder<RpcRequest> messageHolder = new MessageHolder();
 		messageHolder.setSign(sign);
 		messageHolder.setStatus(status);
-		messageHolder.setBody(new String(data));
+		messageHolder.setBody((RpcRequest) obj);
 		out.add(messageHolder);
 	}
 

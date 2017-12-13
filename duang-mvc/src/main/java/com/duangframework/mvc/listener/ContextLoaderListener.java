@@ -6,7 +6,11 @@ import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.IDuang;
-import com.duangframework.mvc.core.helper.*;
+import com.duangframework.mvc.core.helper.BeanHelper;
+import com.duangframework.mvc.core.helper.IocHelper;
+import com.duangframework.mvc.core.helper.PluginHelper;
+import com.duangframework.mvc.core.helper.RouteHelper;
+import com.duangframework.mvc.handles.Handles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +45,6 @@ public class ContextLoaderListener implements IContextLoaderListener{
     }
 
     private ContextLoaderListener() {
-
     }
 
     @Override
@@ -94,5 +97,7 @@ public class ContextLoaderListener implements IContextLoaderListener{
             logger.warn(e.getMessage(), e);
             throw new MvcStartUpException("不能创建类: " + configClass, e);
         }
+        // 用于设置框架必要的Handle处理器， 如将ActionHandle添加到最后等
+        Handles.init();
     }
 }

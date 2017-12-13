@@ -1,10 +1,7 @@
 package com.duangframework.rpc.common;
 
-
-import com.duangframework.core.common.dto.rpc.MessageHolder;
-import com.duangframework.core.common.dto.rpc.Protocol;
-import com.duangframework.core.serializable.HessianSerializableUtil;
-import com.duangframework.core.serializable.JdkSerializableUtil;
+import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.rpc.serializable.JdkSerializableUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -25,7 +22,8 @@ public class NettyEncoder extends MessageToByteEncoder<MessageHolder> {
 //		ByteBuf out = ctx.alloc().buffer(4 * request.length());
 		byte[] data = null;
 		try {
-			data = HessianSerializableUtil.serialize(msg.getBody());
+//			data = HessianSerializableUtil.serialize(msg.getBody());
+			data = ToolsKit.toJsonBytes(msg.getBody());
 		}catch (Exception e) {
 			logger.warn("Hessian序列化时出错： " + e.getMessage(), e);
 			logger.warn("用jdk序列化返回");

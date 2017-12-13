@@ -42,6 +42,12 @@ public class ClassUtils {
     /**
      * 加载类
      */
+    public static Class<?> loadClass(String className) {
+        return loadClass(className, false);
+    }
+    /**
+     * 加载类
+     */
     public static Class<?> loadClass(String className, boolean isInitialized) {
         if (ToolsKit.isEmpty(className)) {
             return null;
