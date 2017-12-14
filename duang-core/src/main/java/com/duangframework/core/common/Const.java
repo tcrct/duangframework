@@ -8,6 +8,11 @@ package com.duangframework.core.common;
 public class Const {
 
     /**
+     * 默认的编码格式字符串
+     */
+    public static final String ENCODING_FIELD = "UTF-8";
+
+    /**
      *数据库
      */
     public static final String HOST_FIELD = "host";
@@ -33,6 +38,12 @@ public class Const {
      * 请求超时默认时间，3秒
      */
     public static final long REQUEST_TIMEOUT = 3000L;
+
+
+    /**
+     * RPC父目录
+     */
+    public static final String RPC_ROOT_PATH = "/root/duangframework/rpc";
 
 
 }

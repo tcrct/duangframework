@@ -18,6 +18,10 @@ public class NettyServiceHandler extends SimpleChannelInboundHandler<MessageHold
 
 	private static final Logger logger = LoggerFactory.getLogger(NettyServiceHandler.class);
 
+	public NettyServiceHandler() {
+//		RpcFactory.getRpcActionMap();
+	}
+
 	@Override
 	public void channelRead0(ChannelHandlerContext ctx, MessageHolder<RpcRequest> holder) throws Exception {
 		System.out.println("#############NettyServiceHandler: " + ToolsKit.toJsonString(holder));
