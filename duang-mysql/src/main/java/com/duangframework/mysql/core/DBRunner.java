@@ -1,7 +1,6 @@
 package com.duangframework.mysql.core;
 
 
-import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

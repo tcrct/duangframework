@@ -61,7 +61,7 @@ public class MysqlUtils {
     }
 
     public static DataSource getDataSource(IConnect connect) {
-        if (ToolsKit.isNotEmpty(dataSource)) {
+        if (ToolsKit.isEmpty(dataSource)) {
             IDataSourceFactory dsFactory = null;
             String dataSourceFactoryClassName = ConfigKit.duang().key("mysql.datasource").asString();
             if (ToolsKit.isEmpty(dataSourceFactoryClassName)) {
