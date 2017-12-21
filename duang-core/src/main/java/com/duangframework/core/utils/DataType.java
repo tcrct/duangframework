@@ -2,6 +2,8 @@ package com.duangframework.core.utils;
 
 import com.duangframework.core.common.IdEntity;
 
+import java.lang.reflect.Array;
+
 @SuppressWarnings("rawtypes")
 public final class DataType {
     
@@ -191,5 +193,30 @@ public final class DataType {
 		}
 		return false;
 	}
+
+    /**
+     * 将可变参数确定类型返回
+     * 如果int[]这种参数的话，在Object...里，会变成[[1,2,3]]，将int[]将Object数组里的第一个元素处理的。所以要处理一下
+     * 如果是包装类的数据，即Integer[]则不会出现该问题
+     * @param value
+     * @return
+     */
+    public static Object conversionVariableType(Object value) {
+        if (value != null && (value instanceof Object[])) {
+            Object[] valueArray= (Object[])value;
+            if(null != valueArray && valueArray.length ==1) {
+                Object valueItem = valueArray[0];
+                if (valueItem != null && valueItem.getClass().isArray()) {
+                    int arrayLength = Array.getLength(value);
+                    Object[] objects = new Object[arrayLength];
+                    for (int i = 0; i < arrayLength; ++i) {
+                        objects[i] = Array.get(valueItem, i);
+                    }
+                    return objects;
+                }
+            }
+        }
+        return value;
+    }
     
 }

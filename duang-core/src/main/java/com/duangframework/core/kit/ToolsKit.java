@@ -33,7 +33,7 @@ public class ToolsKit {
     private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     // 定义一个IdEntity安全线程类
-    private static DuangThreadLocal<String> duangThreadLocal = new DuangThreadLocal<String>() {
+    private static DuangThreadLocal<String> duangIdThreadLocal = new DuangThreadLocal<String>() {
         public String initialValue() {
             return "";
         }
@@ -272,6 +272,15 @@ public class ToolsKit {
             e.printStackTrace();
             return null;
         }
+    }
+
+
+    public static void setRequestId(String objectId) {
+        duangIdThreadLocal.set(objectId);
+    }
+
+    public static String getRequestId() {
+        return duangIdThreadLocal.get();
     }
 
 }

@@ -5,13 +5,13 @@ import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.utils.DataType;
 import com.duangframework.mongodb.Operator;
 import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import org.bson.conversions.Bson;
-import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,26 +236,12 @@ public class MongoQuery<T> {
 		queryObj.put(key, dbo);
 		return this;
 	}
-	
+
 	private void append2DBObject(String key, String oper, Object value){
 		if(ToolsKit.isEmpty(key)) {
 			throw new EmptyNullException("query key is null...");
 		}
-//		if(ToolsUtil.isEmpty(value) && !Operator.NE.equals(oper) && oper == null) throw new NullPointerException("query value is null...");
-		// 如果是ID字段，则改变值
-		if((IdEntity.ENTITY_ID_FIELD.equals(key) || IdEntity.ID_FIELD.equals(key))
-				&& ObjectId.isValid((String)value)) {
-			key = IdEntity.ID_FIELD;
-			value = new ObjectId((String) value);
-		}
-		append(key, oper, value);
-	}
-	
-	private void append2DBObject(String key, String oper, Object... value){
-		if(ToolsKit.isEmpty(key)) {
-			throw new EmptyNullException("query key is null...");
-		}
-//		if(ToolsUtil.isEmpty(value)) throw new NullPointerException("query value is null...");
+		value = DataType.conversionVariableType(value);
 		if(IdEntity.ID_FIELD.equals(key) || IdEntity.ENTITY_ID_FIELD.equals(key)){
 			append(key, oper, MongoUtils.toObjectIds(value));
 		} else {

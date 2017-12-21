@@ -61,7 +61,10 @@ public class RpcPlugin implements IPlugin {
         }
 
         RpcFactory.initService(rpcServiceSet);
-        RpcFactory.initClient(rpcClientSet);
+        if(ToolsKit.isNotEmpty(rpcClientSet)) {
+            RpcFactory.initClient(rpcClientSet);
+            RpcFactory.watchNode();
+        }
 
     }
 

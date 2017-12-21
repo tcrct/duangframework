@@ -17,6 +17,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <server.version>1.0-SNAPSHOT</server.version>
+        <zk.version>1.0-SNAPSHOT</zk.version>
     </properties>
 
     <dependencies>
@@ -25,6 +26,12 @@
             <artifactId>duang-server</artifactId>
             <version>${server.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.duangframework.zookeeper</groupId>
+            <artifactId>duang-zookeeper</artifactId>
+            <version>${zk.version}</version>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/org.objenesis/objenesis -->
         <dependency>
             <groupId>org.objenesis</groupId>
@@ -49,6 +56,5 @@
             <artifactId>hessian</artifactId>
             <version>4.0.38</version>
         </dependency>
-
     </dependencies>
 </project>

@@ -45,5 +45,10 @@ public class Const {
      */
     public static final String RPC_ROOT_PATH = "/root/duangframework/rpc";
 
+    /**
+     * 日期格式
+     */
+    public static final String DEFAULT_DATE_FORM = "yyyy-MM-dd HH:mm:ss";
+
 
 }

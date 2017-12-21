@@ -18,7 +18,7 @@ public abstract class AbstractNettyServer implements IServer {
 
     private static Logger logger = LoggerFactory.getLogger(AbstractNettyServer.class);
 
-    protected ServerBootstrap serverBootstrap;
+    protected ServerBootstrap nettyBootstrap;
     protected BootStrap bootStrap;
 
     public AbstractNettyServer(String host, int port) {
@@ -34,9 +34,9 @@ public abstract class AbstractNettyServer implements IServer {
     }
 
     private void init() {
-        serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bootStrap.getBossGroup(), bootStrap.getWorkerGroup());
-        serverBootstrap.option(ChannelOption.SO_BACKLOG, bootStrap.getBockLog())  //连接数
+        nettyBootstrap = new ServerBootstrap();
+        nettyBootstrap.group(bootStrap.getBossGroup(), bootStrap.getWorkerGroup());
+        nettyBootstrap.option(ChannelOption.SO_BACKLOG, bootStrap.getBockLog())  //连接数
                 .childOption(ChannelOption.ALLOCATOR, bootStrap.getAllocator())
                 .childOption(ChannelOption.MESSAGE_SIZE_ESTIMATOR, DefaultMessageSizeEstimator.DEFAULT)
                 .childOption(ChannelOption.SO_RCVBUF, 65536)
@@ -45,7 +45,7 @@ public abstract class AbstractNettyServer implements IServer {
                 .childOption(ChannelOption.SO_KEEPALIVE, true)  //开启Keep-Alive，长连接
                 .childOption(ChannelOption.TCP_NODELAY, true)  //不延迟，消息立即发送
                 .childOption(ChannelOption.ALLOW_HALF_CLOSURE, false);
-        serverBootstrap.channel(bootStrap.getDefaultChannel());
+        nettyBootstrap.channel(bootStrap.getDefaultChannel());
     }
 
     @Override

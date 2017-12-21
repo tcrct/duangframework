@@ -24,9 +24,9 @@ public class RpcContextListener implements FutureListener<Void> {
     @Override
     public void operationComplete(Future<Void> future) throws Exception {
         if (future.isSuccess()) {
-            System.out.println("INFO: "+sdf.format(new Date())+" RpcServer["+bootStrap.getHost()+":"+bootStrap.getPort()+"] startup in "+bootStrap.getStartTimeMillis()+" ms, God bless no bugs!");
+            System.out.println("INFO: "+sdf.format(new Date())+" RpcClient["+bootStrap.getHost()+":"+bootStrap.getPort()+"] startup in "+bootStrap.getStartTimeMillis()+" ms, God bless no bugs!");
         } else {
-            System.out.println("INFO:  "+sdf.format(new Date())+" RpcServer["+bootStrap.getHost()+":"+bootStrap.getPort()+"] startup failed");
+            System.out.println("INFO:  "+sdf.format(new Date())+" RpcClient["+bootStrap.getHost()+":"+bootStrap.getPort()+"] startup failed");
         }
     }
 

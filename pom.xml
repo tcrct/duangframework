@@ -17,6 +17,7 @@
         <netty.version>4.1.17.Final</netty.version>
         <cglib.version>3.1</cglib.version>
         <configuration.version>1.10</configuration.version>
+        <core.version>1.0-SNAPSHOT</core.version>
     </properties>
 
 
@@ -97,6 +98,7 @@
         <module>duang-web</module>
         <module>duang-mysql</module>
         <module>duang-rpc</module>
+        <module>duang-zookeeper</module>
     </modules>
 
     <dependencies>
