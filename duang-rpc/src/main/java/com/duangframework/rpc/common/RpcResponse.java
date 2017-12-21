@@ -17,8 +17,9 @@ public class RpcResponse implements Serializable {
 		super();
 	}
 
-	public RpcResponse(long startTime) {
+	public RpcResponse(long startTime,String requestId) {
 		setRequestStartTime(startTime);
+		setRequestId(requestId);
 	}
 
 	public String getRequestId() {

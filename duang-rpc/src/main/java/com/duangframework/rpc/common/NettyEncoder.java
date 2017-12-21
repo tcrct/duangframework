@@ -1,7 +1,6 @@
 package com.duangframework.rpc.common;
 
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.rpc.serializable.JdkSerializableUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -22,19 +21,12 @@ public class NettyEncoder extends MessageToByteEncoder<MessageHolder> {
 //		ByteBuf out = ctx.alloc().buffer(4 * request.length());
 		byte[] data = null;
 		try {
-//			data = HessianSerializableUtil.serialize(msg.getBody());
 			data = ToolsKit.toJsonBytes(msg.getBody());
 		}catch (Exception e) {
-			logger.warn("Hessian序列化时出错： " + e.getMessage(), e);
-			logger.warn("用jdk序列化返回");
-			try {
-				data = JdkSerializableUtil.serialize(msg.getBody());
-			}catch (Exception e1) {
-				logger.warn("JDK序列化时出错： " + e1.getMessage(), e1);
-			}
+			logger.warn("netty encoder is fail： " + e.getMessage(), e);
 		}
 		if(null == data) {
-			throw new NullPointerException("hessian or jdk encoder is fail");
+			throw new NullPointerException("netty encoder is fail");
 		}
 		out.writeShort(Protocol.MAGIC)
 				.writeByte(msg.getSign())

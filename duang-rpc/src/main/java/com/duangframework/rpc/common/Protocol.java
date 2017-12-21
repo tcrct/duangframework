@@ -16,4 +16,5 @@ public class Protocol {
 
 
     public static final byte OK  = (byte) 200;    //  正常响应
+
 }

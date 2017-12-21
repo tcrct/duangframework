@@ -24,6 +24,13 @@ public class BeanUtils {
     }
 
     /**
+     *  根据Class取出对应的Bean
+     */
+    public static Object getBean(Class<?> clazz) {
+        return allBeanMap.get(clazz);
+    }
+
+    /**
      * 所有Class Bean集合， 这里的所有是指@DefaultClassTemplate扫描后且实例化后的
      * 经过滤后的Class并Class.forName()
      * key为 Class

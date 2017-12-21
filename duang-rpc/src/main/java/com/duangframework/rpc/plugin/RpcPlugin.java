@@ -60,9 +60,12 @@ public class RpcPlugin implements IPlugin {
             }
         }
 
+        // 初始化服务生产者
         RpcFactory.initService(rpcServiceSet);
         if(ToolsKit.isNotEmpty(rpcClientSet)) {
+            // 初始化服务消费者
             RpcFactory.initClient(rpcClientSet);
+            // 监听节点
             RpcFactory.watchNode();
         }
 

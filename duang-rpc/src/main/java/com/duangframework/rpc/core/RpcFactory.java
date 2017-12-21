@@ -8,6 +8,7 @@ import com.duangframework.core.interfaces.IProxy;
 import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
+import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.core.utils.IpUtils;
 import com.duangframework.rpc.common.RpcAction;
 import com.duangframework.rpc.server.RpcServer;
@@ -67,8 +68,8 @@ public class RpcFactory {
             if(ToolsKit.isEmpty(serviceName)) {
                 throw new EmptyNullException("serviceFullPath is empty");
             }
-            HANDLER_MAP.put(interfaceName, new RpcAction(serviceName,
-                    interfaceName,
+            HANDLER_MAP.put(interfaceName, new RpcAction(ClassUtils.loadClass(serviceName),
+                    rpcInterfaceClass,
                     IpUtils.getLocalHostIP(false),
                     IpUtils.getLocalHostIP(true),
                     RpcUtils.getPort()

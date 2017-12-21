@@ -2,7 +2,6 @@ package com.duangframework.rpc.common;
 
 
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.rpc.serializable.JdkSerializableUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -43,7 +42,6 @@ public class NettyDecoder extends ByteToMessageDecoder {
 		// 确认消息体长度
 		int bodyLength = in.readInt();
 		int sss = in.readableBytes();
-		System.out.println(sss +  "    bodyLength: " + bodyLength);
 		if (sss != bodyLength) {
 			// 消息体长度不一致
 			logger.warn("消息体长度不一致");
@@ -54,30 +52,20 @@ public class NettyDecoder extends ByteToMessageDecoder {
 		byte[] data = new byte[bodyLength];
 		in.readBytes(data);
 
-		Object obj = null;
+		RpcRequest obj = null;
 		try {
-//			obj = org.apache.commons.lang3.SerializationUtils.deserialize(data);
-//			obj = SerializableUtilsProtostruff.deserialize(data, genericClass);
-//			obj = JdkSerializableUtil.deserialize(data);
-//			obj = HessianSerializableUtil.deserialize(data);
 			obj = ToolsKit.jsonParseObject(data, RpcRequest.class);
 		} catch (Exception e) {
-			logger.warn("Hessian反序列化时出错： " + e.getMessage(), e);
-			logger.warn("用jdk反序列化");
-			try {
-				obj = JdkSerializableUtil.deserialize(data);
-			} catch (Exception e1) {
-				logger.warn("JDK反序列化时出错： " + e.getMessage(), e);
-			}
+			logger.warn("netty decoder is fail： " + e.getMessage(), e);
 		}
 		if(null == obj) {
-			throw new NullPointerException("hessian or jdk decoder is fail");
+			throw new NullPointerException("netty decoder is fail");
 		}
 
 		MessageHolder<RpcRequest> messageHolder = new MessageHolder();
 		messageHolder.setSign(sign);
 		messageHolder.setStatus(status);
-		messageHolder.setBody((RpcRequest) obj);
+		messageHolder.setBody(obj);
 		out.add(messageHolder);
 	}
 

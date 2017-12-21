@@ -1,6 +1,8 @@
 package com.duangframework.rpc.common;
 
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 /**
  * 生产者服务信息对象
  *
@@ -13,33 +15,37 @@ public class RpcAction implements java.io.Serializable {
 	public static final String REMOTEIP_FIELD = "remoteip";
 	public static final String PORT_FIELD = "port";
 
-	private String service;// 服务实现类
-	private String iface;// 服务接口类
+	@JSONField(serialize= false, deserialize = false)
+	private Class<?> service;// 服务实现类
+	@JSONField(serialize= false, deserialize = false)
+	private Class<?> iface;// 服务接口类
+	private String ifaceName;
 	private String intranetip;     // 内网IP地址
 	private String remoteip;  // 公网IP地址
 	private int port;		// 端口
 
-	public RpcAction(String service, String iface, String intranetip, String remoteip, int port) {
+	public RpcAction(Class<?> service, Class<?> iface, String intranetip, String remoteip, int port) {
 		this.service = service;
 		this.iface = iface;
+		this.ifaceName = iface.getName();
 		this.intranetip = intranetip;
 		this.remoteip = remoteip;
 		this.port = port;
 	}
 
-	public String getService() {
+	public Class<?> getService() {
 		return service;
 	}
 
-	public void setService(String service) {
+	public void setService(Class<?> service) {
 		this.service = service;
 	}
 
-	public String getIface() {
+	public Class<?> getIface() {
 		return iface;
 	}
 
-	public void setIface(String iface) {
+	public void setIface(Class<?> iface) {
 		this.iface = iface;
 	}
 
@@ -65,5 +71,13 @@ public class RpcAction implements java.io.Serializable {
 
 	public void setPort(int port) {
 		this.port = port;
+	}
+
+	public String getIfaceName() {
+		return ifaceName;
+	}
+
+	public void setIfaceName(String ifaceName) {
+		this.ifaceName = ifaceName;
 	}
 }

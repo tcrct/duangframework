@@ -14,12 +14,11 @@ package com.duangframework.rpc.common;
  Magic //数据包验证位，short类型
  Sign   //消息标志，请求/响应  byte类型
  Status     //响应状态
- ContentLength        // 协议长度
  Body       // 协议内容
 
 
  -----------------------------------------------------------
-   Magic  |  Sign  |  Status  |  ContentLength  |  Body
+   Magic  |  Sign  |  Status  |  Body
  -----------------------------------------------------------
  *
  * @author Created by laotang
@@ -32,18 +31,15 @@ public class MessageHolder<T> implements java.io.Serializable {
     private byte sign;
     // 响应状态
     private byte status;
-    // 协议长度
-    private int  contentLength;
     // 内容
     private T body;
 
     public MessageHolder() {
     }
 
-    public MessageHolder(byte sign, byte status, int contentLength, T body) {
+    public MessageHolder(byte sign, byte status, T body) {
         this.sign = sign;
         this.status = status;
-        this.contentLength = contentLength;
         this.body = body;
     }
 
@@ -61,14 +57,6 @@ public class MessageHolder<T> implements java.io.Serializable {
 
     public void setStatus(byte status) {
         this.status = status;
-    }
-
-    public int getContentLength() {
-        return contentLength;
-    }
-
-    public void setContentLength(int contentLength) {
-        this.contentLength = contentLength;
     }
 
     public T getBody() {

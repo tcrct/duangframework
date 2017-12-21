@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 如果监听到内容或目录节点发生变化，则将actionMap清空，待调用RPC时，再重新调用ZK去拿具体的信息
+ * 如果监听到内容或目录节点发生变化，则将actionMap清空，再重新调用ZK去拿具体的信息
  * Created by laotang on 2017/4/11.
  */
 public class ZooKeeperListener {

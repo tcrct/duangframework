@@ -2,9 +2,7 @@ package com.duangframework.rpc.client;
 
 import com.duangframework.core.exceptions.RpcException;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.rpc.common.RpcAction;
-import com.duangframework.rpc.common.RpcRequest;
-import com.duangframework.rpc.common.RpcResponse;
+import com.duangframework.rpc.common.*;
 import com.duangframework.rpc.utils.RpcUtils;
 import com.duangframework.server.netty.server.AbstractNettyServer;
 import io.netty.channel.Channel;
@@ -34,7 +32,7 @@ public class RpcClient extends AbstractNettyServer {
     private static final long LockTimeoutMillis = 3000;
 
     private static final ConcurrentHashMap<String, ChannelWrapper> channelMap = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, LinkedBlockingQueue<RpcResponse>> RESPONSE_MAP = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, LinkedBlockingQueue<RpcResponse>> RESPONSE_MAP = new ConcurrentHashMap<>();
 
     public RpcClient() {
         super("0.0.0.0", 0);
@@ -93,7 +91,8 @@ public class RpcClient extends AbstractNettyServer {
         RESPONSE_MAP.put(requestId, new LinkedBlockingQueue<RpcResponse>(1));
         try{
             if(channel.isOpen()) {
-                ChannelFuture writeFuture = channel.writeAndFlush(request).sync();
+                MessageHolder<RpcRequest> messageHolder = new MessageHolder<RpcRequest>(Protocol.REQUEST, Protocol.OK, request);
+                ChannelFuture writeFuture = channel.writeAndFlush(messageHolder).sync();
                 writeFuture.addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {
@@ -102,11 +101,8 @@ public class RpcClient extends AbstractNettyServer {
                             return;
                         } else {
                             String errorMsg = "Send request[" + requestId + "] to [" + future.channel().toString() + "] is error: " + future.cause().toString();
-                            // 移除集合中指定KEY的队列
-                            RESPONSE_MAP.remove(requestId);
                             throw new RpcException(errorMsg);
                         }
-
                     }
                 });
             } else {
@@ -160,7 +156,7 @@ public class RpcClient extends AbstractNettyServer {
                 } else {
                     createNewConnection = true;
                 }
-
+                // 创建新的链接
                 if (createNewConnection) {
                     ChannelFuture channelFuture = nettyBootstrap.bind(new InetSocketAddress(targetHost, targetPort)).sync();
                     channelFuture.awaitUninterruptibly(LockTimeoutMillis); //等待
@@ -185,6 +181,11 @@ public class RpcClient extends AbstractNettyServer {
         }
         return null;
     }
+
+    public static ConcurrentHashMap<String, LinkedBlockingQueue<RpcResponse>> getResponseMap() {
+        return RESPONSE_MAP;
+    }
+
 
     /**
      * 取RPC返回对象

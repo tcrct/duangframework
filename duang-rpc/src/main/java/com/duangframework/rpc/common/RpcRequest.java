@@ -26,8 +26,9 @@ public class RpcRequest implements Serializable {
 		super();
 	}
 
-	public RpcRequest(long startTime) {
+	public RpcRequest(long startTime, String requestId) {
 		setStartTime(startTime);
+		setRequestId(requestId);
 	}
 
 	public RpcRequest(String requestId, String iface, String service, String methodName, Class<?> methodResult,

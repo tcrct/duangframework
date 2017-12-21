@@ -43,7 +43,7 @@ public class HttpChannelInitializer extends ChannelInitializer<SocketChannel> {
         p.addLast(new HttpObjectAggregator(1048576));
         //目的是支持异步大文件传输
         p.addLast(new ChunkedWriteHandler());
-        // 真正处理HTTP业务逻辑的地方
+        // 真正处理HTTP业务逻辑的地方,针对每个TCP连接创建一个新的ChannelHandler实例
         p.addLast(new HttpBaseHandler(bootStrap));
     }
 

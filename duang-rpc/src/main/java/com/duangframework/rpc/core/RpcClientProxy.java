@@ -25,18 +25,17 @@ public class RpcClientProxy implements IProxy {
 	public Object doProxy(ProxyChain proxyChain) throws Exception {
 		Method method = proxyChain.getTargetMethod();
 		Class<?> targetClass =  proxyChain.getTargetClass();
-		// 发现服务， 第一次调用时才触发去调用ZK去拿具体的信息
+		// 发现服务
 		RpcAction action = RpcFactory.discoverService(targetClass);
 		if(ToolsKit.isEmpty(action)) {
 			throw new RpcException("Can't Discover " + targetClass.getName() +" RpcAction! Please Check ZooKeep Server");
 		}
-		RpcRequest request = new RpcRequest(System.currentTimeMillis()); // 创建并初始化 RPC 请求
-		request.setRequestId(RpcUtils.getRequestId());
+		RpcRequest request = new RpcRequest(System.currentTimeMillis(), RpcUtils.getRequestId()); // 创建并初始化 RPC 请求
 		request.setIface(targetClass.getName());
 		request.setMethodName(method.getName());
 		request.setParameterTypes(method.getParameterTypes());
 		request.setParameters(proxyChain.getMethodParams());
-		request.setService(action.getService());
+		request.setService(action.getService().getName());
 		logger.warn("["+RpcUtils.formatDate(request.getStartTime()) + "] request["+request.getRequestId()+"] ["+action.getRemoteip()+ "/" + action.getIntranetip()+":"+action.getPort()+"] "+ request.getIface()+"."+request.getMethodName());
 		RpcResponse response = RpcClient.getInstance().call(request, action);
 		if (response != null ) {
