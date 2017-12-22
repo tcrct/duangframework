@@ -3,12 +3,15 @@ package com.duangframework.rpc.plugin;
 import com.duangframework.core.annotation.ioc.Import;
 import com.duangframework.core.annotation.mvc.Controller;
 import com.duangframework.core.annotation.mvc.Service;
-import com.duangframework.core.annotation.rpc.Rpc;
+import com.duangframework.core.exceptions.RpcException;
 import com.duangframework.core.interfaces.IPlugin;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
 import com.duangframework.rpc.core.RpcFactory;
+import com.duangframework.rpc.utils.AutoBuildServiceInterface;
+import com.duangframework.rpc.utils.RpcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,16 +28,25 @@ import java.util.Set;
 public class RpcPlugin implements IPlugin {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcPlugin.class);
-
     @Override
     public void init() throws Exception {
+        // 先创建需要发布的的接口类
+        String rpcModulePath = ConfigKit.duang().key("rpc.module.path").asString();
+        if(ToolsKit.isEmpty(rpcModulePath)) {
+            throw new RpcException("rpc module path is empty");
+        }
+        // 服务提供者目录
+        rpcModulePath += rpcModulePath.endsWith("/") ? "provider" : "/provider";
+        RpcUtils.autoCreateBatchInterface(rpcModulePath);
+        // 先发布所有提供者服务到ZK
+        RpcUtils.pushProviderServiceSource();
     }
 
     @Override
     public void start() throws Exception {
         Map<Class<?>, Object> controllerMap = BeanUtils.getAllBeanMaps().get(Controller.class.getSimpleName());
         Map<Class<?>, Object> serviceMap = BeanUtils.getAllBeanMaps().get(Service.class.getSimpleName());
-        Map<Class<?>, Object> rpcServiceMap = BeanUtils.getAllBeanMaps().get(Rpc.class.getSimpleName());
+        Map<Class<?>, Object> rpcServiceMap = AutoBuildServiceInterface.getInterfaceClassMap(); //BeanUtils.getAllBeanMaps().get(Rpc.class.getSimpleName());
         if(ToolsKit.isEmpty(rpcServiceMap)) {
             logger.warn("RpcPlugin start:  rpcServiceMap is null, so return..."  );
             return;
@@ -43,7 +55,8 @@ public class RpcPlugin implements IPlugin {
         if(ToolsKit.isNotEmpty(controllerMap)) {rpcClassSet.addAll(controllerMap.keySet());}
         if(ToolsKit.isNotEmpty(serviceMap)) {rpcClassSet.addAll(serviceMap.keySet());}
         Set<String> excludeMethodNameSet = ObjectKit.buildExcludedMethodName();
-        Set<Class<?>> rpcServiceSet = rpcServiceMap.keySet();       // 生产者，需要发布到注册中心
+        // 生产者，需要发布到注册中心
+        Set<Class<?>> rpcServiceSet = rpcServiceMap.keySet();
         Set<Class<?>> rpcClientSet = new HashSet<>();
         for(Iterator<Class<?>> iterator = rpcClassSet.iterator(); iterator.hasNext();) {
             Class<?> cls = iterator.next();

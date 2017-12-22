@@ -18,6 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <server.version>1.0-SNAPSHOT</server.version>
         <zk.version>1.0-SNAPSHOT</zk.version>
+        <sist.version>3.12.1.GA</sist.version>
     </properties>
 
     <dependencies>
@@ -31,30 +32,10 @@
             <artifactId>duang-zookeeper</artifactId>
             <version>${zk.version}</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.objenesis/objenesis -->
         <dependency>
-            <groupId>org.objenesis</groupId>
-            <artifactId>objenesis</artifactId>
-            <version>2.4</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.dyuproject.protostuff/protostuff-core -->
-        <dependency>
-            <groupId>com.dyuproject.protostuff</groupId>
-            <artifactId>protostuff-core</artifactId>
-            <version>1.0.10</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.dyuproject.protostuff/protostuff-runtime -->
-        <dependency>
-            <groupId>com.dyuproject.protostuff</groupId>
-            <artifactId>protostuff-runtime</artifactId>
-            <version>1.0.10</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/com.caucho/hessian -->
-        <dependency>
-            <groupId>com.caucho</groupId>
-            <artifactId>hessian</artifactId>
-            <version>4.0.38</version>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>${sist.version}</version>
         </dependency>
     </dependencies>
 </project>

@@ -3,10 +3,12 @@ package com.duangframework.rpc.utils;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.DuangId;
 import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.exceptions.RpcException;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.IpUtils;
 import com.duangframework.rpc.common.RpcAction;
+import com.duangframework.zookeeper.kit.ZooKit;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,5 +153,48 @@ public class RpcUtils {
     public static String createRpcClientKey(String ip, int port) {
 //        return Base64.encode(Unpooled.copiedBuffer((ip+port).getBytes())).toString();
         return ip+"_"+port;
+    }
+
+    /**
+     * 自动创建Service类的接口文件
+     * @param rpcModulePath     RPC模块文件夹路径，即是接口文件存在的父目录
+     */
+    public static void autoCreateBatchInterface(String rpcModulePath) throws Exception {
+        try {
+            AutoBuildServiceInterface.createBatchInterface(rpcModulePath);
+        } catch (Exception e) {
+            throw new RpcException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 接品文件
+     * @param productCode
+     * @return
+     */
+    public static String getInterFaceJavaPath(String productCode) {
+        return getZookNotePath(productCode) + "/interface";
+    }
+
+    /**
+     * 发布服务提供者代码到ZK里
+     * @throws Exception
+     */
+    public static void pushProviderServiceSource() throws Exception {
+        String interFaceJaveString = ToolsKit.toJsonString(AutoBuildServiceInterface.getInterfaceJavaMap());
+        ZooKit.duang().path(getInterFaceJavaPath(getProductCode())).data(interFaceJaveString).set();
+    }
+
+    /**
+     * 生成消费者端的接口文件
+     * @param interFaceDirPath      接口文件的父级目录
+     * @param packageStr               包路径，包括文件名
+     * @param fileContext               内容
+     * @return
+     * @throws Exception
+     */
+    public static void createInterFaceFileOnDisk(String interFaceDirPath, String packageStr, String fileContext) throws Exception {
+        String fileName = packageStr.substring(packageStr.lastIndexOf(".")+1) + ".java";
+        AutoBuildServiceInterface.createInterFaceFileOnDisk(interFaceDirPath, packageStr, fileName, fileContext);
     }
 }
