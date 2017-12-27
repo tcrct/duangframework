@@ -28,6 +28,16 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
     protected Set<String> jarNameSet = new HashSet<>();
     protected Set<String> suffixSet  = new HashSet<>();
 
+    protected AbstractClassTemplate(Class<? extends Annotation> annotation,
+                                    String packages,
+                                    String jarName,
+                                    String suffix) {
+        this.annotationSet.add(annotation);
+        this.packageSet.add(packages);
+        this.jarNameSet.add(jarName);
+        this.suffixSet.add(suffix);
+    }
+
     protected AbstractClassTemplate(Set<Class<? extends Annotation>> annotationSet,
                                     Set<String> packageSet,
                                     Set<String> jarNameSet,

@@ -18,10 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Created by laotang
@@ -60,7 +57,7 @@ public class RpcFactory {
         }
         for(Class<?> rpcInterfaceClass : classSet) {
             Rpc rpcAnnotation = rpcInterfaceClass.getAnnotation(Rpc.class);
-            if(!rpcInterfaceClass.isInterface() && ToolsKit.isEmpty(rpcAnnotation)) {
+            if(!rpcInterfaceClass.isInterface() || ToolsKit.isEmpty(rpcAnnotation)) {
                 continue;
             }
             String interfaceName = rpcInterfaceClass.getName();
@@ -91,22 +88,21 @@ public class RpcFactory {
     *  @return
      */
     private static boolean startRpcServer() {
-        FutureTask<Boolean> futureTask = ThreadPoolKit.execute(new Callable<Boolean>() {
-            @Override
-            public Boolean call() {
-                rpcServer = new RpcServer(RpcUtils.getHost(), RpcUtils.getPort());
-                try {
-                    rpcServer.start();
-                    return true;
-                } catch (Exception e) {
-                    logger.warn("startRpcServer is fail: " + e.getMessage(), e);
-                    rpcServer.shutdown();
-                    return false;
-                }
-            }
-        });
         try {
-            return futureTask.get(3000, TimeUnit.MILLISECONDS);
+            ThreadPoolKit.execute(new Runnable() {
+                @Override
+                public void run() {
+                    rpcServer = new RpcServer(RpcUtils.getHost(), RpcUtils.getPort());
+                    try {
+                        rpcServer.start();
+                    } catch (Exception e) {
+                        throw new RpcException("startRpcServer is fail: " + e.getMessage(), e);
+                    } finally {
+                        rpcServer.shutdown();
+                    }
+                }
+            });
+            return true;
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
            throw new RpcException("start rpc server is fail : " + e.getMessage(), e);

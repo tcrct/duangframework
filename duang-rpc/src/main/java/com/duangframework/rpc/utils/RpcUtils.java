@@ -1,5 +1,6 @@
 package com.duangframework.rpc.utils;
 
+import com.duangframework.core.annotation.rpc.RpcPackage;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.DuangId;
 import com.duangframework.core.exceptions.EmptyNullException;
@@ -12,8 +13,8 @@ import com.duangframework.zookeeper.kit.ZooKit;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.security.krb5.Config;
 
-import java.net.URLEncoder;
 import java.util.*;
 
 /**
@@ -24,6 +25,7 @@ import java.util.*;
 public class RpcUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(RpcUtils.class);
+    private static String RPC_PACKAGE_PATH = "";
 
     /**
      *
@@ -62,9 +64,8 @@ public class RpcUtils {
      * @return
      */
     public static String getZookNoteFullPath() {
-        String path =  getZookNotePath(RpcUtils.getProductCode()) + "/" + getZKNoteItemDir();
         try {
-            return URLEncoder.encode(path, Const.ENCODING_FIELD);
+            return getZookNotePath(RpcUtils.getProductCode()) + "/" + getZKNoteItemDir();
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage());
         }
@@ -157,11 +158,13 @@ public class RpcUtils {
 
     /**
      * 自动创建Service类的接口文件
-     * @param rpcModulePath     RPC模块文件夹路径，即是接口文件存在的父目录
+     * RPC模块文件夹路径，即是接口文件存在的父目录
      */
-    public static void autoCreateBatchInterface(String rpcModulePath) throws Exception {
+    public static void autoCreateBatchInterface() throws Exception {
         try {
-            AutoBuildServiceInterface.createBatchInterface(rpcModulePath);
+            // 自定义目录
+            String customizeDir = ConfigKit.duang().key("rpc.module.customdir").defaultValue("provider").asString();
+            AutoBuildServiceInterface.createBatchInterface(RpcUtils.getRpcModulePath(customizeDir), customizeDir);
         } catch (Exception e) {
             throw new RpcException(e.getMessage(), e);
         }
@@ -177,15 +180,6 @@ public class RpcUtils {
     }
 
     /**
-     * 发布服务提供者代码到ZK里
-     * @throws Exception
-     */
-    public static void pushProviderServiceSource() throws Exception {
-        String interFaceJaveString = ToolsKit.toJsonString(AutoBuildServiceInterface.getInterfaceJavaMap());
-        ZooKit.duang().path(getInterFaceJavaPath(getProductCode())).data(interFaceJaveString).set();
-    }
-
-    /**
      * 生成消费者端的接口文件
      * @param interFaceDirPath      接口文件的父级目录
      * @param packageStr               包路径，包括文件名
@@ -195,6 +189,34 @@ public class RpcUtils {
      */
     public static void createInterFaceFileOnDisk(String interFaceDirPath, String packageStr, String fileContext) throws Exception {
         String fileName = packageStr.substring(packageStr.lastIndexOf(".")+1) + ".java";
-        AutoBuildServiceInterface.createInterFaceFileOnDisk(interFaceDirPath, packageStr, fileName, fileContext);
+        AutoBuildServiceInterface.createInterFaceFileOnDisk(interFaceDirPath, fileName, fileContext);
+    }
+
+    /**
+     * 取得RPC模块的全路径
+     * @param flag      自定义目录
+     * @return
+     */
+    public static String getRpcModulePath(String customizeDir) {
+        String rpcModulePath = ConfigKit.duang().key("rpc.module.path").asString();
+        rpcModulePath = rpcModulePath.endsWith("/") ? rpcModulePath.substring(0, rpcModulePath.length()-1) : rpcModulePath;
+        return rpcModulePath + "/" +getRpcPackagePath("").replace(".","/")+(ToolsKit.isNotEmpty(customizeDir) ? "/" +customizeDir  : "");
+    }
+
+
+    public static String getRpcPackagePath(String flag) {
+        if(ToolsKit.isEmpty(RPC_PACKAGE_PATH)) {
+            String basePackagePath = ConfigKit.duang().key("base.package.path").asString();
+            Package[] pkgs = Package.getPackages();
+            for (Package pkg : pkgs) {
+                if (pkg.getName().contains(basePackagePath)) {
+                    RpcPackage rpcPackage = pkg.getAnnotation(RpcPackage.class);
+                    if (null != rpcPackage) {
+                        RPC_PACKAGE_PATH = pkg.getName();
+                    }
+                }
+            }
+        }
+        return RPC_PACKAGE_PATH + (ToolsKit.isNotEmpty(flag) ? "." +flag  : "");
     }
 }

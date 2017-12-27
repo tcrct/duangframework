@@ -26,4 +26,9 @@ public class Duang implements IDuang {
     public void addPlugins() {
         System.out.println("addPlugins");
     }
+
+    @Override
+    public void initDuang() {
+
+    }
 }

@@ -8,13 +8,18 @@ package com.duangframework.mvc.core;
 public interface IDuang {
 
     /**
-     *
+     * 有序添加处理器
      */
     void addHandlers();
 
     /**
-     *
+     * 有序添加插件
      */
     void addPlugins();
+
+    /**
+     *  初始化其它启动项，在框架启动完成后执行
+     */
+    void initDuang();
 
 }

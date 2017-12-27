@@ -9,7 +9,6 @@ import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
-import com.duangframework.core.utils.ClassUtils;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -36,16 +35,15 @@ import java.util.*;
 public class AutoBuildServiceInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(AutoBuildServiceInterface.class);
-    private static final Map<Class<?>, Object> INTERFACECLASS_MAP = new HashMap<>();
-    private static final Map<String, String> INTERFACECJAVA_MAP = new HashMap<>();
 
     /**
      *  批量创建Service类接口文件到指定目录下
      * @param interFaceDirPath      存放RPC接口文件的目录
+     * @param  customizeDir           自定义目录
      * @return
      * @throws Exception
      */
-    public static boolean createBatchInterface(String interFaceDirPath)  throws Exception {
+    public static boolean createBatchInterface(String interFaceDirPath, String customizeDir)  throws Exception {
         Map<Class<?>, Object> serviceMap = BeanUtils.getAllBeanMaps().get(Service.class.getSimpleName());
         if(ToolsKit.isEmpty(serviceMap)) {
             throw new EmptyNullException("serviceMap is null");
@@ -53,9 +51,8 @@ public class AutoBuildServiceInterface {
         try {
             for (Iterator<Class<?>> iterator = serviceMap.keySet().iterator(); iterator.hasNext(); ) {
                 Class<?> clazz = iterator.next();
-                String packagePath = clazz.getPackage().getName();
+                String packagePath = RpcUtils.getRpcPackagePath(customizeDir);
                 createInterface(clazz, interFaceDirPath, packagePath);
-                logger.warn("create " + interFaceDirPath+"/"+ packagePath.replace(".", "/")+"/I"+clazz.getSimpleName()+" is success!");
             }
             return true;
         } catch (Exception e) {
@@ -64,15 +61,6 @@ public class AutoBuildServiceInterface {
         }
     }
 
-    /**
-     * 根据参数，创建单个接口类文件
-     * @param clazz		要创建接口文件的类
-     * @param interFaceDirPath  接口文件路径，不能包括文件名
-     * @return
-     */
-    public static boolean createInterface(Class<?> clazz, String interFaceDirPath) throws Exception{
-        return createInterface(clazz, interFaceDirPath, "");
-    }
     /**
      * 根据参数，创建接口类文件
      * @param clazz		要创建接口文件的类
@@ -102,9 +90,9 @@ public class AutoBuildServiceInterface {
             // Service接口名
             String fileName = "I"+clazz.getSimpleName();
             // 创建包路径
-            String packageStr = createPackagePath(ToolsKit.isEmpty(packagePath) ? interFaceDirPath : packagePath);
+//            String packageStr = createPackagePath(ToolsKit.isEmpty(packagePath) ? interFaceDirPath : packagePath);
             // 创建接口类内容
-            String fileContext = createInterfaceContextString(clazz.getName(), fileName, packageStr, sb.toString());
+            String fileContext = createInterfaceContextString(clazz.getName(), fileName, packagePath, sb.toString());
 
             File interFaceFileDir = new File(interFaceDirPath);
             // 文件夹不存在则创建
@@ -112,23 +100,21 @@ public class AutoBuildServiceInterface {
                 logger.warn("dir is not exists, create it...");
                 interFaceFileDir.mkdirs();
             }
-            File interFaceFile = createInterFaceFileOnDisk(interFaceDirPath, packageStr, fileName, fileContext);
-            Class<?> interFaceClass = interFaceFile.getClass();
-            // 取得Service接口类对象
-            INTERFACECLASS_MAP.put(interFaceClass, ClassUtils.loadClass(interFaceClass.getName()));
-            INTERFACECJAVA_MAP.put(interFaceClass.getName(), fileContext);
+            File interFaceFile = createInterFaceFileOnDisk(interFaceDirPath, fileName, fileContext);
+            if(interFaceFile.isFile()) {
+                logger.warn("create " + interFaceDirPath+"/"+fileName+".java is success!");
+            }
             return true;
         } catch (Exception e) {
             throw new RpcException(e.getMessage(), e);
         }
     }
 
-    public static File createInterFaceFileOnDisk(String interFaceDirPath, String packageStr, String fileName, String fileContext) throws Exception {
-        String  interFaceItemPath = packageStr.replace(".", "/");
-        interFaceDirPath = interFaceDirPath.endsWith("/") ? interFaceDirPath.substring(0, interFaceDirPath.length()-1) : interFaceDirPath;
-        interFaceDirPath = interFaceDirPath + "/"+ interFaceItemPath+ "/" +fileName + ".java";
+    public static File createInterFaceFileOnDisk(String interFaceFilePath, String fileName, String fileContext) throws Exception {
+        interFaceFilePath = interFaceFilePath.endsWith("/") ? interFaceFilePath.substring(0, interFaceFilePath.length()-1) : interFaceFilePath;
+        interFaceFilePath = interFaceFilePath + "/"+ (fileName.endsWith(".java") ? fileName : fileName+".java");
         // 如果文件存在则先删除后再创建
-        File interFaceFile = new File(interFaceDirPath);
+        File interFaceFile = new File(interFaceFilePath);
         if(interFaceFile.exists() &&interFaceFile.isFile()){
             logger.warn("file is exists, delete it...");
             interFaceFile.delete();
@@ -139,7 +125,7 @@ public class AutoBuildServiceInterface {
 
     private static String createPackagePath(String path) {
         int startIndex = path.contains("com") ? path.indexOf("com") : 0;
-        path = path.substring(startIndex, path.length()); //.replace("/", ".").replace("\\\\", ".").replace("\\", ".");
+        path = path.substring(startIndex, path.length());
         File file = new File(path);
         return file.getPath().replace(File.separator, ".");
     }
@@ -149,7 +135,7 @@ public class AutoBuildServiceInterface {
         String rpcPackage = Rpc.class.getName();
         String iRpcPackage = IRpc.class.getName();
         sb.append("package "+packagePath+";\n\n");
-        sb.append("import "+rpcPackage+"\n");
+        sb.append("import "+rpcPackage+";\n");
         sb.append("import "+iRpcPackage+";\n");
         sb.append("/**\n");
         sb.append("*  根据"+clsName+"类文件自动构建接口文件\n");
@@ -164,7 +150,7 @@ public class AutoBuildServiceInterface {
         return sb.toString();
     }
 
-    private static String toGenericString(Method method, List<String> variableNames)  throws Exception {
+    private static String toGenericString(Method method, List<String> variableNames)  {
         try {
             StringBuilder sb = new StringBuilder();
             int mod = method.getModifiers() & Modifier.methodModifiers();
@@ -172,7 +158,7 @@ public class AutoBuildServiceInterface {
                 sb.append(Modifier.toString(mod)).append(" ");
             }
             TypeVariable<?>[] typeparms = method.getTypeParameters();
-            if (typeparms.length > 0) {
+            if (ToolsKit.isNotEmpty(typeparms) && typeparms.length > 0) {
                 boolean first = true;
                 sb.append("<");
                 for (TypeVariable<?> typeparm : typeparms) {
@@ -191,19 +177,22 @@ public class AutoBuildServiceInterface {
             sb.append(getTypeName(method.getDeclaringClass())).append(".");
             sb.append(method.getName()).append("(");
             Type[] params = method.getGenericParameterTypes();
-            for (int j = 0; j < params.length; j++) {
-                String param = (params[j] instanceof Class) ? getTypeName((Class) params[j]) : (params[j].toString());
-                if (method.isVarArgs() && (j == params.length - 1)) {
-                    param = param.replaceFirst("\\[\\]$", "...");
+            if(ToolsKit.isNotEmpty(params)) {
+                for (int j = 0; j < params.length; j++) {
+                    String param = (params[j] instanceof Class) ? getTypeName((Class) params[j]) : (params[j].toString());
+                    if (method.isVarArgs() && (j == params.length - 1)) {
+                        param = param.replaceFirst("\\[\\]$", "...");
+                    }
+                    sb.append(param);
+                    if (j < (params.length - 1)) {
+                        sb.append(" " + variableNames.get(j) + ", ");
+                    }
                 }
-                sb.append(param);
-                if (j < (params.length - 1)) {
-                    sb.append(" " + variableNames.get(j) + ", ");
-                }
+                sb.append(" "+variableNames.get(params.length-1));
             }
-            sb.append(" "+variableNames.get(params.length-1)+")");
+            sb.append(")");
             Type[] exceptions = method.getGenericExceptionTypes();
-            if (exceptions.length > 0) {
+            if (ToolsKit.isNotEmpty(exceptions) && exceptions.length > 0) {
                 sb.append(" throws ");
                 for (int k = 0; k < exceptions.length; k++) {
                     sb.append((exceptions[k] instanceof Class) ? ((Class) exceptions[k]).getName() : exceptions[k].toString());
@@ -212,7 +201,7 @@ public class AutoBuildServiceInterface {
                     }
                 }
             }
-            return sb.toString();
+            return (sb.length() > -1) ? sb.toString() : "";
         } catch (Exception e) {
             throw new RpcException(e.getMessage(), e);
         }
@@ -260,14 +249,4 @@ public class AutoBuildServiceInterface {
         }
         return type.getName();
     }
-
-    public static Map<Class<?>, Object> getInterfaceClassMap() {
-        return INTERFACECLASS_MAP;
-    }
-
-    public static Map<String, String> getInterfaceJavaMap() {
-        return INTERFACECJAVA_MAP;
-    }
-
-
 }

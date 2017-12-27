@@ -77,6 +77,8 @@ public class ContextLoaderListener implements IContextLoaderListener{
         IocHelper.duang();
         // 初始化路由
         RouteHelper.duang();
+        // 初始化其它工具类
+        newInstanceDuang();
     }
 
     /**
@@ -97,7 +99,16 @@ public class ContextLoaderListener implements IContextLoaderListener{
             logger.warn(e.getMessage(), e);
             throw new MvcStartUpException("不能创建类: " + configClass, e);
         }
+
+    }
+
+    /**
+     * 框架启动到最后执行的方法
+     */
+    private void newInstanceDuang() {
+        duangFrameword.initDuang();
         // 用于设置框架必要的Handle处理器， 如将ActionHandle添加到最后等
         Handles.init();
+        logger.warn("instance " + duangFrameword.getClass().getName() + " success!");
     }
 }
