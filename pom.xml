@@ -99,6 +99,7 @@
         <module>duang-mysql</module>
         <module>duang-rpc</module>
         <module>duang-zookeeper</module>
+        <module>duang-mq</module>
     </modules>
 
     <dependencies>
