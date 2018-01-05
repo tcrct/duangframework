@@ -53,11 +53,11 @@ public class MainProcess implements IProcess {
 
     @Override
     public IResponse doWork(IRequest req, IResponse res) throws Exception {
-        final HttpRequest request = (HttpRequest)req;
-        final HttpResponse response = (HttpResponse)res;
+        HttpRequest request = (HttpRequest)req;
+        HttpResponse response = (HttpResponse)res;
         if(ToolsKit.isEmpty(request)) {  throw new EmptyNullException("request is null");}
         if(ToolsKit.isEmpty(response)) {throw new EmptyNullException("response is null");}
-        final String target = request.getRequestURI().toString();
+        String target = request.getRequestURI().toString();
 
         AsyncContext asyncContext = new AsyncContextThreadImpl(target, request, response);
         return asyncContext.complete();
