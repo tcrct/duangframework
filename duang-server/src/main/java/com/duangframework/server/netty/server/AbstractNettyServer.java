@@ -1,13 +1,19 @@
 package com.duangframework.server.netty.server;
 
+import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.interfaces.IProcess;
+import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.server.IServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultMessageSizeEstimator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.ServerSocket;
 
 /**
  *
@@ -34,6 +40,9 @@ public abstract class AbstractNettyServer implements IServer {
     }
 
     private void init() {
+        if(isUse()){
+            throw new MvcStartUpException("Server Startup Fail: " + bootStrap.getPort() + " is use!");
+        }
         nettyBootstrap = new ServerBootstrap();
         nettyBootstrap.group(bootStrap.getBossGroup(), bootStrap.getWorkerGroup());
         nettyBootstrap.option(ChannelOption.SO_BACKLOG, bootStrap.getBockLog())  //连接数
@@ -58,5 +67,38 @@ public abstract class AbstractNettyServer implements IServer {
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
         }
+    }
+
+    /**
+     * 检测本机指定端口是否可用<br/>
+     * 如果端口可用，则返回false
+     * @return
+     */
+    private boolean isUse() {
+//        if(port < minPort || port > maxPort) throw new IllegalStateException("port only range is "+minPort+"~"+maxPort);
+        ServerSocket ss  = null;
+        DatagramSocket ds = null;
+        try {
+            ss = new ServerSocket(bootStrap.getPort());
+            ss.setReuseAddress(true);
+            ds = new DatagramSocket(bootStrap.getPort());
+            ds.setReuseAddress(true);
+            logger.warn(ss.getInetAddress().getHostName()+":"+ ss.getLocalPort() +" is not use!");
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }  finally {
+            try {
+                if(ToolsKit.isNotEmpty(ds)) {
+                    ds.close();
+                }
+                if(ToolsKit.isNotEmpty(ss)) {
+                    ss.close();
+                }
+            } catch (IOException e) {
+                logger.warn(e.getMessage(), e);
+            }
+        }
+        return true;
     }
 }
