@@ -44,12 +44,14 @@ public class BeanHelper {
             // 找出所有代理类进行实例化并缓存
             Map<Class<? extends Annotation>, IProxy> annotationMap = new HashMap<>();
             List<Class<?>> proxyList = classMap.get(proxyKey);
-            for(Class<?> proxyClass : proxyList) {
-                Proxy proxy = proxyClass.getAnnotation(Proxy.class);
-                if(ToolsKit.isNotEmpty(proxy)) {
-                    Class<? extends Annotation> aopClass = proxy.aop();
-                    IProxy proxyObj = ClassUtils.newInstance(proxyClass);
-                    annotationMap.put(aopClass, proxyObj);
+            if(ToolsKit.isNotEmpty(proxyList)) {
+                for (Class<?> proxyClass : proxyList) {
+                    Proxy proxy = proxyClass.getAnnotation(Proxy.class);
+                    if (ToolsKit.isNotEmpty(proxy)) {
+                        Class<? extends Annotation> aopClass = proxy.aop();
+                        IProxy proxyObj = ClassUtils.newInstance(proxyClass);
+                        annotationMap.put(aopClass, proxyObj);
+                    }
                 }
             }
             // 将扫描后的Class进行实例化并缓存(Proxy除外)
