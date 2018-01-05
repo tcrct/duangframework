@@ -8,9 +8,8 @@ import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.interfaces.IProcess;
-import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.mvc.core.helper.PluginHelper;
+import com.duangframework.mvc.listener.ContextLoaderListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +67,6 @@ public class MainProcess implements IProcess {
 
     @Override
     public void destroy() {
-        ThreadPoolKit.shutdown();
-        PluginHelper.stop();
+        ContextLoaderListener.contextDestroyed();
     }
 }

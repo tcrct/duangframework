@@ -4,6 +4,7 @@ import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ObjectKit;
+import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.IDuang;
 import com.duangframework.mvc.core.helper.BeanHelper;
@@ -59,8 +60,9 @@ public class ContextLoaderListener implements IContextLoaderListener{
     /**
      * 容器销毁时监听
      */
-    public void contextDestroyed() {
+    public static void contextDestroyed() {
         PluginHelper.stop();
+        ThreadPoolKit.shutdown();
     }
 
     /**
