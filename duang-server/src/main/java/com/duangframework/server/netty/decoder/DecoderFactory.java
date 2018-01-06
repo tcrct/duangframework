@@ -29,7 +29,7 @@ public class DecoderFactory {
                 decoder = new JsonDecoder(request);
             }
             else if(ContentType.XML.getValue().contains(contentType)) {
-
+                decoder = new XmlDecoder(request);
             }
             else if (ContentType.FORM.getValue().contains(contentType)) {
                 decoder = new PostDecoder(request.copy());

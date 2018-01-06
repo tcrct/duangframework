@@ -2,6 +2,7 @@ package com.duangframework.mvc.core;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.duangframework.core.common.Const;
 import com.duangframework.core.common.dto.http.head.HttpHeaders;
 import com.duangframework.core.common.dto.http.request.HttpRequest;
 import com.duangframework.core.common.dto.http.request.IRequest;
@@ -17,9 +18,13 @@ import com.duangframework.mvc.render.JsonRender;
 import com.duangframework.mvc.render.Render;
 import com.duangframework.mvc.render.TextRender;
 import com.duangframework.mvc.render.XmlRender;
+import com.duangframework.server.common.enums.ContentType;
+import com.duangframework.validation.core.ValidatorFactory;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -367,9 +372,7 @@ public abstract class BaseController {
         if (ToolsKit.isNotEmpty(value)) {
             try {
                 long millisecond = Long.parseLong(value);
-                Date date = new Date();
-                date.setTime(millisecond);
-                return date;
+                return new Date(millisecond);
             } catch (Exception ex) {
                 try {
                     return ToolsKit.parseDate(value, "yyyy-MM-dd HH:mm:ss");
@@ -379,5 +382,90 @@ public abstract class BaseController {
             }
         }
         return null;
+    }
+
+    /**
+     * 取请求body
+     * @return
+     */
+    private Object getBodyString() {
+        return request.getAttribute(Const.DUANG_INPUTSTREAM_STR_NAME);
+    }
+
+    /**
+     * 取出请求对象的json字符串
+     * @return
+     */
+    protected String getJson() {
+        Object inputStreamObj = getBodyString();
+        if (ToolsKit.isNotEmpty(inputStreamObj)) {
+            return (String) inputStreamObj;
+        }
+        return "";
+    }
+
+    /**
+     * 取出请求对象的xml字符串
+     * @return
+     */
+    protected String getXml() {
+        return getJson();
+    }
+
+    /**
+     * 取出请求body对象的InputStream对象
+     * @return
+     */
+    public InputStream getInputStream() {
+        InputStream is = null;
+        Object inputStreamObj = getBodyString();
+        try{
+            if(ToolsKit.isNotEmpty(inputStreamObj)) {
+                is = IOUtils.toInputStream((String)inputStreamObj, ConfigKit.duang().key("encoding").defaultValue("UTF-8").asString());
+            }
+        }catch(Exception e) {
+            logger.warn("Controller.getInputStream() fail: " + e.getMessage() + " return null...", e);
+        }
+        return is;
+    }
+
+    /**
+     * 根据类，取出请求参数并将其转换为Bean对象返回
+     * 默认验证
+     * @param tClass            要转换的类
+     * @return
+     */
+    protected <T> T getBean(Class<T> tClass) {
+        return getBean(tClass, true);
+    }
+
+    /**
+     * 根据类，取出请求参数并将其转换为Bean对象返回
+     * @param tClass            要转换的类
+     * @param isValidator     是否验证
+     * @param <T>
+     * @return
+     */
+    protected <T> T getBean(Class<T> tClass, boolean isValidator) {
+        T t = null;
+        String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
+        try {
+            if(ContentType.JSON.getValue().contains(contentType)) {
+                t = ToolsKit.jsonParseObject(getJson(), tClass);
+            } else  if(ContentType.XML.getValue().contains(contentType)) {
+                // TODO 待处理XML
+            } else if (ContentType.FORM.getValue().contains(contentType)) {
+                String paramsJson = ToolsKit.toJsonString(getAllParams());
+                t = ToolsKit.jsonParseObject(paramsJson, tClass);
+            }
+            // 默认开启验证
+            if(isValidator) {
+                ValidatorFactory.validator(t);
+            }
+        } catch (Exception e) {
+            logger.warn("getBean is fail : " + e.getMessage(), e);
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+        return t;
     }
 }

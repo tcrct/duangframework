@@ -3,6 +3,7 @@ package com.duangframework.server.netty.decoder;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.duangframework.core.common.Const;
 import com.duangframework.core.common.dto.result.ReturnDto;
 import com.duangframework.core.kit.ToolsKit;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -29,6 +30,9 @@ public class JsonDecoder extends AbstractDecoder<Map<String, String[]>> {
         } else if(ToolsKit.isArrayJsonString(json)) {
             //TODO ..数组JSON方式待处理
 //            parseArray(JSON.parseArray(json, ArrayList.class));
+        }
+        if(ToolsKit.isNotEmpty(json)) {
+            paramsMap.put(Const.DUANG_INPUTSTREAM_STR_NAME, new String[]{json});
         }
         return paramsMap;
     }

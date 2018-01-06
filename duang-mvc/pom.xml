@@ -19,6 +19,7 @@
         <mongo.version>1.0-SNAPSHOT</mongo.version>
         <rpc.version>1.0-SNAPSHOT</rpc.version>
         <server.version>1.0-SNAPSHOT</server.version>
+        <validation.version>1.0-SNAPSHOT</validation.version>
     </properties>
 
     <dependencies>
@@ -36,6 +37,11 @@
             <groupId>com.duangframework.rpc</groupId>
             <artifactId>duang-rpc</artifactId>
             <version>${rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.duangframework.validation</groupId>
+            <artifactId>duang-validation</artifactId>
+            <version>${validation.version}</version>
         </dependency>
     </dependencies>
 </project>

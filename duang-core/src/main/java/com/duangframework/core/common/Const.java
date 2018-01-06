@@ -50,5 +50,9 @@ public class Const {
      */
     public static final String DEFAULT_DATE_FORM = "yyyy-MM-dd HH:mm:ss";
 
+    /**
+     *  以JSON或XML方式提交参数时，暂存在Request里的key
+     */
+    public static final String DUANG_INPUTSTREAM_STR_NAME = "dunag_inputstream_str";
 
 }
