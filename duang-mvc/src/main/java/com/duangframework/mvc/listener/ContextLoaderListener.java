@@ -4,9 +4,9 @@ import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ObjectKit;
-import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.IDuang;
+import com.duangframework.mvc.core.InstanceFactory;
 import com.duangframework.mvc.core.helper.BeanHelper;
 import com.duangframework.mvc.core.helper.IocHelper;
 import com.duangframework.mvc.core.helper.PluginHelper;
@@ -15,6 +15,8 @@ import com.duangframework.mvc.handles.Handles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -62,7 +64,8 @@ public class ContextLoaderListener implements IContextLoaderListener{
      */
     public static void contextDestroyed() {
         PluginHelper.stop();
-        ThreadPoolKit.shutdown();
+        InstanceFactory.getHandles().clear();
+//        ThreadPoolKit.shutdown();
     }
 
     /**
@@ -112,5 +115,19 @@ public class ContextLoaderListener implements IContextLoaderListener{
         // 用于设置框架必要的Handle处理器， 如将ActionHandle添加到最后等
         Handles.init();
         logger.warn("instance " + duangFrameword.getClass().getName() + " success!");
+
+        long halfTimeOut = 10000L;
+        new Timer().schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    try {
+                        contextDestroyed();
+                        contextInitialized();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+        }, halfTimeOut, halfTimeOut);
+
     }
 }

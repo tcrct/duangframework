@@ -22,6 +22,18 @@ public class ObjectKit {
 
     private static final Logger logger = LoggerFactory.getLogger(ObjectKit.class);
 
+    /**
+     * 设置成员变量
+     */
+    public static void setField(Object obj, Field field, Object fieldValue) {
+        try {
+            field.setAccessible(true);
+            field.set(obj, fieldValue);
+        } catch (Exception e) {
+            logger.error("设置成员变量出错！", e);
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * 获取成员变量

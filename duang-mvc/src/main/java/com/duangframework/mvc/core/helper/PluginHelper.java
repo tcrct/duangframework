@@ -50,5 +50,6 @@ public class PluginHelper {
                 }
             }
         }
+        InstanceFactory.getPlugins().clear();
     }
 }

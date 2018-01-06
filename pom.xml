@@ -100,6 +100,7 @@
         <module>duang-rpc</module>
         <module>duang-zookeeper</module>
         <module>duang-mq</module>
+        <module>duang-validation</module>
     </modules>
 
     <dependencies>
@@ -151,6 +152,7 @@
             <artifactId>commons-configuration</artifactId>
             <version>${configuration.version}</version>
         </dependency>
+
     </dependencies>
 
 </project>
