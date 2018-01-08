@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,9 +28,14 @@ public class ClassUtils {
      * 获取类加载器
      */
     public static ClassLoader getClassLoader() {
+//        ClassLoader classLoader = new URLClassLoader();
         return Thread.currentThread().getContextClassLoader();
     }
 
+    // TODO 完成构造函数反射创建
+    public static <T> T newInstance(Class<?> clazz, Object[] value, Class[] typeRef) {
+        return  null;
+    }
 
     public static <T> T newInstance(Class<?> clazz) {
         try {

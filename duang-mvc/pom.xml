@@ -18,6 +18,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mongo.version>1.0-SNAPSHOT</mongo.version>
         <rpc.version>1.0-SNAPSHOT</rpc.version>
+        <mq.version>1.0-SNAPSHOT</mq.version>
         <server.version>1.0-SNAPSHOT</server.version>
         <validation.version>1.0-SNAPSHOT</validation.version>
     </properties>
@@ -37,6 +38,11 @@
             <groupId>com.duangframework.rpc</groupId>
             <artifactId>duang-rpc</artifactId>
             <version>${rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.duangframework.mq</groupId>
+            <artifactId>duang-mq</artifactId>
+            <version>${mq.version}</version>
         </dependency>
         <dependency>
             <groupId>com.duangframework.validation</groupId>

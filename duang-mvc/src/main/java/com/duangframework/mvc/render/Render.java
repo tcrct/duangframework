@@ -6,7 +6,7 @@ import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.common.dto.result.ReturnDto;
-import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.PropertiesKit;
 
 import java.io.Serializable;
 
@@ -15,7 +15,7 @@ public abstract class Render implements Serializable {
 	
 	private static final long serialVersionUID = -8406693915721288408L;
 	protected static final String _DUANG_BACKDOOR_PWD_  = "laotang";
-	protected  static final String ENCODING = ConfigKit.duang().key("encoding").defaultValue("UTF-8").asString();
+	protected  static final String ENCODING = PropertiesKit.duang().key("encoding").defaultValue("UTF-8").asString();
 	protected transient IRequest request;
 	protected transient IResponse response;
 	protected Object obj;

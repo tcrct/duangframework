@@ -7,14 +7,27 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.duangframework.core</groupId>
-    <artifactId>duang-core</artifactId>
+    <groupId>com.duangframework.config</groupId>
+    <artifactId>duang-config</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-core</name>
+    <name>duang-config</name>
     <url>http://maven.apache.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.duangframework.core</groupId>
+            <artifactId>duang-core</artifactId>
+            <version>${core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.duangframework.zookeeper</groupId>
+            <artifactId>duang-zookeeper</artifactId>
+            <version>${zk.version}</version>
+        </dependency>
+    </dependencies>
 </project>

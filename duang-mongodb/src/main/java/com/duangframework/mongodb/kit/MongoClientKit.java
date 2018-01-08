@@ -1,7 +1,7 @@
 package com.duangframework.mongodb.kit;
 
 import com.duangframework.core.exceptions.EmptyNullException;
-import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mongodb.common.MongoConnect;
 import com.mongodb.*;
@@ -20,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class MongoClientKit {
 
-    private static Logger logger = LoggerFactory.getLogger(ConfigKit.class);
+    private static Logger logger = LoggerFactory.getLogger(PropertiesKit.class);
 
     private static MongoClientKit _mongoClientKit;
     private static Lock _mongoClientKitLock = new ReentrantLock();

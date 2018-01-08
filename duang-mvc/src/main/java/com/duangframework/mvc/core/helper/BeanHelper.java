@@ -4,7 +4,7 @@ import com.duangframework.core.annotation.aop.Proxy;
 import com.duangframework.core.common.aop.ProxyManager;
 import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.interfaces.IProxy;
-import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
@@ -33,8 +33,8 @@ public class BeanHelper {
         //扫描指定包路径下的类文件，类文件包含有指定的注解类或文件名以指定的字符串结尾的
         Map<String, List<Class<?>>> classMap =  ClassScanKit.duang()
                 .annotations(InstanceFactory.MVC_ANNOTATION_SET)
-                .packages(ConfigKit.duang().key("base.package.path").asString())
-                .jarname(ConfigKit.duang().key("jar.prefix").asString())
+                .packages(PropertiesKit.duang().key("base.package.path").asString())
+                .jarname(PropertiesKit.duang().key("jar.prefix").asString())
                 // 增加MVC固定扫描的包路径
                 .packages(AbstractProxy.class.getPackage().getName())
                 .map();

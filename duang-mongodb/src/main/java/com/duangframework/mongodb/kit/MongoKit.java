@@ -3,7 +3,7 @@ package com.duangframework.mongodb.kit;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.MongodbException;
-import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.common.MongoConnect;
@@ -27,7 +27,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class MongoKit {
 
-    private static Logger logger = LoggerFactory.getLogger(ConfigKit.class);
+    private static Logger logger = LoggerFactory.getLogger(PropertiesKit.class);
 
     private static MongoKit _mongoKit;
     private static Lock _mongoKitLock = new ReentrantLock();

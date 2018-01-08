@@ -18,6 +18,7 @@
         <cglib.version>3.1</cglib.version>
         <configuration.version>1.10</configuration.version>
         <core.version>1.0-SNAPSHOT</core.version>
+        <zk.version>1.0-SNAPSHOT</zk.version>
     </properties>
 
 
@@ -101,6 +102,7 @@
         <module>duang-zookeeper</module>
         <module>duang-mq</module>
         <module>duang-validation</module>
+        <module>duang-config</module>
     </modules>
 
     <dependencies>

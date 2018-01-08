@@ -1,7 +1,6 @@
 package com.duangframework.mysql.common;
 
 import com.duangframework.core.common.DBConnect;
-import com.duangframework.mysql.common.IConnect;
 
 /**
  * Created by laotang on 2017/11/25 0025.

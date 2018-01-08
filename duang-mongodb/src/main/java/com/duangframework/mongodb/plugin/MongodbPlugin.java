@@ -2,7 +2,7 @@ package com.duangframework.mongodb.plugin;
 
 import com.duangframework.core.annotation.ioc.Import;
 import com.duangframework.core.interfaces.IPlugin;
-import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
 import com.duangframework.core.utils.ClassUtils;
@@ -32,12 +32,12 @@ public class MongodbPlugin implements IPlugin {
     @Override
     public void start() throws Exception {
         MongoClientKit.duang().connect(new MongoConnect(
-                ConfigKit.duang().key("mongodb.host").defaultValue("127.0.0.1").asString(),
-                ConfigKit.duang().key("mongodb.port").defaultValue("27017").asInt(),
-                ConfigKit.duang().key("mongodb.databasename").defaultValue("local").asString(),
-                ConfigKit.duang().key("mongodb.username").defaultValue("").asString(),
-                ConfigKit.duang().key("mongodb.password").defaultValue("").asString(),
-                ConfigKit.duang().key("mongodb.replicaset").asList()
+                PropertiesKit.duang().key("mongodb.host").defaultValue("127.0.0.1").asString(),
+                PropertiesKit.duang().key("mongodb.port").defaultValue("27017").asInt(),
+                PropertiesKit.duang().key("mongodb.databasename").defaultValue("local").asString(),
+                PropertiesKit.duang().key("mongodb.username").defaultValue("").asString(),
+                PropertiesKit.duang().key("mongodb.password").defaultValue("").asString(),
+                PropertiesKit.duang().key("mongodb.replicaset").asList()
         )).getClient();
 
         importDao();

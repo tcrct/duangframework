@@ -1,7 +1,7 @@
-package com.duangframework.core.kit;
+package com.duangframework.config.kit;
 
-import com.duangframework.core.common.Properties;
-import org.apache.commons.configuration.Configuration;
+import com.duangframework.config.core.ConfigFactory;
+import com.duangframework.core.interfaces.IConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +11,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * 解释duang.properties文件
  * 用作整个系统的配置
  * @author laotang
  * @date 2017/11/16 0016
@@ -22,7 +21,7 @@ public class ConfigKit {
 
     private static ConfigKit _configKit;
     private static Lock _configKitLock = new ReentrantLock();
-    private static Configuration _configuration;
+    private static IConfig _configuration;
     private static String _key;
     private static Object _defaultValue;
 
@@ -31,7 +30,7 @@ public class ConfigKit {
             try {
                 _configKitLock.lock();
                 _configKit = new ConfigKit();
-                _configuration = Properties.init();
+                _configuration = ConfigFactory.getClient();
             } catch (Exception e) {
                 logger.warn(e.getMessage(), e);
             } finally {
@@ -61,13 +60,19 @@ public class ConfigKit {
     }
 
     public String asString() {
-        return _configuration.getString(_key, _defaultValue+"");
+        try {
+            return _configuration.getString(_key, _defaultValue+"");
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+            return null;
+        }
     }
 
     public int asInt() {
         try {
             return _configuration.getInt(_key, Integer.parseInt(_defaultValue + ""));
         } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
             return -1;
         }
     }
@@ -76,6 +81,7 @@ public class ConfigKit {
         try {
             return _configuration.getLong(_key, Long.parseLong(_defaultValue + ""));
         } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
             return -1L;
         }
     }
@@ -84,6 +90,7 @@ public class ConfigKit {
         try {
             return _configuration.getDouble(_key, Double.parseDouble(_defaultValue + ""));
         } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
             return -1d;
         }
     }
@@ -92,19 +99,16 @@ public class ConfigKit {
         try {
             return _configuration.getStringArray(_key);
         } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
             return null;
         }
     }
 
     public List<String> asList() {
         try {
-            List<Object> objectList =  _configuration.getList(_key, new ArrayList());
-            List<String> resultList = new ArrayList<>(objectList.size());
-            for(Object object : objectList) {
-                resultList.add(object+"");
-            }
-            return resultList;
+            return  _configuration.getList(_key, new ArrayList());
         } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
             return null;
         }
     }

@@ -5,15 +5,13 @@ import com.duangframework.core.common.Const;
 import com.duangframework.core.common.DuangId;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.RpcException;
-import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.IpUtils;
 import com.duangframework.rpc.common.RpcAction;
-import com.duangframework.zookeeper.kit.ZooKit;
 import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.security.krb5.Config;
 
 import java.util.*;
 
@@ -32,7 +30,7 @@ public class RpcUtils {
      * @return
      */
     public static String getHost() {
-        return ConfigKit.duang().key("rpc.host").defaultValue("0.0.0.0").asString();
+        return PropertiesKit.duang().key("rpc.host").defaultValue("0.0.0.0").asString();
     }
 
     /**
@@ -40,7 +38,7 @@ public class RpcUtils {
      * @return
      */
     public static int getPort() {
-        return ConfigKit.duang().key("rpc.port").defaultValue(9091).asInt();
+        return PropertiesKit.duang().key("rpc.port").defaultValue(9091).asInt();
     }
 
     /**
@@ -48,7 +46,7 @@ public class RpcUtils {
      * @return
      */
     public static String getProductCode() {
-        String productCode = ConfigKit.duang().key("product.code").asString();
+        String productCode = PropertiesKit.duang().key("product.code").asString();
         if(ToolsKit.isEmpty(productCode)) {
             throw new EmptyNullException("product.code is null");
         }
@@ -106,7 +104,7 @@ public class RpcUtils {
      * @return
      */
     public static Map<String, List<RpcAction>> getAssignRpcActionMap(Map<String, List<RpcAction>> actionMap) {
-        String[] endPortArray = ConfigKit.duang().key("rpc.endport").asArray(); //endport的格式为 ip:port,
+        String[] endPortArray = PropertiesKit.duang().key("rpc.endport").asArray(); //endport的格式为 ip:port,
         if(ToolsKit.isEmpty(endPortArray)) { return null; }
         List endPortList = Arrays.asList(endPortArray);
         Map<String, List<RpcAction>> newActionMap = new HashMap<String, List<RpcAction>>();
@@ -163,7 +161,7 @@ public class RpcUtils {
     public static void autoCreateBatchInterface() throws Exception {
         try {
             // 自定义目录
-            String customizeDir = ConfigKit.duang().key("rpc.module.customdir").defaultValue("provider").asString();
+            String customizeDir = PropertiesKit.duang().key("rpc.module.customdir").defaultValue("provider").asString();
             AutoBuildServiceInterface.createBatchInterface(RpcUtils.getRpcModulePath(customizeDir), customizeDir);
         } catch (Exception e) {
             throw new RpcException(e.getMessage(), e);
@@ -198,7 +196,7 @@ public class RpcUtils {
      * @return
      */
     public static String getRpcModulePath(String customizeDir) {
-        String rpcModulePath = ConfigKit.duang().key("rpc.module.path").asString();
+        String rpcModulePath = PropertiesKit.duang().key("rpc.module.path").asString();
         rpcModulePath = rpcModulePath.endsWith("/") ? rpcModulePath.substring(0, rpcModulePath.length()-1) : rpcModulePath;
         return rpcModulePath + "/" +getRpcPackagePath("").replace(".","/")+(ToolsKit.isNotEmpty(customizeDir) ? "/" +customizeDir  : "");
     }
@@ -206,7 +204,7 @@ public class RpcUtils {
 
     public static String getRpcPackagePath(String flag) {
         if(ToolsKit.isEmpty(RPC_PACKAGE_PATH)) {
-            String basePackagePath = ConfigKit.duang().key("base.package.path").asString();
+            String basePackagePath = PropertiesKit.duang().key("base.package.path").asString();
             Package[] pkgs = Package.getPackages();
             for (Package pkg : pkgs) {
                 if (pkg.getName().contains(basePackagePath)) {

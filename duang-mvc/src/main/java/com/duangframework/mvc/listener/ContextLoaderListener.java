@@ -2,7 +2,7 @@ package com.duangframework.mvc.listener;
 
 import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
-import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.IDuang;
@@ -91,7 +91,7 @@ public class ContextLoaderListener implements IContextLoaderListener{
      * @throws Exception
      */
     private void initContext()  throws Exception {
-        String configClass = ConfigKit.duang().key("mvc.config").asString();
+        String configClass = PropertiesKit.duang().key("mvc.config").asString();
         if (ToolsKit.isEmpty(configClass)) {
             throw new MvcStartUpException("IDuang子类路径不能为空!");
         }

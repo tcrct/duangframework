@@ -5,7 +5,7 @@ import com.duangframework.core.annotation.rpc.Rpc;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.RpcException;
 import com.duangframework.core.interfaces.IRpc;
-import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
@@ -143,7 +143,7 @@ public class AutoBuildServiceInterface {
         sb.append("*  @author duangframework\n");
         sb.append("*  @since 1.0\n");
         sb.append("*/\n");
-        sb.append("@Rpc(service=\""+clsName+"\", productcode=\""+ ConfigKit.duang().key("product.code").defaultValue("dunagdunagduang").asString()+"\")\n");
+        sb.append("@Rpc(service=\""+clsName+"\", productcode=\""+ PropertiesKit.duang().key("product.code").defaultValue("dunagdunagduang").asString()+"\")\n");
         sb.append("public interface ").append(fileName).append(" extends IRpc {\n\n");
         sb.append(body);
         sb.append("}");
