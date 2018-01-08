@@ -25,6 +25,9 @@ public class ZkConfigClient extends AbstractConfig {
         init();
     }
 
+    /**
+     * 将配置内容初始化为Map集合
+     */
     @Override
     public void init() {
         try {
