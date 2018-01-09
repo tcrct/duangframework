@@ -80,7 +80,9 @@ public class ConfigPlugin implements IPlugin {
     @Override
     public void start() throws Exception {
         // 启动时创建枚举文件
-        ConfigFactory.init(clientClassName, enumsFilePath, containerPath, nodeNameSet);
+        if(!ToolsKit.isAliyunHost()) {
+            ConfigFactory.init(clientClassName, enumsFilePath, containerPath, nodeNameSet);
+        }
     }
 
     @Override
