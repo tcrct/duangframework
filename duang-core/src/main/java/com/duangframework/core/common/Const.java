@@ -55,4 +55,29 @@ public class Const {
      */
     public static final String DUANG_INPUTSTREAM_STR_NAME = "dunag_inputstream_str";
 
+
+    /**
+     * 配置中心客户端类名，全路径
+     */
+    public static final String CONFIG_CLIENTCLASS_NAME= "config.client.name";
+
+    /**
+     * 配置中心容器路径，即注册中心的父目录
+     */
+    public static final String CONFIG_CONTAINER_PATH= "config.container.path";
+
+    /**
+     * 配置中心枚举文件全路径
+     */
+    public static final String CONFIG_ENUMS_PATH= "config.enums.path";
+
+    /**
+     * 默认的注册中心父目录路径
+     */
+    public static final String CONFIG_CONTAINER_PATH_VALUE = "";
+
+    /**
+     * 节点名称，与上面的父目录路径组合成一个完成的路径
+     */
+    public static final String CONFIG_NODENAMES = "config.node.names";
 }

@@ -2,8 +2,8 @@ package com.duangframework.mvc.listener;
 
 import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
-import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ObjectKit;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.IDuang;
 import com.duangframework.mvc.core.InstanceFactory;
@@ -15,8 +15,6 @@ import com.duangframework.mvc.handles.Handles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -116,18 +114,18 @@ public class ContextLoaderListener implements IContextLoaderListener{
         Handles.init();
         logger.warn("instance " + duangFrameword.getClass().getName() + " success!");
 
-        long halfTimeOut = 10000L;
-        new Timer().schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        contextDestroyed();
-                        contextInitialized();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-        }, halfTimeOut, halfTimeOut);
+//        long halfTimeOut = 10000L;
+//        new Timer().schedule(new TimerTask() {
+//                @Override
+//                public void run() {
+//                    try {
+//                        contextDestroyed();
+//                        contextInitialized();
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//        }, halfTimeOut, halfTimeOut);
 
     }
 }

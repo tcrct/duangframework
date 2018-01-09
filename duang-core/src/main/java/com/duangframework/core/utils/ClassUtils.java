@@ -5,9 +5,9 @@ import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,9 +32,24 @@ public class ClassUtils {
         return Thread.currentThread().getContextClassLoader();
     }
 
-    // TODO 完成构造函数反射创建
-    public static <T> T newInstance(Class<?> clazz, Object[] value, Class[] typeRef) {
-        return  null;
+    /**
+     * 通过反射构造函数创建实例
+     * @param className             类名
+     * @param values                    参数值
+     * @param parameterTypes     参数属性
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstance(String className, Object[] values, Class<?>... parameterTypes ) {
+        T instance;
+        try {
+            Class<?> commandClass = Class.forName(className);
+            Constructor<?> constructor = commandClass.getConstructor(parameterTypes);
+            instance = (T) constructor.newInstance(values);
+        } catch (Exception e) {
+            logger.error("创建实例出错！", e);
+            throw new RuntimeException(e);
+        }
+        return instance;
     }
 
     public static <T> T newInstance(Class<?> clazz) {

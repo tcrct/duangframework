@@ -8,6 +8,11 @@ import java.util.List;
 public interface IConfig {
 
     /**
+     * 将配置内容初始化为Map集合
+     */
+    void initValue2Map();
+
+    /**
      * 取String字符串值
      * @param key                   关键字
      * @param defaultValue   默认值

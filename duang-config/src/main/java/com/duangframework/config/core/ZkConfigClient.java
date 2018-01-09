@@ -1,35 +1,38 @@
 package com.duangframework.config.core;
 
-import com.alibaba.fastjson.JSONArray;
+import com.duangframework.config.utils.ConfigUtils;
 import com.duangframework.core.exceptions.EmptyNullException;
-import com.duangframework.core.interfaces.IConfig;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.zookeeper.kit.ZooKit;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by laotang on 2018/1/8.
  */
 public class ZkConfigClient extends AbstractConfig {
 
+    private String enumsFilePath;
     private String zkParentPath;
     private Set<String> nodeNames;
 
     private ZkConfigClient() {
     }
 
-    public ZkConfigClient(String zkParentPath, Set<String> nodeNames) {
+    public ZkConfigClient(String enumsFilePath, String zkParentPath, Set<String> nodeNames) {
+        this.enumsFilePath = enumsFilePath;
         this.zkParentPath = zkParentPath;
         this.nodeNames = nodeNames;
-        init();
     }
 
     /**
      * 将配置内容初始化为Map集合
      */
     @Override
-    public void init() {
+    public void initValue2Map() {
         try {
             for(String nodeName : nodeNames) {
                 String zkPath = zkParentPath + "/" + nodeName;
@@ -43,11 +46,10 @@ public class ZkConfigClient extends AbstractConfig {
                 }
                 for(Iterator<Map.Entry<String,Object>> it = valueTmpMap.entrySet().iterator(); it.hasNext();) {
                     Map.Entry<String,Object> entry = it.next();
-                    String key = nodeName +"_" + entry.getKey();
-                    VALUE_MAP.put(key, entry.getValue());
+                    VALUE_MAP.put(ConfigUtils.createMapKey(nodeName, entry.getKey()), entry.getValue());
                 }
                 // 创建枚举文件
-                createNumsFile();
+                ConfigUtils.createNumsFile(enumsFilePath, VALUE_MAP);
             }
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);

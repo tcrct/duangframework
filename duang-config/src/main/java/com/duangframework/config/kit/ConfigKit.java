@@ -1,6 +1,7 @@
 package com.duangframework.config.kit;
 
 import com.duangframework.config.core.ConfigFactory;
+import com.duangframework.core.common.enums.IConfigKeyEnums;
 import com.duangframework.core.interfaces.IConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,13 @@ public class ConfigKit {
         _key = key;
         return this;
     }
+
+    public ConfigKit key(IConfigKeyEnums keyEnums) {
+        _key = keyEnums.getValue();
+        return this;
+    }
+
+
 
     public ConfigKit defaultValue(Object defaultValue) {
         _defaultValue = defaultValue;
