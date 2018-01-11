@@ -6,6 +6,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.DuangId;
+import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.utils.DuangThreadLocal;
 import com.duangframework.core.utils.IpUtils;
@@ -32,10 +33,11 @@ public class ToolsKit {
 
     private static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
-    // 定义一个IdEntity安全线程类
-    private static DuangThreadLocal<String> duangIdThreadLocal = new DuangThreadLocal<String>() {
-        public String initialValue() {
-            return "";
+    // 定义一个请求对象安全线程类
+    private static DuangThreadLocal<HeadDto> requestHeaderThreadLocal = new DuangThreadLocal<HeadDto>() {
+        @Override
+        public HeadDto initialValue() {
+            return new HeadDto();
         }
     };
 
@@ -275,12 +277,20 @@ public class ToolsKit {
     }
 
 
-    public static void setRequestId(String objectId) {
-        duangIdThreadLocal.set(objectId);
+    /**
+     * 设置请求头DTO到ThreadLocal变量
+     * @param headDto       请求头DTO
+     */
+    public static void setThreadLocalDto(HeadDto headDto) {
+        requestHeaderThreadLocal.set(headDto);
     }
 
-    public static String getRequestId() {
-        return duangIdThreadLocal.get();
+    /**
+     *  取ThreadLocal里的HeadDto对象
+     * @return
+     */
+    public static HeadDto getThreadLocalDto() {
+        return  requestHeaderThreadLocal.get();
     }
 
 }

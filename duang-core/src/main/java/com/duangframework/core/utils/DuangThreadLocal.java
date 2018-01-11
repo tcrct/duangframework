@@ -4,7 +4,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DuangThreadLocal<T> {
+/**
+ * @author laotang
+ */
+public abstract  class DuangThreadLocal<T> {
 
 	private Map<Thread, T> duangThreadLocalMap = Collections.synchronizedMap(new HashMap<Thread, T>());
 	private final static int MAX_THREAD_NUMBER = 10;
@@ -37,8 +40,6 @@ public class DuangThreadLocal<T> {
 		}
 	}
 
-	protected T initialValue() {
-		return null;
-	}
+	protected abstract T initialValue() ;
 
 }

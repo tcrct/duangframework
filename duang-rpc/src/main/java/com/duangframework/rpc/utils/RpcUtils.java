@@ -89,7 +89,7 @@ public class RpcUtils {
      * @return
      */
     public static String getRequestId() {
-        String requestId = ToolsKit.getRequestId();
+        String requestId = ToolsKit.getThreadLocalDto().getRequestId();
         if(ToolsKit.isEmpty(requestId)) {
             //已经出错,但为了程序正常运行，只有NEW一个新的ID
             requestId = new DuangId().toString();

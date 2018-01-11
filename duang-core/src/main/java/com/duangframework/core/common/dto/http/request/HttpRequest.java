@@ -6,6 +6,7 @@ package com.duangframework.core.common.dto.http.request;
  * @date 2017/11/4
  */
 
+import com.duangframework.core.common.dto.http.head.HttpHeaders;
 import com.duangframework.core.kit.ToolsKit;
 
 import java.io.ByteArrayInputStream;
@@ -90,7 +91,7 @@ public class HttpRequest implements IRequest {
 
     @Override
     public String getContentType() {
-        return headers.get("content-type");
+        return headers.get(HttpHeaders.CONTENT_TYPE);
     }
 
     @Override
@@ -169,6 +170,11 @@ public class HttpRequest implements IRequest {
     @Override
     public Enumeration<String> getHeaderNames() {
         return new Vector(headers.keySet()).elements();
+    }
+
+    @Override
+    public Map<String, String> getHeaderMap() {
+        return headers;
     }
 
     @Override

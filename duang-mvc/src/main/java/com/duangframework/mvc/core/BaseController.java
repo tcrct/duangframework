@@ -65,6 +65,11 @@ public abstract class BaseController {
     }
 
     /**
+     * 设置请求信息到
+     */
+
+
+    /**
      * 取出请求日期时间
      * @return
      */

@@ -76,4 +76,6 @@ public interface IRequest {
 
     StringBuffer getRequestURL();
 
+    Map<String,String> getHeaderMap();
+
 }

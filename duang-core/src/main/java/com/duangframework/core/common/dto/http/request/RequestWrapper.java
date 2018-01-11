@@ -198,4 +198,9 @@ public class RequestWrapper implements IRequest {
             return null;
         }
     }
+
+    @Override
+    public Map<String, String> getHeaderMap() {
+        return headers;
+    }
 }

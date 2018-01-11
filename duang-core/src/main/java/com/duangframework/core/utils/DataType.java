@@ -207,7 +207,7 @@ public final class DataType {
             if(null != valueArray && valueArray.length ==1) {
                 Object valueItem = valueArray[0];
                 if (valueItem != null && valueItem.getClass().isArray()) {
-                    int arrayLength = Array.getLength(value);
+                    int arrayLength = Array.getLength(valueItem);
                     Object[] objects = new Object[arrayLength];
                     for (int i = 0; i < arrayLength; ++i) {
                         objects[i] = Array.get(valueItem, i);

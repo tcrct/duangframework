@@ -1,5 +1,7 @@
 package com.duangframework.core.common.dto.result;
 
+import java.util.Map;
+
 /**
  *	手机访问后返回的信息头,每一个dto对象须包含
  */
@@ -9,12 +11,11 @@ public class HeadDto implements java.io.Serializable {
 	
 	private int ret;
 	private String msg;
+    private String uri;
 	private String token;
-	private String uri;
-	private String method;
 	private long timestamp = System.currentTimeMillis();
 	private String requestId;
-	private String clientId;
+    private Map<String, String> headerMap ;
 	
 	public HeadDto(){
 		
@@ -38,15 +39,13 @@ public class HeadDto implements java.io.Serializable {
 		this.uri = uri;
 	}
 	
-	public HeadDto(int ret, String msg, String token, String uri, String method, long timestamp, String requestId, String clientId){
+	public HeadDto(int ret, String msg, String token, long timestamp, String requestId, Map<String,String> headerMap){
 		this.ret = ret;
 		this.msg = msg;
 		this.token = token;
-		this.uri = uri;
-		this.method = method;
 		this.timestamp = timestamp;
 		this.requestId = requestId;
-		this.clientId = clientId;
+		this.headerMap = headerMap;
 	}
 	
 	
@@ -70,22 +69,6 @@ public class HeadDto implements java.io.Serializable {
 		this.token = token;
 	}
 
-	public String getUri() {
-		return uri;
-	}
-
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
-
-	public String getMethod() {
-		return method;
-	}
-
-	public void setMethod(String method) {
-		this.method = method;
-	}
-
 	public long getTimestamp() {
 		return timestamp;
 	}
@@ -102,11 +85,18 @@ public class HeadDto implements java.io.Serializable {
 		this.requestId = requestId;
 	}
 
-	public String getClientId() {
-		return clientId;
-	}
+    public Map<String, String> getHeaderMap() {
+        return headerMap;
+    }
 
-	public void setClientId(String clientId) {
-		this.clientId = clientId;
-	}
+    public void setHeaderMap(Map<String, String> headerMap) {
+        this.headerMap = headerMap;
+    }
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 }
