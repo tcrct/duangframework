@@ -1,0 +1,52 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>duangframework</artifactId>
+        <groupId>com.duangframework</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.duangframework.log</groupId>
+    <artifactId>duang-log</artifactId>
+    <packaging>jar</packaging>
+
+    <name>duang-log</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <aliyunlog.version>0.6.8</aliyunlog.version>
+        <protobuf.version>2.5.0</protobuf.version>
+        <loghub.version>0.1.8</loghub.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.duangframework.core</groupId>
+            <artifactId>duang-core</artifactId>
+            <version>${core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun.openservices</groupId>
+            <artifactId>aliyun-log</artifactId>
+            <version>${aliyunlog.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun.openservices</groupId>
+            <artifactId>log-loghub-producer</artifactId>
+            <version>${loghub.version}</version>
+        </dependency>
+    </dependencies>
+</project>

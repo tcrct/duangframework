@@ -463,7 +463,7 @@ public abstract class BaseController {
                 String paramsJson = ToolsKit.toJsonString(getAllParams());
                 t = ToolsKit.jsonParseObject(paramsJson, tClass);
             }
-            // 默认开启验证
+            // 开启验证
             if(isValidator) {
                 ValidatorFactory.validator(t);
             }

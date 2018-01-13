@@ -80,4 +80,9 @@ public class Const {
      * 节点名称，与上面的父目录路径组合成一个完成的路径
      */
     public static final String CONFIG_NODENAMES = "config.node.names";
+
+
+    public final static String FORWARDED_FOR= "X-Forwarded-For";
+    public final static String FORWARDED_PROTO = "X-Forwarded-Proto";
+    public final static String REAL_IP = "X-Real-IP";
 }

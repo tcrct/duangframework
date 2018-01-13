@@ -1,3 +1,12 @@
+/**
+ * FileName:     AutoBuildServiceInterface.java
+ * All rights Reserved,
+ * Copyright:    Copyright(C) 2010-2017
+ * Company       sythealth
+ *
+ * @author: laotang
+ * Createdate:  2017/12/2217:08
+ */
 package com.duangframework.rpc.utils;
 
 import com.duangframework.core.annotation.mvc.Service;
@@ -31,6 +40,7 @@ import java.util.*;
  * 自动创建所有Service类的接口类文件
  * @author Created by laotang
  * @date on 2017/12/22.
+ * @since 1.0
  */
 public class AutoBuildServiceInterface {
 
@@ -89,8 +99,6 @@ public class AutoBuildServiceInterface {
             }
             // Service接口名
             String fileName = "I"+clazz.getSimpleName();
-            // 创建包路径
-//            String packageStr = createPackagePath(ToolsKit.isEmpty(packagePath) ? interFaceDirPath : packagePath);
             // 创建接口类内容
             String fileContext = createInterfaceContextString(clazz.getName(), fileName, packagePath, sb.toString());
 
@@ -110,6 +118,14 @@ public class AutoBuildServiceInterface {
         }
     }
 
+    /**
+     * 创建接口文件到指定目录下
+     * @param interFaceFilePath     接口文件存放的目录地址
+     * @param fileName  文件名
+     * @param fileContext       文件内容
+     * @return
+     * @throws Exception
+     */
     public static File createInterFaceFileOnDisk(String interFaceFilePath, String fileName, String fileContext) throws Exception {
         interFaceFilePath = interFaceFilePath.endsWith("/") ? interFaceFilePath.substring(0, interFaceFilePath.length()-1) : interFaceFilePath;
         interFaceFilePath = interFaceFilePath + "/"+ (fileName.endsWith(".java") ? fileName : fileName+".java");
@@ -123,6 +139,11 @@ public class AutoBuildServiceInterface {
         return interFaceFile;
     }
 
+    /**
+     * 创建包路径
+     * @param path
+     * @return
+     */
     private static String createPackagePath(String path) {
         int startIndex = path.contains("com") ? path.indexOf("com") : 0;
         path = path.substring(startIndex, path.length());
@@ -130,6 +151,14 @@ public class AutoBuildServiceInterface {
         return file.getPath().replace(File.separator, ".");
     }
 
+    /**
+     * 创建文件内容
+     * @param clsName           Service类文件名
+     * @param fileName          接口类文件名
+     * @param packagePath     包路径
+     * @param body                  文件内容
+     * @return
+     */
     private static String createInterfaceContextString(String clsName, String fileName, String packagePath, String body) {
         StringBuilder sb = new StringBuilder();
         String rpcPackage = Rpc.class.getName();
@@ -150,6 +179,12 @@ public class AutoBuildServiceInterface {
         return sb.toString();
     }
 
+    /**
+     * 构建方法内容字符串，包括方法名，参数名<br/>
+     * @param method                 方法对象
+     * @param variableNames      参数集合
+     * @return
+     */
     private static String toGenericString(Method method, List<String> variableNames)  {
         try {
             StringBuilder sb = new StringBuilder();
@@ -170,16 +205,15 @@ public class AutoBuildServiceInterface {
                 }
                 sb.append("> ");
             }
+            // 方法的返回类型
             Type genRetType = method.getGenericReturnType();
-            sb.append(((genRetType instanceof Class<?>) ? getTypeName((Class<?>) genRetType) : genRetType.toString()))
-                    .append(" ");
-
+            sb.append(((genRetType instanceof Class<?>) ? getTypeName((Class<?>) genRetType) : genRetType.toString())).append(" ");
             sb.append(getTypeName(method.getDeclaringClass())).append(".");
             sb.append(method.getName()).append("(");
             Type[] params = method.getGenericParameterTypes();
             if(ToolsKit.isNotEmpty(params)) {
                 for (int j = 0; j < params.length; j++) {
-                    String param = (params[j] instanceof Class) ? getTypeName((Class) params[j]) : (params[j].toString());
+                    String param = (params[j] instanceof Class) ? getTypeName((Class) params[j]) : params[j].toString();
                     if (method.isVarArgs() && (j == params.length - 1)) {
                         param = param.replaceFirst("\\[\\]$", "...");
                     }
@@ -207,6 +241,13 @@ public class AutoBuildServiceInterface {
         }
     }
 
+    /**
+     * 反射取出方法里的参数名
+     * @param cc                类对象
+     * @param method        方法名
+     * @return      方法名集合
+     * @throws Exception
+     */
     private static List<String> getLocalVariableAttributeName(CtClass cc, Method method)  throws Exception {
         List<String> paramNames = null;
         try {
@@ -228,6 +269,12 @@ public class AutoBuildServiceInterface {
         return paramNames;
     }
 
+    /**
+     * 根据参数类型取出参数类型名称字符串
+     * @param type      参数类型
+     * @return
+     * @throws Exception
+     */
     private static String getTypeName(Class<?> type)  throws Exception {
         if (type.isArray()) {
             try {
