@@ -62,7 +62,7 @@ public class JedisPoolUtils {
         }
     }
     
-    public boolean isSuccess() {
+    public static boolean isSuccess() {
 		return ToolsKit.isNotEmpty(pool);
 	}
 

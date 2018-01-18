@@ -2,7 +2,7 @@ package com.duangframework.cache.plugin;
 
 import com.duangframework.cache.sdk.redis.RedisClient;
 import com.duangframework.cache.sdk.redis.RedisClusterClient;
-import com.duangframework.cache.utils.JedisClusterUtils;
+import com.duangframework.cache.utils.JedisClusterPoolUtils;
 import com.duangframework.cache.utils.JedisPoolUtils;
 import com.duangframework.core.interfaces.IPlugin;
 
@@ -59,7 +59,7 @@ public class CachePlugin implements IPlugin {
         if(!isClusterRedis) {
             JedisPoolUtils.getJedis();
         } else {
-            JedisClusterUtils.getJedisCluster();
+            JedisClusterPoolUtils.getJedisCluster();
         }
     }
 
@@ -68,7 +68,7 @@ public class CachePlugin implements IPlugin {
         if(!isClusterRedis) {
             JedisPoolUtils.close();
         } else {
-            JedisClusterUtils.close();
+            JedisClusterPoolUtils.close();
         }
     }
 }

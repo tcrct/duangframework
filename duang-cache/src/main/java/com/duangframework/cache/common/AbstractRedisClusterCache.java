@@ -7,13 +7,13 @@ import redis.clients.jedis.JedisCluster;
  * @author Created by laotang
  * @date createed in 2018/1/17.
  */
-public abstract class AbstractRedisICache<T> implements ICacheAction<T> {
+public abstract class AbstractRedisClusterCache<T> implements ICacheAction<T> {
 
     @Override
-    public abstract T execute(Jedis jedis);
-
-    @Override
-    public T execute(JedisCluster jedisCluster) {
+    public T execute(Jedis jedis) {
         return null;
     }
+
+    @Override
+    public abstract T execute(JedisCluster jedisCluster);
 }

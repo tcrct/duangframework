@@ -20,9 +20,9 @@ import java.util.Set;
 /**
  * @author laotang
  */
-public class JedisClusterUtils {
+public class JedisClusterPoolUtils {
 
-    private static Logger logger      = LoggerFactory.getLogger(JedisClusterUtils.class);
+    private static Logger logger      = LoggerFactory.getLogger(JedisClusterPoolUtils.class);
 
     private static JedisCluster jedisCluster = null;
     private static Map<String, String> map         = null;
@@ -59,6 +59,10 @@ public class JedisClusterUtils {
             e.printStackTrace();
             logger.info("初始化 redis 出错啦...");
         }
+    }
+
+    public static boolean isSuccess() {
+        return ToolsKit.isNotEmpty(jedisCluster);
     }
     
     private static String[] getClusterIps() {

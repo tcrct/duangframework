@@ -65,7 +65,7 @@ public class JsonDecoder extends AbstractDecoder<Map<String, String[]>> {
             if(ToolsKit.isNotEmpty(value)) {
                 if (ToolsKit.isArray(value)) {
                     JSONArray jsonArray = (JSONArray) entry.getValue();
-                    List<String> valueList = jsonArray.toJavaList(String.class);
+                    List<String> valueList = jsonArray.toJavaObject(List.class); //.toJavaList(String.class);
                         /*
                         List<String> valueList = new ArrayList(jsonArray.size());
                         for(Iterator<Object> iterator = jsonArray.iterator(); iterator.hasNext();) {

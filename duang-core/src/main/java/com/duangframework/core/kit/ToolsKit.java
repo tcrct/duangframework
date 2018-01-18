@@ -1,6 +1,7 @@
 package com.duangframework.core.kit;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
@@ -140,6 +141,10 @@ public class ToolsKit {
 
     public static <T> T jsonParseObject(String jsonText, Type typeClazz) {
         return JSON.parseObject(jsonText, typeClazz);
+    }
+
+    public static <T> T jsonParseObject(String jsonText, TypeReference<T> typeReference) {
+        return JSON.parseObject(jsonText, typeReference);
     }
 
     public static <T> List<T> jsonParseArray(String jsonText, Class<T> clazz) {

@@ -20,7 +20,7 @@ public class Handles {
     private static Logger logger = LoggerFactory.getLogger(Handles.class);
 
     public static void init() {
-//        InstanceFactory.getHandles().add(0, new InitHandle());
+        InstanceFactory.getHandles().add(0, new initHandle());
         // 添加ActionHandle，在其它的Handle后
         InstanceFactory.getHandles().add(new ActionHandle());
 

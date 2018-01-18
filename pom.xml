@@ -104,6 +104,8 @@
         <module>duang-validation</module>
         <module>duang-config</module>
         <module>duang-log</module>
+        <module>duang-cache</module>
+        <module>duang-rule</module>
     </modules>
 
     <dependencies>

@@ -52,7 +52,7 @@ public class AsyncContextThreadImpl extends AbstractAsyncContext {
             // 中止线程，参数为true时，会中止正在运行的线程，为false时，如果线程未开始，则停止运行
             futureTask.cancel(true);
         } catch (Exception  e) {
-            System.out.println(e.getCause().getClass().getName() + "###################e.getMessage():  " + e.getMessage());
+            logger.warn(e.getMessage(),e);
             response = buildExceptionResponse(e.getMessage());
         }
         return response;

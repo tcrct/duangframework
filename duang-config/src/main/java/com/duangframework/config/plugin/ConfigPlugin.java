@@ -43,7 +43,7 @@ public class ConfigPlugin implements IPlugin {
     /**
      * 构造函数
      * @param clientClassName       客户类名
-     * @param enumsFilePath             枚举文件目录地址
+     * @param enumsFilePath             本地枚举文件目录地址
      * @param containerPath             注册中心父目录
      * @param nodeNameSet           节点集合
      */

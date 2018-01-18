@@ -12,7 +12,7 @@ import redis.clients.jedis.JedisCluster;
  * @author Created by laotang
  * @date createed in 2018/1/17.
  */
-public class AbstractRedisClient  implements ICache<ICacheAction> {
+public abstract class AbstractRedisClient  implements ICache<ICacheAction> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractRedisClient.class);
 
@@ -68,8 +68,8 @@ public class AbstractRedisClient  implements ICache<ICacheAction> {
     @Override
     public <T> T call(ICacheAction cacheAction) {
         T result = null;
-        if(cacheAction instanceof AbstractRedisICache) {
-            logger.info("##############AbstractRedisICache");
+        if(cacheAction instanceof AbstractRedisCache) {
+            logger.info("##############AbstractRedisCache");
             Jedis jedis = JedisPoolUtils.getJedis();
             try {
                 result = (T) cacheAction.execute(jedis);
@@ -79,8 +79,8 @@ public class AbstractRedisClient  implements ICache<ICacheAction> {
             } finally {
                 JedisPoolUtils.returnResource(jedis);
             }
-        } else if(cacheAction instanceof AbstractRedisClusterICache) {
-            logger.info("##############AbstractRedisClusterICache");
+        } else if(cacheAction instanceof AbstractRedisClusterCache) {
+            logger.info("##############AbstractRedisClusterCache");
             JedisCluster jedisCluster = null;
             result = (T) cacheAction.execute(jedisCluster);
         }

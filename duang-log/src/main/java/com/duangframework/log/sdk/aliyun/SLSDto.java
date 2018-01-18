@@ -2,8 +2,6 @@ package com.duangframework.log.sdk.aliyun;
 
 import com.duangframework.log.core.ILogRequest;
 
-import java.util.Map;
-
 /**
  * @author Created by laotang
  * @date createed in 2018/1/13.
@@ -16,11 +14,10 @@ public class SLSDto extends ILogRequest {
     public SLSDto() {
     }
 
-    public SLSDto(String project, String store, String topic, Map<String, String> logItemMap) {
+    public SLSDto(String project, String store, String topic) {
         this.project = project;
         this.store = store;
         this.topic = topic;
-        this.logItemMap = logItemMap;
     }
 
     public String getProject() {
