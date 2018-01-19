@@ -16,11 +16,11 @@ import java.util.*;
  */
 public class CORSHandle implements IHandle {
 
-    private Set<String> allowHostSet;					// 过滤后的允许跨域的域名
+    private Map<String,String> allowHostMap;					// 过滤后的允许跨域的域名
     private final static String PROTOCOL = "http://";
     private final static String PROTOCOLS = "https://";
     private final static String FORWARDED_PROTO = "X-Forwarded-Proto";
-    private final static String DUANG_HTTPS               = "duang_https";			//自定义设置，在nginx里添加的设置
+    private final static String DUANG_HTTPS  = "duang_https";			//自定义设置，在nginx里添加的设置
     private static String accessControlAllowHeaders = "";
 
     /**
@@ -30,12 +30,12 @@ public class CORSHandle implements IHandle {
      */
     public CORSHandle(Map<String, String> accessHostMap) {
         if (ToolsKit.isNotEmpty(accessHostMap)) {
-            this.allowHostSet = new HashSet<>(accessHostMap.size());
+            allowHostMap = new HashMap<>(accessHostMap.size());
             for (Iterator<Map.Entry<String, String>> it = accessHostMap.entrySet().iterator(); it.hasNext();) {
                 Map.Entry<String, String> entry = it.next();
                 String host = entry.getValue().toLowerCase().replace(PROTOCOL,"").replace(PROTOCOLS,"").replace("*","");
                 if(ToolsKit.isNotEmpty(host)) {
-                    allowHostSet.add(host);
+                    allowHostMap.put(entry.getKey(), host);
                 }
             }
         }
@@ -50,28 +50,32 @@ public class CORSHandle implements IHandle {
      */
     @Override
     public void execute(String target, IRequest request, IResponse response) throws Exception {
-        if(ToolsKit.isEmpty(allowHostSet)) return;
+        if(ToolsKit.isEmpty(allowHostMap)) {
+            return;
+        }
         String host = "";
         boolean isAllowAccess = false;
         String allowhost =  request.getHeader("Origin"); //httpRequest.getRequestURL().toString();
         if(ToolsKit.isEmpty(allowhost)) {
             allowhost = request.getHeader("Referer");
-            if(ToolsKit.isEmpty(allowhost)) {
+            if (ToolsKit.isEmpty(allowhost)) {
                 allowhost = request.getHeader("Host");
             }
-            if(ToolsKit.isEmpty(allowhost)) {
-                allowhost = getScheme(request);
+            if (ToolsKit.isEmpty(allowhost)) {
+                String key = request.getParameter("allowhost");
+                allowhost = allowHostMap.get(key);
             }
-            if(ToolsKit.isNotEmpty(allowhost)) {
-                host = allowhost.toLowerCase().replace(PROTOCOL,"").replace(PROTOCOLS,"").replace("*","");
-                isAllowAccess = allowHostSet.contains(host);
-                if(!isAllowAccess) {
-                    for(Iterator<String> it = allowHostSet.iterator(); it.hasNext();) {
-                        host = it.next();
-                        if(allowhost.endsWith(host)) {
-                            isAllowAccess = true;
-                            break;
-                        }
+        }
+
+        if(ToolsKit.isNotEmpty(allowhost)) {
+            host = allowhost.toLowerCase().replace(PROTOCOL,"").replace(PROTOCOLS,"").replace("*","");
+            isAllowAccess = allowHostMap.containsValue(host);
+            if(!isAllowAccess) {
+                for(Iterator<Map.Entry<String,String>> it = allowHostMap.entrySet().iterator(); it.hasNext();) {
+                    Map.Entry<String, String> entry = it.next();
+                    if(allowhost.endsWith(entry.getValue())) {
+                        isAllowAccess = true;
+                        break;
                     }
                 }
             }
