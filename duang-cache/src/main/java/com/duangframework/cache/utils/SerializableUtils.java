@@ -14,7 +14,11 @@ public class SerializableUtils {
 
 	}
 
-	public static <T> byte[] serialize(T obj) {
+	public static <T> String serialize(T obj) {
+		return ToolsKit.toJsonString(obj);
+	}
+
+	public static <T> byte[] serializeByte(T obj) {
 		return SafeEncoder.encode(ToolsKit.toJsonString(obj));
 	}
 

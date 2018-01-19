@@ -1,7 +1,6 @@
 package com.duangframework.cache.common;
 
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisCluster;
+import com.duangframework.cache.core.IJedisCache;
 
 /**
  * 缓存的执行方法接口
@@ -9,7 +8,7 @@ import redis.clients.jedis.JedisCluster;
  */
 public interface ICacheAction<T> {
 	
-	T execute(Jedis jedis);
+	T execute(IJedisCache jedis);
 
-	T execute(JedisCluster jedisCluster);
+//	T execute(JedisCluster jedisCluster);
 }

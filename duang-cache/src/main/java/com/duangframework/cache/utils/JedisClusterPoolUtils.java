@@ -2,7 +2,8 @@
  * 
  */
 package com.duangframework.cache.utils;
-import com.duangframework.cache.sdk.redis.RedisClusterClient;
+
+import com.duangframework.cache.sdk.redis.RedisClient;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ToolsKit;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -66,7 +67,7 @@ public class JedisClusterPoolUtils {
     }
     
     private static String[] getClusterIps() {
-        String host = RedisClusterClient.getInstance().getHost();
+        String host = RedisClient.getInstance().getHost();
         return host.split(",");
 	}
     /**

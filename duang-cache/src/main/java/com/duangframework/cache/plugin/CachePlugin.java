@@ -1,7 +1,6 @@
 package com.duangframework.cache.plugin;
 
 import com.duangframework.cache.sdk.redis.RedisClient;
-import com.duangframework.cache.sdk.redis.RedisClusterClient;
 import com.duangframework.cache.utils.JedisClusterPoolUtils;
 import com.duangframework.cache.utils.JedisPoolUtils;
 import com.duangframework.core.interfaces.IPlugin;
@@ -17,18 +16,16 @@ public class CachePlugin implements IPlugin {
     public CachePlugin(String endpoint, String pwd, int database) {
         String [] arrayItem = endpoint.split(",");
         if(arrayItem.length > 1) {
-            RedisClusterClient.getInstance().setHost(endpoint);
-            RedisClusterClient.getInstance().setPort(0);
-            RedisClusterClient.getInstance().setDatabase(database);
-            RedisClusterClient.getInstance().setPassword(pwd);
+            RedisClient.getInstance().setHost(endpoint);
+            RedisClient.getInstance().setPort(0);
             isClusterRedis = true;
         } else {
             String [] endpointArray = endpoint.split(":");
             RedisClient.getInstance().setHost(endpointArray[0]);
             RedisClient.getInstance().setPort(Integer.parseInt(endpointArray[1]));
-            RedisClient.getInstance().setDatabase(database);
-            RedisClient.getInstance().setPassword(pwd);
         }
+        RedisClient.getInstance().setDatabase(database);
+        RedisClient.getInstance().setPassword(pwd);
     }
 
     public CachePlugin(String host, int port, String pwd, int database) {

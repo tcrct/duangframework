@@ -54,7 +54,11 @@ public class JedisPoolUtils {
 			host = RedisClient.getInstance().getHost();
 			password = RedisClient.getInstance().getPassword();
 			port = RedisClient.getInstance().getPort();
-			pool = new JedisPool(config, host, port, timeout, password, database);
+			if(ToolsKit.isEmpty(password)) {
+				pool = new JedisPool(config, host, port, timeout);
+			} else {
+				pool = new JedisPool(config, host, port, timeout, password, database);
+			}
 			System.out.println("Connent  " + host + ":"+port +" Redis is Success...");
         }catch(Exception e){
         	e.printStackTrace();
