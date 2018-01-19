@@ -102,11 +102,15 @@ public class RequestUtils {
         String uri = request.uri();
         if (uri == null || uri.trim().length() == 0) {
             throw new VerificationException("request uri length is 0 , so exit...");
-        }
-
-        // 如果包含有.则视为静态文件访问
-        if(uri.contains(".")) {
-            throw new VerificationException("not support static file access, so exit...");
+        } else {
+            // 判断是否有参数，有参数则先截掉参数
+            if(uri.contains("?")) {
+                uri = uri.substring(0, uri.indexOf("?"));
+            }
+            // 如果包含有.则视为静态文件访问
+            if(uri.contains(".")) {
+                throw new VerificationException("not support static file access, so exit...");
+            }
         }
     }
 

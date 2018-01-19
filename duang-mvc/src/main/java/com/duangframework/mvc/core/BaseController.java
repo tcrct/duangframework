@@ -1,6 +1,5 @@
 package com.duangframework.mvc.core;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.dto.http.head.HttpHeaders;
@@ -11,8 +10,9 @@ import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.common.dto.result.ReturnDto;
 import com.duangframework.core.exceptions.DuangMvcException;
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ObjectKit;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.render.JsonRender;
 import com.duangframework.mvc.render.Render;
@@ -42,7 +42,8 @@ public abstract class BaseController {
     public void init(IRequest request, IResponse response) {
         this.request = request;
         this.response = response;
-        logger.warn(ToolsKit.toJsonString(request.getParameterMap()));
+//        logger.warn(ToolsKit.toJsonString(request.getParameterMap()));
+        printRequest();
     }
 
     public HttpRequest getRequest() {
@@ -54,13 +55,18 @@ public abstract class BaseController {
     }
 
     private void printRequest() {
+        String contentType = request.getContentType();
         logger.info("******************************************************************************");
         logger.info("###########RequestDate:   " + ToolsKit.formatDate(getRequestDate(), PropertiesKit.duang().key("default.date.format").defaultValue("yyyy-MM-dd HH:mm:ss").asString()));
         logger.info("###########RequestHeader: " + request.getHeader(HttpHeaders.USER_AGENT));
         logger.info("###########RequestURL:    " + request.getRequestURL());
         logger.info("###########RemoteMethod:  " + request.getMethod());
-        logger.info("###########getContentType:  " + request.getContentType());
-        logger.info("###########RequestValues: " + JSON.toJSONString(getAllParams()));
+        logger.info("###########getContentType:  " + contentType);
+        logger.info("###########RequestValues: " + ToolsKit.toJsonString(getAllParams()));
+//        if(ContentType.JSON.getValue().contains(contentType) ||
+//                ContentType.XML.getValue().contains(contentType)) {
+//            logger.info("###########RequestValues: " + getJson());
+//        }
         logger.info("******************************************************************************");
     }
 
@@ -95,6 +101,9 @@ public abstract class BaseController {
         if (ToolsKit.isNotEmpty(requestParams)) {
             for (Iterator<String> iter = requestParams.keySet().iterator(); iter.hasNext();) {
                 String name = (String) iter.next();
+                if(Const.DUANG_INPUTSTREAM_STR_NAME.equalsIgnoreCase(name)) {
+                    continue;
+                }
                 String[] values = (String[]) requestParams.get(name);
                 String valueStr = "";
                 for (int i = 0; i < values.length; i++) {
@@ -394,7 +403,7 @@ public abstract class BaseController {
      * @return
      */
     private Object getBodyString() {
-        return request.getAttribute(Const.DUANG_INPUTSTREAM_STR_NAME);
+        return getValue(Const.DUANG_INPUTSTREAM_STR_NAME);
     }
 
     /**
@@ -404,7 +413,11 @@ public abstract class BaseController {
     protected String getJson() {
         Object inputStreamObj = getBodyString();
         if (ToolsKit.isNotEmpty(inputStreamObj)) {
-            return (String) inputStreamObj;
+            if(inputStreamObj instanceof String[]) {
+                return ((String[])inputStreamObj)[0];
+            } else {
+                return (String) inputStreamObj;
+            }
         }
         return "";
     }
@@ -453,10 +466,14 @@ public abstract class BaseController {
      */
     protected <T> T getBean(Class<T> tClass, boolean isValidator) {
         T t = null;
+        String json = getJson();
+        if(ToolsKit.isEmpty(json)) {
+            throw new EmptyNullException("json or xml is null");
+        }
         String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
         try {
             if(ContentType.JSON.getValue().contains(contentType)) {
-                t = ToolsKit.jsonParseObject(getJson(), tClass);
+                t = ToolsKit.jsonParseObject(json, tClass);
             } else  if(ContentType.XML.getValue().contains(contentType)) {
                 // TODO 待处理XML
             } else if (ContentType.FORM.getValue().contains(contentType)) {

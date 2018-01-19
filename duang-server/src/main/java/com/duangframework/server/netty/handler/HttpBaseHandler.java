@@ -1,8 +1,12 @@
 package com.duangframework.server.netty.handler;
 
+import com.duangframework.core.common.dto.result.HeadDto;
+import com.duangframework.core.common.dto.result.ReturnDto;
 import com.duangframework.core.exceptions.VerificationException;
+import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.server.netty.server.BootStrap;
 import com.duangframework.server.utils.RequestUtils;
+import com.duangframework.server.utils.ResponseUtils;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -27,16 +31,18 @@ public class HttpBaseHandler extends SimpleChannelInboundHandler<FullHttpRequest
     public void channelRead0(final ChannelHandlerContext ctx, final FullHttpRequest request) throws Exception {
         try {
             RequestUtils.verificationRequest(request);
+            new ActionHandler(bootStrap, ctx, request).run();
         }catch (VerificationException ve) {
-            //TODO 应该要有信息返回到客户端
             logger.warn(ve.getMessage());
-            return;
+            ReturnDto<String> returnDto = new ReturnDto<>();
+            HeadDto headDto = new HeadDto();
+            headDto.setUri(request.uri());
+            headDto.setTimestamp(System.currentTimeMillis());
+            headDto.setRet(500);
+            headDto.setMsg(ve.getMessage());
+            returnDto.setData(ve.getMessage());
+            returnDto.setHead(headDto);
+            ResponseUtils.buildFullHttpResponse(ctx, request, ToolsKit.toJsonString(returnDto));
         }
-        // 再开线程执行后续操作，异步操作，提升效率
-//        ThreadPoolKit.execute(new ActionHandler(ctx, request));
-
-        //不开线程，因为netty本身就是NIO方式
-        new ActionHandler(bootStrap, ctx, request).run();
-
     }
 }

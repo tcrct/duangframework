@@ -53,7 +53,7 @@ public class Const {
     /**
      *  以JSON或XML方式提交参数时，暂存在Request里的key
      */
-    public static final String DUANG_INPUTSTREAM_STR_NAME = "dunag_inputstream_str";
+    public static final String DUANG_INPUTSTREAM_STR_NAME = "duang_inputstream_str";
 
 
     /**
