@@ -11,6 +11,7 @@ import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.utils.DuangThreadLocal;
 import com.duangframework.core.utils.IpUtils;
+import com.duangframework.core.utils.XmlHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,6 +154,11 @@ public class ToolsKit {
 
     public static <T> T jsonParseObject(byte[] bytes, Class<T> clazz) {
         return JSON.parseObject(bytes, clazz);
+    }
+
+    public static <T> T xmlParseObject(String xmlText, Class<T> clazz) {
+        String json = toJsonString(XmlHelper.of(xmlText).toMap());
+        return jsonParseObject(json, clazz);
     }
 
     public static String getCurrentDateString() {
@@ -298,4 +304,17 @@ public class ToolsKit {
         return  requestHeaderThreadLocal.get();
     }
 
+    /**
+     * 控制台打印信息
+     * @param message       要打印的信息
+     */
+    public static void console(Object message) {
+        if(PropertiesKit.duang().key("debug").defaultValue(false).asBoolean()) {
+            if(message instanceof String) {
+                System.out.println(message);
+            } else {
+                System.out.println(toJsonString(message));
+            }
+        }
+    }
 }

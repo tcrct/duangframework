@@ -4,12 +4,7 @@
 
 ##工具类使用方法
 
-    CacheKit.duang()
-        .key()
-        .type()
-        .value()
-        .asString();
-        .asBean(Class<T> clazz);
+    CacheKit.duang().set(String key, Object value);
         
 
 以上的使用方法，看名字大概也能知道其用处了，这里就不再进行描述。

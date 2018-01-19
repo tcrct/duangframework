@@ -88,6 +88,14 @@ public class PropertiesKit {
         }
     }
 
+    public boolean asBoolean() {
+        try {
+            return _configuration.getBoolean(_key, Boolean.parseBoolean(_defaultValue + ""));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public String[] asArray() {
         try {
             return _configuration.getStringArray(_key);

@@ -10,7 +10,6 @@ import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.common.dto.result.ReturnDto;
 import com.duangframework.core.exceptions.DuangMvcException;
-import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
@@ -28,8 +27,10 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
+ * Controller基类，封装公用方法
  * @author Created by laotang
  * @date on 2017/11/17.
+ * @since 1.0
  */
 public abstract class BaseController {
 
@@ -42,8 +43,9 @@ public abstract class BaseController {
     public void init(IRequest request, IResponse response) {
         this.request = request;
         this.response = response;
-//        logger.warn(ToolsKit.toJsonString(request.getParameterMap()));
-        printRequest();
+        if(PropertiesKit.duang().key("debug").defaultValue(false).asBoolean()) {
+            printRequest();
+        }
     }
 
     public HttpRequest getRequest() {
@@ -69,11 +71,6 @@ public abstract class BaseController {
 //        }
         logger.info("******************************************************************************");
     }
-
-    /**
-     * 设置请求信息到
-     */
-
 
     /**
      * 取出请求日期时间
@@ -465,29 +462,25 @@ public abstract class BaseController {
      * @return
      */
     protected <T> T getBean(Class<T> tClass, boolean isValidator) {
-        T t = null;
-        String json = getJson();
-        if(ToolsKit.isEmpty(json)) {
-            throw new EmptyNullException("json or xml is null");
-        }
+        T resultBean = null;
         String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
         try {
             if(ContentType.JSON.getValue().contains(contentType)) {
-                t = ToolsKit.jsonParseObject(json, tClass);
+                resultBean = ToolsKit.jsonParseObject(getJson(), tClass);
             } else  if(ContentType.XML.getValue().contains(contentType)) {
-                // TODO 待处理XML
-            } else if (ContentType.FORM.getValue().contains(contentType)) {
+                resultBean = ToolsKit.xmlParseObject(getXml(), tClass);
+            } else if (ContentType.FORM.getValue().contains(contentType) || ToolsKit.isEmpty(contentType)) {
                 String paramsJson = ToolsKit.toJsonString(getAllParams());
-                t = ToolsKit.jsonParseObject(paramsJson, tClass);
+                resultBean = ToolsKit.jsonParseObject(paramsJson, tClass);
             }
             // 开启验证
             if(isValidator) {
-                ValidatorFactory.validator(t);
+                ValidatorFactory.validator(resultBean);
             }
         } catch (Exception e) {
             logger.warn("getBean is fail : " + e.getMessage(), e);
             throw new IllegalArgumentException(e.getMessage(), e);
         }
-        return t;
+        return resultBean;
     }
 }
