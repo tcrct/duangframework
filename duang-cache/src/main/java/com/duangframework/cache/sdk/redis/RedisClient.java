@@ -26,10 +26,10 @@ import java.util.*;
  */
 public class RedisClient extends AbstractRedisClient {
 
-    private final Logger logger = LoggerFactory.getLogger(RedisClient.class);
-    private RedisClient ourInstance;
+    private final static Logger logger = LoggerFactory.getLogger(RedisClient.class);
+    private static RedisClient ourInstance;
 
-    public RedisClient getInstance() {
+    public static RedisClient getInstance() {
         try {
             if (null == ourInstance) {
                 ourInstance = new RedisClient();
