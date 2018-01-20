@@ -2,8 +2,7 @@ package com.duangframework.cache.sdk.redis;
 
 import com.alibaba.fastjson.TypeReference;
 import com.duangframework.cache.common.AbstractRedisClient;
-import com.duangframework.cache.common.ICacheAction;
-import com.duangframework.cache.core.IJedisCache;
+import com.duangframework.cache.common.JedisAction;
 import com.duangframework.cache.utils.JedisClusterPoolUtils;
 import com.duangframework.cache.utils.JedisPoolUtils;
 import com.duangframework.cache.utils.SerializableUtils;
@@ -15,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.*;
 import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.params.geo.GeoRadiusParam;
+import redis.clients.util.SafeEncoder;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -25,10 +26,10 @@ import java.util.*;
  */
 public class RedisClient extends AbstractRedisClient {
 
-    private static final Logger logger = LoggerFactory.getLogger(RedisClient.class);
-    private static RedisClient ourInstance;
+    private final Logger logger = LoggerFactory.getLogger(RedisClient.class);
+    private RedisClient ourInstance;
 
-    public static RedisClient getInstance() {
+    public RedisClient getInstance() {
         try {
             if (null == ourInstance) {
                 ourInstance = new RedisClient();
@@ -43,50 +44,51 @@ public class RedisClient extends AbstractRedisClient {
 
     }
 
-    @Override
-    public <T> T get(final String key, final Class<T> typeReference){
-        return call(new ICacheAction<T>(){
-            @Override
-            public T execute(IJedisCache jedis) {
-                byte[] bytes = null;
-                try {
-                    bytes = jedis.get(key).getBytes(Protocol.CHARSET);
-                    String data = new String(bytes, Const.ENCODING_FIELD);
-                    if(typeReference.equals(String.class)){
-                        return (T)data;
-                    } else if(typeReference.equals(Integer.class) || typeReference.equals(int.class)){
-                        return (T)new Integer(data);
-                    } else if(typeReference.equals(Long.class) || typeReference.equals(long.class)){
-                        return (T)new Long(data);
-                    } else if(typeReference.equals(Double.class) || typeReference.equals(double.class)){
-                        return (T)new Double(data);
-                    }
-                } catch (Exception e) {
-                    throw new JedisException(e.getMessage(), e);
-                }
-                return (T)SerializableUtils.deserialize(bytes, typeReference);
-            }
-        });
+    /**
+     * 是否集群对象
+     * @param jedisObj  jedis对象
+     * @return   是集群返回true
+     */
+    private boolean isCluster(Object jedisObj) {
+        return (jedisObj instanceof JedisCluster)  ? true : false;
+    }
+    private Jedis c2j(Object jedisObj) {
+        return (Jedis) jedisObj;
+    }
+    private JedisCluster c2jc(Object jedisObj) {
+        return (JedisCluster) jedisObj;
+    }
+    private byte[] getBytes4Cluster(String value){
+        return ToolsKit.isEmpty(value) ? null : value.getBytes();
     }
 
     /**
-     *  取值
-     * @param key        关键字
-     * @param typeReference		泛型
+     * 根据key取值
+     * @param key
      * @return
      */
-    @Override
-    public <T> T get(final String key, final TypeReference<T> typeReference){
-        return call(new ICacheAction<T>(){
+    public <T extends Serializable> T get(final String key, final Class<T> typeReference){
+        return call(new JedisAction<T>(){            
             @Override
-            public T execute(IJedisCache jedis) {
-                try {
-                    byte[] bytes = jedis.get(key).getBytes(Protocol.CHARSET);
-                    if (ToolsKit.isNotEmpty(bytes)) {
-                        return (T) SerializableUtils.deserialize(bytes, typeReference);
+            public T execute(Object jedisObj) {
+                byte[] bytes = (isCluster(jedisObj)) ? getBytes4Cluster(c2jc(jedisObj).get(key)) :  c2j( jedisObj).get(SafeEncoder.encode(key));
+                if(ToolsKit.isNotEmpty(bytes)){
+                    try {
+                        String str = new String(bytes, Const.ENCODING_FIELD);
+                        if(typeReference.equals(String.class)){
+                            return (T)str;
+                        } else if(typeReference.equals(Integer.class) || typeReference.equals(int.class)){
+                            return (T)new Integer(str);
+                        } else if(typeReference.equals(Long.class) || typeReference.equals(long.class)){
+                            return (T)new Long(str);
+                        } else if(typeReference.equals(Double.class) || typeReference.equals(double.class)){
+                            return (T)new Double(str);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new JedisException(e.getMessage());
                     }
-                } catch (Exception e) {
-                    logger.warn(e.getMessage(), e);
+                    return (T)SerializableUtils.deserialize(bytes, typeReference);
                 }
                 return null;
             }
@@ -94,24 +96,36 @@ public class RedisClient extends AbstractRedisClient {
     }
 
     /**
-     *  取数据值
-     * @param key                       参数值
-     * @param clazz                     要转换的类
-     * @param <T>
+     *  取值
+     * @param key
+     * @param type		泛型
      * @return
      */
-    @Override
-    public <T> List<T> getArray(final String key, final Class<T> clazz){
-        return call(new ICacheAction<List<T>>(){
+    public <T extends Serializable> T get(final String key, final TypeReference<T> type){
+        return call(new JedisAction<T>(){
             @Override
-            public List<T> execute(IJedisCache jedis) {
-                String byteString = jedis.get(key);
-                if(ToolsKit.isNotEmpty(byteString)){
+            public T execute(Object jedisObj) {
+                byte[] bytes = (isCluster(jedisObj)) ? getBytes4Cluster(c2jc(jedisObj).get(key)) :  c2j( jedisObj).get(SafeEncoder.encode(key));
+                if(ToolsKit.isNotEmpty(bytes)){
+                    return (T)SerializableUtils.deserialize(bytes, type);
+                }
+                return null;
+            }
+        });
+    }
+
+
+    public <T extends Serializable> List<T> getArray(final String key, final Class<T> typeReference){
+        return call(new JedisAction<List<T>>(){
+            @Override
+            public List<T> execute(Object jedisObj) {
+                byte[] bytes = (!isCluster(jedisObj)) ? c2j(jedisObj).get(SafeEncoder.encode(key)) :  getBytes4Cluster(c2jc(jedisObj).get(key));
+                if(ToolsKit.isNotEmpty(bytes)){
                     try {
-                        byte[] bytes = byteString.getBytes(Protocol.CHARSET);
-                        return (List<T>)SerializableUtils.deserializeArray(bytes, clazz);
+                        return (List<T>)SerializableUtils.deserializeArray(bytes, typeReference);
                     } catch (Exception e) {
-                        throw new JedisException(e.getMessage(), e);
+                        e.printStackTrace();
+                        throw new JedisException(e.getMessage());
                     }
                 }
                 return null;
@@ -125,20 +139,19 @@ public class RedisClient extends AbstractRedisClient {
      * @param value
      * @return
      */
-    @Override
     public boolean set(final String key, final Object value){
         if(null == value){
-            logger.warn("RedisClient.set value is null, return false...");
+            logger.warn("JedisUtils.set value is null, return false...");
             return false;
         }
-        return call(new ICacheAction<Boolean>(){
+        return call(new JedisAction<Boolean>(){
             @Override
-            public Boolean execute(IJedisCache jedis) {
+            public Boolean execute(Object jedisObj) {
                 String result = "";
                 if(value instanceof String){
-                    result = jedis.set(key, (String) value);
+                    result = isCluster(jedisObj) ? c2jc(jedisObj).set(key, (String)value)  : c2j(jedisObj).set(key, (String) value);
                 }else{
-                    result = jedis.set(key, SerializableUtils.serialize(value));
+                    result = isCluster(jedisObj) ? c2jc(jedisObj).set(key, SerializableUtils.serializeString(value)) : c2j(jedisObj).set(SafeEncoder.encode(key), SerializableUtils.serialize(value));
                 }
                 return "OK".equalsIgnoreCase(result);
             }
@@ -152,36 +165,47 @@ public class RedisClient extends AbstractRedisClient {
      * @param seconds		缓存时间，秒作单位
      * @return
      */
-    @Override
     public boolean set(final String key, final Object value, final int seconds){
-        return call(new ICacheAction<Boolean>(){
+        return call(new JedisAction<Boolean>(){
             @Override
-            public Boolean execute(IJedisCache jedis) {
+            public Boolean execute(Object jedisObj) {
                 String result = "";
                 if(value instanceof String){
-                    result = jedis.setex(key, seconds,  (String) value);
+                    result = isCluster(jedisObj) ? c2jc(jedisObj).setex(key, seconds, (String)value)  : c2j(jedisObj).setex(key, seconds,  (String) value);
                 }else{
-                    result = jedis.setex(key, seconds, SerializableUtils.serialize(value));
+                    result = isCluster(jedisObj) ? c2jc(jedisObj).setex(key, seconds, SerializableUtils.serializeString(value)) : c2j(jedisObj).setex(SafeEncoder.encode(key), seconds, SerializableUtils.serialize(value));
                 }
                 return "OK".equalsIgnoreCase(result);
             }
         });
     }
 
+
     /**
      * 根据key删除指定的内容
      * @param keys
      * @return
      */
-    @Override
     public long del(final String... keys){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.del(keys);
+            public Long execute(Object jedisObj) {
+                if(isCluster(jedisObj)){
+                    try{
+                        for(String keyItem : keys){
+                            c2jc(jedisObj).del(keyItem);
+                        }
+                        return 1L;
+                    }catch(Exception e){
+                        return 0L;
+                    }
+                } else {
+                    return c2j(jedisObj).del(keys);
+                }
             }
         });
     }
+
 
     /**
      * 将内容添加到list里的第一位
@@ -189,19 +213,20 @@ public class RedisClient extends AbstractRedisClient {
      * @param value		内容
      * @return
      */
-    @Override
     public long lpush(final String key, final Object value) {
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
+            public Long execute(Object jedisObj) {
                 if(value instanceof String){
-                    return jedis.lpush(key, (String)value);
+                    return isCluster(jedisObj) ? c2jc(jedisObj).lpush(key,(String)value) : c2j(jedisObj).lpush(key, (String)value);
                 }else{
-                    return jedis.lpush(key, SerializableUtils.serialize(value));
+                    return isCluster(jedisObj) ? c2jc(jedisObj).lpush(key,SerializableUtils.serializeString(value)) : c2j(jedisObj).lpush(SafeEncoder.encode(key), SerializableUtils.serialize(value));
                 }
             }
         });
     }
+
+
 
     /**
      * 将内容添加到list里的最后一位
@@ -210,13 +235,13 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public long rpush(final String key, final Object value) {
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
+            public Long execute(Object jedisObj) {
                 if(value instanceof String){
-                    return jedis.rpush(key, (String)value);
+                    return isCluster(jedisObj) ? c2jc(jedisObj).rpush(key, SerializableUtils.serializeString(value)) : c2j(jedisObj).rpush(key, (String)value);
                 }else{
-                    return jedis.rpush(key, SerializableUtils.serialize(value));
+                    return isCluster(jedisObj) ? c2jc(jedisObj).rpush(key, SerializableUtils.serializeString(value)) : c2j(jedisObj).rpush(SafeEncoder.encode(key), SerializableUtils.serialize(value));
                 }
             }
         });
@@ -230,33 +255,22 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<String> lrange(final String key, final int start, final int end) {
-        return call(new ICacheAction<List<String>>(){
+        return call(new JedisAction<List<String>>(){
             @Override
-            public List<String> execute(IJedisCache jedis) {
-                return jedis.lrange(key, start, end);
+            public List<String> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).lrange(key, start, end): c2j(jedisObj).lrange(key, start, end);
             }
         });
     }
 
-    /**
-     * 根据参数 count 的值，移除列表中与参数 value 相等的元素。
-        count 的值可以是以下几种：
-             count > 0 : 从表头开始向表尾搜索，移除与 value 相等的元素，数量为 count 。
-             count < 0 : 从表尾开始向表头搜索，移除与 value 相等的元素，数量为 count 的绝对值。
-             count = 0 : 移除表中所有与 value 相等的值。
-     * @param key
-     * @param count
-     * @param value
-     * @return
-     */
     public long lrem(final String key, final int count, final Object value){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
+            public Long execute(Object jedisObj) {
                 if(value instanceof String){
-                    return jedis.lrem(key, count, (String)value);
+                    return isCluster(jedisObj) ? c2jc(jedisObj).lrem(key, count, (String)value) : c2j(jedisObj).lrem(key, count, (String)value);
                 }else{
-                    return  jedis.lrem(key, count, SerializableUtils.serialize(value));
+                    return  isCluster(jedisObj) ? c2jc(jedisObj).lrem(key, count, SerializableUtils.serializeString(value)) : c2j(jedisObj).lrem(SafeEncoder.encode(key), count, SerializableUtils.serialize(value));
                 }
             }
         });
@@ -269,11 +283,25 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public boolean hmset(final String key, final Map<String, String> values) {
-        return call(new ICacheAction<Boolean>() {
+        return call(new JedisAction<Boolean>() {
             @Override
-            public Boolean execute(IJedisCache jedis) {
-                String isok = jedis.hmset(key, values);
-                return "OK".equalsIgnoreCase(isok);
+            public Boolean execute(Object jedisObj) {
+                boolean isCluster =  isCluster(jedisObj);
+                String isok = "";
+                if(null != values){
+                    if(!isCluster){
+                        Map<byte[], byte[]> map = new HashMap<byte[], byte[]>(values.size());
+                        for (Iterator<Map.Entry<String,String>> it = values.entrySet().iterator(); it.hasNext(); ){
+                            Map.Entry<String,String> entry = it.next();
+                            map.put(SafeEncoder.encode(entry.getKey()), SafeEncoder.encode(entry.getValue()));
+                        }
+                        isok = c2j(jedisObj).hmset(SafeEncoder.encode(key), map);
+                    } else {
+                        isok = c2jc(jedisObj).hmset(key, values);
+                    }
+                    return "OK".equalsIgnoreCase(isok);
+                }
+                return false;
             }
         });
     }
@@ -285,10 +313,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<String> hmget(final String key, final String... fields) {
-        return call(new ICacheAction<List<String>>() {
+        return call(new JedisAction<List<String>>() {
             @Override
-            public List<String> execute(IJedisCache jedis) {
-                return jedis.hmget(key, fields);
+            public List<String> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).hmget(key, fields): c2j(jedisObj).hmget(key, fields);
             }
         });
     }
@@ -300,11 +328,11 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Map<String,String> hmgetToMap(final String key, final String... fields) {
-        return call(new ICacheAction<Map<String,String>>() {
+        return call(new JedisAction<Map<String,String>>() {
             @Override
-            public Map<String, String> execute(IJedisCache jedis) {
-                List<String> byteList = jedis.hmget(key, fields);
-                Map<String,String> map = new HashMap<>(byteList.size());
+            public Map<String, String> execute(Object jedisObj) {
+                List<String> byteList = isCluster(jedisObj) ? c2jc(jedisObj).hmget(key, fields) : c2j(jedisObj).hmget(key, fields);
+                Map<String,String> map = new HashMap<String, String>();
                 int size  = byteList.size();
                 for (int i = 0; i < size; i ++) {
                     if(ToolsKit.isNotEmpty(byteList.get(i))){
@@ -323,10 +351,18 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public long hdel(final String key, final String... fields) {
-        return call(new ICacheAction<Long>() {
+        return call(new JedisAction<Long>() {
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.hdel(key, fields);
+            public Long execute(Object jedisObj) {
+                if(isCluster(jedisObj)){
+                    return c2jc(jedisObj).hdel(key, fields);
+                } else {
+                    byte[][] byteFields = new byte[fields.length][];
+                    for (int i = 0; i < fields.length; i++) {
+                        byteFields[i] = SafeEncoder.encode(fields[i]);
+                    }
+                    return c2j(jedisObj).hdel(SafeEncoder.encode(key), byteFields);
+                }
             }
         });
     }
@@ -337,10 +373,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Set<String> hkeys(final String key) {
-        return call(new ICacheAction<Set<String>>() {
+        return call(new JedisAction<Set<String>>() {
             @Override
-            public Set<String> execute(IJedisCache jedis) {
-                return jedis.hkeys(key);
+            public Set<String> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).hkeys(key) : c2j(jedisObj).hkeys(key);
             }
         });
     }
@@ -352,13 +388,14 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public boolean hexists(final String key, final String field) {
-        return call(new ICacheAction<Boolean>() {
+        return call(new JedisAction<Boolean>() {
             @Override
-            public Boolean execute(IJedisCache jedis) {
+            public Boolean execute(Object jedisObj) {
+                boolean isok = false;
                 if (null != field) {
-                    return jedis.hexists(key,  field);
+                    return isCluster(jedisObj) ? c2jc(jedisObj).hexists(key, field) : c2j(jedisObj).hexists(key,  field);
                 }
-                return false;
+                return isok;
             }
         });
     }
@@ -370,10 +407,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public String hget(final String key, final String field) {
-        return call(new ICacheAction<String>() {
+        return call(new JedisAction<String>() {
             @Override
-            public String execute(IJedisCache jedis) {
-                return jedis.hget(key,  field);
+            public String execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).hget(key, field) : c2j(jedisObj).hget(key,  field);
             }
         });
     }
@@ -384,10 +421,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Map<String,String> hgetAll(final String key) {
-        return call(new ICacheAction<Map<String,String>>() {
+        return call(new JedisAction<Map<String,String>>() {
             @Override
-            public Map<String,String> execute(IJedisCache jedis) {
-                return jedis.hgetAll(key);
+            public Map<String,String> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).hgetAll(key) : c2j(jedisObj).hgetAll(key);
             }
         });
     }
@@ -399,14 +436,14 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public boolean sadd(final String key, final Object value) {
-        return call(new ICacheAction<Boolean>(){
+        return call(new JedisAction<Boolean>(){
             @Override
-            public Boolean execute(IJedisCache jedis) {
+            public Boolean execute(Object jedisObj) {
                 long isok = 0;
                 if(value instanceof String){
-                    isok = jedis.sadd(key, (String)value);
+                    isok = isCluster(jedisObj) ? c2jc(jedisObj).sadd(key, (String)value) : c2j(jedisObj).sadd(key, (String)value);
                 }else{
-                    isok = jedis.sadd(key, SerializableUtils.serialize(value));
+                    isok = isCluster(jedisObj) ? c2jc(jedisObj).sadd(key, SerializableUtils.serializeString(value)) : c2j(jedisObj).sadd(SafeEncoder.encode(key), SerializableUtils.serialize(value));
                 }
                 return isok == 1 ? true : false;
             }
@@ -419,13 +456,14 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long scard(final String key) {
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.scard(key);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).scard(key) : c2j(jedisObj).scard(key);
             }
         });
     }
+
 
     /**
      * 测试member是否是名称为key的set的元素
@@ -434,10 +472,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public boolean sismember(final String key, final Object value) {
-        return call(new ICacheAction<Boolean>(){
+        return call(new JedisAction<Boolean>(){
             @Override
-            public Boolean execute(IJedisCache jedis) {
-                return jedis.sismember(key, (String)value);
+            public Boolean execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).sismember(key, (String)value) : c2j(jedisObj).sismember(key, (String)value);
             }
         });
     }
@@ -448,30 +486,30 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Set<String> keys(final String pattern){
-        return call(new ICacheAction<Set<String>>(){
+        return call(new JedisAction<Set<String>>(){
             @Override
-            public Set<String> execute(IJedisCache jedis) {
-                return jedis.keys(pattern);
+            public Set<String> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? null : c2j(jedisObj).keys(pattern);
             }
         });
     }
 
     /**
      * 根据标识取出redis里的集合size
-     * @param type		标识("List.class", "Map.class", "Set.class")
+     * @param type		标识("list", "hash", "set")
      * @param key		关键字
      * @return
      */
-    public long size(final Class<?> type, final String key) {
-        return call(new ICacheAction<Long>(){
+    public long size(final String type, final String key) {
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                if(List.class.equals(type)){
-                    return jedis.llen(key);
-                }else if(Map.class.equals(type)){
-                    return jedis.hlen(key);
-                }else if(Set.class.equals(type)){
-                    return jedis.scard(key);
+            public Long execute(Object jedisObj) {
+                if("list".equalsIgnoreCase(type)){
+                    return isCluster(jedisObj) ? c2jc(jedisObj).llen(key) : c2j(jedisObj).llen(key);
+                }else if("hash".equalsIgnoreCase(type)){
+                    return isCluster(jedisObj) ? c2jc(jedisObj).hlen(key) : c2j(jedisObj).hlen(key);
+                }else if("set".equalsIgnoreCase(type)){
+                    return isCluster(jedisObj) ? c2jc(jedisObj).scard(key) : c2j(jedisObj).scard(key);
                 }
                 return 0L;
             }
@@ -480,14 +518,14 @@ public class RedisClient extends AbstractRedisClient {
 
     /**
      * 根据key判断值类型
-     * @param key		关键字
+     * @param key		关键字	
      * @return		类型名称
      */
     public String type(final String key) {
-        return call(new ICacheAction<String>() {
+        return call(new JedisAction<String>() {
             @Override
-            public String execute(IJedisCache jedis) {
-                return jedis.type(key);
+            public String execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).type(key) : c2j(jedisObj).type(key);
             }
         });
     }
@@ -498,10 +536,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return			存在返回true
      */
     public boolean exists(final String key) {
-        return call(new ICacheAction<Boolean>() {
+        return call(new JedisAction<Boolean>() {
             @Override
-            public Boolean execute(IJedisCache jedis) {
-                return jedis.exists(key);
+            public Boolean execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).exists(key) : c2j(jedisObj).exists(key);
             }
         });
     }
@@ -513,10 +551,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long expire(final String key, final Integer seconds) {
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.expire(key, seconds);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).expire(key, seconds) : c2j(jedisObj).expire(key, seconds);
             }
         });
     }
@@ -529,12 +567,16 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Boolean zadd(final String key ,final double sort ,final String value){
-        return call(new ICacheAction<Boolean>(){
+        return call(new JedisAction<Boolean>(){
             @Override
-            public Boolean execute(IJedisCache jedis) {
+            public Boolean execute(Object jedisObj) {
                 try {
-                    long count = jedis.zadd(key, sort, value);
-                    return count > 0 ? true : false;
+                    if(isCluster(jedisObj)) {
+                        c2jc(jedisObj).zadd(key, sort, value);
+                    } else {
+                        c2j(jedisObj).zadd(key, sort, value);
+                    }
+                    return true;
                 } catch (Exception e) {
                     e.printStackTrace();
                     return false;
@@ -550,10 +592,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long zrem(final String key ,final String value){
-        return call(new ICacheAction<Long >(){
+        return call(new JedisAction<Long >(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.zrem(key, value);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zrem(key, value) : c2j(jedisObj).zrem(key, value);
             }
         });
     }
@@ -565,10 +607,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long zrank(final String key, final String member){
-        return call(new ICacheAction<Long >(){
+        return call(new JedisAction<Long >(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.zrank(key, member);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zrank(key, member) : c2j(jedisObj).zrank(key, member);
             }
         });
     }
@@ -580,10 +622,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long zrevrank(final String key,final String member){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long >(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.zrevrank(key, member);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zrevrank(key, member) : c2j(jedisObj).zrevrank(key, member);
             }
         });
     }
@@ -594,10 +636,14 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<String> zrevrank(final String key){
-        return call(new ICacheAction<List<String> >(){
+        return call(new JedisAction<List<String> >(){
             @Override
-            public List<String> execute(IJedisCache jedis) {
-                return new ArrayList<String>(jedis.zrange(key, 0, -1));
+            public List<String> execute(Object jedisObj) {
+                if(isCluster(jedisObj)){
+                    return new ArrayList<String>(c2jc(jedisObj).zrange(key, 0, -1));
+                } else {
+                    return new ArrayList<String>( ((Jedis)jedisObj).zrange(key, 0, -1) );
+                }
             }
         });
     }
@@ -610,12 +656,16 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<String> zrevrank(final String key,final int start, final int end){
-        return call(new ICacheAction<List<String> >(){
+        return call(new JedisAction<List<String> >(){
             @Override
-            public List<String> execute(IJedisCache jedis) {
+            public List<String> execute(Object jedisObj) {
                 int e = end;
                 if(e > 0){e--;}
-                return new ArrayList<String>( jedis.zrange(key, start, e) );
+                if(isCluster(jedisObj)){
+                    return new ArrayList<String>(c2jc(jedisObj).zrange(key, start, e));
+                } else {
+                    return new ArrayList<String>( c2j(jedisObj).zrange(key, start, e) );
+                }
             }
         });
     }
@@ -626,10 +676,14 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<String> zrevrange(final String key){
-        return call(new ICacheAction<List<String> >(){
+        return call(new JedisAction<List<String> >(){
             @Override
-            public List<String> execute(IJedisCache jedis) {
-                return new ArrayList<String>( jedis.zrevrange(key, 0, -1) );
+            public List<String> execute(Object jedisObj) {
+                if(isCluster(jedisObj)){
+                    return new ArrayList<String>( c2jc(jedisObj).zrevrange(key, 0, -1) );
+                } else {
+                    return new ArrayList<String>( c2j(jedisObj).zrevrange(key, 0, -1) );
+                }
             }
         });
     }
@@ -642,28 +696,29 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<String> zrevrange(final String key,final int start, final int end){
-        return call(new ICacheAction<List<String> >(){
+        return call(new JedisAction<List<String> >(){
             @Override
-            public List<String> execute(IJedisCache jedis) {
+            public List<String> execute(Object jedisObj) {
                 int e = end;
                 if(e > 0){e--;}
-                return new ArrayList<String>( jedis.zrevrange(key,start, e) );
+                if(isCluster(jedisObj)){
+                    return new ArrayList<String>( c2jc(jedisObj).zrevrange(key,start, e) );
+                } else {
+                    return new ArrayList<String>( c2j(jedisObj).zrevrange(key,start, e) );
+                }
             }
         });
     }
 
-    /**
-     * 取范围值
-     * @param key
-     * @param start
-     * @param end
-     * @return
-     */
     public List<String> zrange(final String key,final int start, final int end){
-        return call(new ICacheAction<List<String> >(){
+        return call(new JedisAction<List<String> >(){
             @Override
-            public List<String> execute(IJedisCache jedis) {
-                return new ArrayList<String>( jedis.zrange(key, start, end) );
+            public List<String> execute(Object jedisObj) {
+                if(isCluster(jedisObj)){
+                    return new ArrayList<String>( c2jc(jedisObj).zrange(key, start, end) );
+                } else {
+                    return new ArrayList<String>( c2j(jedisObj).zrange(key, start, end) );
+                }
             }
         });
     }
@@ -677,10 +732,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Set<Tuple> zrevrangeWithScores(final String key, final int start, final int end) {
-        return call(new ICacheAction<Set<Tuple>>() {
+        return call(new JedisAction<Set<Tuple>>() {
             @Override
-            public Set<Tuple> execute(IJedisCache jedis) {
-                return jedis.zrevrangeWithScores(key, start, end);
+            public Set<Tuple> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zrevrangeWithScores(key, start, end) : c2j(jedisObj).zrevrangeWithScores(key, start, end);
             }
         });
     }
@@ -691,10 +746,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long llen(final String key){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.llen(key);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).llen(key) : c2j(jedisObj).llen(key);
             }
         });
     }
@@ -705,10 +760,10 @@ public class RedisClient extends AbstractRedisClient {
      * @returnrpop
      */
     public String rpop(final String key){
-        return call(new ICacheAction<String>(){
+        return call(new JedisAction<String>(){
             @Override
-            public String  execute(IJedisCache jedis) {
-                return jedis.rpop(key);
+            public String  execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).rpop(key) : c2j(jedisObj).rpop(key);
             }
         });
     }
@@ -721,10 +776,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long hincrby(final String key,final String field,final Integer integer){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.hincrBy(key, field, integer);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).hincrBy(key, field, integer) : c2j(jedisObj).hincrBy(key, field, integer);
             }
         });
     }
@@ -737,13 +792,13 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long hset(final String key,final String field, final Object value){
-        return call(new ICacheAction<Long >(){
+        return call(new JedisAction<Long >(){
             @Override
-            public Long  execute(IJedisCache jedis) {
+            public Long  execute(Object jedisObj) {
                 if(value instanceof String){
-                    return jedis.hset(key, field, (String)value);
+                    return isCluster(jedisObj) ? c2jc(jedisObj).hset(key, field, (String)value) : c2j(jedisObj).hset(key, field, (String)value);
                 } else {
-                    return jedis.hset(key, field, SerializableUtils.serialize(value));
+                    return isCluster(jedisObj) ? c2jc(jedisObj).hset(key, field, SerializableUtils.serializeString(value)) : c2j(jedisObj).hset(SafeEncoder.encode(key), SafeEncoder.encode(field), SerializableUtils.serialize(value));
                 }
             }
         });
@@ -759,10 +814,60 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Set<String> zrangebyscore(final String key, final double min, final double max) {
-        return call(new ICacheAction<Set<String>>() {
+        return call(new JedisAction<Set<String>>() {
             @Override
-            public Set<String> execute(IJedisCache jedis) {
-                return jedis.zrangeByScore(key, min, max);
+            public Set<String> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zrangeByScore(key, min, max) : c2j(jedisObj).zrangeByScore(key, min, max);
+            }
+        });
+    }
+
+    /**
+     * 返回名称为key的zset中score>=min且score<=max结果之间的区间数据 <br/>
+     *  offset, count就相当于sql中limit的用法 <br/>
+     *  select * from table where score >=min and score <=max limit offset count
+     *
+     * @param key
+     * @param min
+     * @param max
+     * @param offset
+     * @param count
+     * @return
+     */
+    public Set<String> zrangebyscore(final String key, final double min, final double max, final int offset, final int count) {
+        return call(new JedisAction<Set<String>>() {
+            @Override
+            public Set<String> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zrangeByScore(key, min, max, offset, count) : c2j(jedisObj).zrangeByScore(key, min, max, offset, count);
+            }
+        });
+    }
+
+
+    /**
+     * 返回名称为key的zset中score>=min且score<=max结果之间的区间数据 <br/>
+     *  offset, count就相当于sql中limit的用法 <br/>
+     *  select * from table where score >=min and score <=max limit offset count
+     *
+     * @param key
+     * @param min
+     * @param max
+     * @param offset
+     * @param count
+     * @return
+     */
+    public List<TupleDto> zrangeByScoreWithScores(final String key, final double min, final double max, final int offset, final int count) {
+        return call(new JedisAction<List<TupleDto>>() {
+            @Override
+            public List<TupleDto> execute(Object jedisObj) {
+                Set<Tuple> tupleSet = isCluster(jedisObj) ? c2jc(jedisObj).zrangeByScoreWithScores(key, min, max, offset, count) : c2j(jedisObj).zrangeByScoreWithScores(key, min, max, offset, count);
+                List<TupleDto> tupleDtoList = new ArrayList<>();
+                if(ToolsKit.isNotEmpty(tupleSet)) {
+                    for(Tuple tuple : tupleSet) {
+                        tupleDtoList.add(new TupleDto(tuple.getElement(), BigDecimal.valueOf(tuple.getScore()).doubleValue()));
+                    }
+                }
+                return tupleDtoList;
             }
         });
     }
@@ -772,10 +877,10 @@ public class RedisClient extends AbstractRedisClient {
      * 删除名称为key的zset中score>=min且score<=max的所有元素
      */
     public Long zremrangebyscore(final String key, final double min, final double max) {
-        return call(new ICacheAction<Long>() {
+        return call(new JedisAction<Long>() {
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.zremrangeByScore(key, min, max);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zremrangeByScore(key, min, max) : c2j(jedisObj).zremrangeByScore(key, min, max);
             }
         });
     }
@@ -788,10 +893,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long zremrangebyrank(final String key, final int start,final int max){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.zremrangeByRank(key, start, max);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zremrangeByRank(key, start, max) : c2j(jedisObj).zremrangeByRank(SafeEncoder.encode(key), start, max);
             }
         });
     }
@@ -803,10 +908,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long incr(final String key){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.incr(key);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).incr(key) : c2j(jedisObj).incr(SafeEncoder.encode(key));
             }
         });
     }
@@ -817,10 +922,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long decr(final String key){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.decr(key);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).decr(key) : c2j(jedisObj).decr(SafeEncoder.encode(key));
             }
         });
     }
@@ -831,10 +936,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long zcard(final String key){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.zcard(key);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zcard(key) : c2j(jedisObj).zcard(SafeEncoder.encode(key));
             }
         });
     }
@@ -845,10 +950,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long ttl(final String key){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.ttl(key);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).ttl(key) : c2j(jedisObj).ttl(SafeEncoder.encode(key));
             }
         });
     }
@@ -860,10 +965,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Long srem(final String key,final String member){
-        return call(new ICacheAction<Long>(){
+        return call(new JedisAction<Long>(){
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.srem(key, member);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).srem(key, member) : c2j(jedisObj).srem(key, member);
             }
         });
     }
@@ -874,10 +979,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Set<String> smembers(final String key){
-        return call(new ICacheAction<Set<String>>(){
+        return call(new JedisAction<Set<String>>(){
             @Override
-            public Set<String> execute(IJedisCache jedis) {
-                return jedis.smembers(key);
+            public Set<String> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).smembers(key) : c2j(jedisObj).smembers(key);
             }
         });
     }
@@ -888,10 +993,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Double zscore(final String key,final String member){
-        return call(new ICacheAction<Double>(){
+        return call(new JedisAction<Double>(){
             @Override
-            public Double execute(IJedisCache jedis) {
-                return jedis.zscore(key, member);
+            public Double execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).zscore(key, member) : c2j(jedisObj).zscore(key, member);
             }
         });
     }
@@ -902,23 +1007,35 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<String> hvals(final String key){
-        return call(new ICacheAction<List<String>>(){
+        return call(new JedisAction<List<String>>(){
             @Override
-            public List<String> execute(IJedisCache jedis) {
-                return jedis.hvals(key);
+            public List<String> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).hvals(key) : c2j(jedisObj).hvals(key);
             }
         });
     }
 
     @SuppressWarnings("unused")
     private <T extends Serializable> T batctGet(final Set<String> keys) {
-        return call(new ICacheAction<T>(){
+        return call(new JedisAction<T>(){
             @Override
             @SuppressWarnings("unchecked")
-            public T execute(IJedisCache jedis){
-                Map<String,String> result = new HashMap<>(keys.size());
-                for(String key : keys){
-                    result.put(key, jedis.get(key));
+            public T execute(Object jedisObj){
+                Map<String,String> result = new HashMap<String, String>(keys.size());
+                if(isCluster(jedisObj)) {
+                    for(String key : keys){
+                        result.put(key, c2jc(jedisObj).get(key));
+                    }
+                } else {
+                    Pipeline p = c2j(jedisObj).pipelined();
+                    Map<String,Response<Map<String,String>>> responses = new HashMap<String,Response<Map<String,String>>>(keys.size());
+                    for(String key : keys) {
+                        responses.put(key, p.hgetAll(key));
+                    }
+                    for(Iterator<String> it = responses.keySet().iterator(); it.hasNext();){
+                        String key = it.next();
+                        result.put(key, responses.get(key).get().get(key));
+                    }
                 }
                 return (T)result;
             }
@@ -934,10 +1051,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public long geoadd(final String key, final double longitude, final double latitude, final String member) {
-        return call(new ICacheAction<Long>() {
+        return call(new JedisAction<Long>() {
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.geoadd(key, longitude, latitude, member);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).geoadd(key, longitude, latitude, member) : c2j(jedisObj).geoadd(key, longitude, latitude, member);
             }
         });
     }
@@ -949,10 +1066,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public long geoadd(final String key, final Map<String, GeoCoordinate> memberCoordinateMap) {
-        return call(new ICacheAction<Long>() {
+        return call(new JedisAction<Long>() {
             @Override
-            public Long execute(IJedisCache jedis) {
-                return jedis.geoadd(key, memberCoordinateMap);
+            public Long execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).geoadd(key, memberCoordinateMap) : c2j(jedisObj).geoadd(key, memberCoordinateMap);
             }
         });
     }
@@ -964,10 +1081,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<GeoCoordinate> geopos(final String key, final String... members) {
-        return call(new ICacheAction<List<GeoCoordinate>>() {
+        return call(new JedisAction<List<GeoCoordinate>>() {
             @Override
-            public List<GeoCoordinate> execute(IJedisCache jedis) {
-                return jedis.geopos(key, members);
+            public List<GeoCoordinate> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).geopos(key, members) : c2j(jedisObj).geopos(key, members);
             }
         });
     }
@@ -981,10 +1098,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public Double geodist(final String key, final String member1, final String member2, final GeoUnit unit) {
-        return call(new ICacheAction<Double>() {
+        return call(new JedisAction<Double>() {
             @Override
-            public Double execute(IJedisCache jedis) {
-                return jedis.geodist(key, member1, member2, unit);
+            public Double execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).geodist(key, member1, member2, unit) : c2j(jedisObj).geodist(key, member1, member2, unit);
             }
         });
     }
@@ -999,10 +1116,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<GeoRadiusResponse> georadius(final String key, final double longitude, final double latitude, final double radius, final GeoUnit unit) {
-        return call(new ICacheAction<List<GeoRadiusResponse>>() {
+        return call(new JedisAction<List<GeoRadiusResponse>>() {
             @Override
-            public List<GeoRadiusResponse> execute(IJedisCache jedis) {
-                return jedis.georadius(key, longitude, latitude, radius, unit);
+            public List<GeoRadiusResponse> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).georadius(key, longitude, latitude, radius, unit) : c2j(jedisObj).georadius(key, longitude, latitude, radius, unit);
             }
         });
     }
@@ -1018,10 +1135,10 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<GeoRadiusResponse> georadius(final String key, final double longitude, final double latitude, final double radius, final GeoUnit unit, final GeoRadiusParam param) {
-        return call(new ICacheAction<List<GeoRadiusResponse>>() {
+        return call(new JedisAction<List<GeoRadiusResponse>>() {
             @Override
-            public List<GeoRadiusResponse> execute(IJedisCache jedis) {
-                return jedis.georadius(key, longitude, latitude, radius, unit, param);
+            public List<GeoRadiusResponse> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).georadius(key, longitude, latitude, radius, unit, param) : c2j(jedisObj).georadius(key, longitude, latitude, radius, unit, param);
             }
         });
     }
@@ -1035,103 +1152,103 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public List<GeoRadiusResponse> georadiusByMember(final String key, final String member, final double radius, final GeoUnit unit) {
-        return call(new ICacheAction<List<GeoRadiusResponse>>() {
+        return call(new JedisAction<List<GeoRadiusResponse>>() {
             @Override
-            public List<GeoRadiusResponse> execute(IJedisCache jedis) {
-                return jedis.georadiusByMember(key, member, radius, unit);
+            public List<GeoRadiusResponse> execute(Object jedisObj) {
+                return isCluster(jedisObj) ? c2jc(jedisObj).georadiusByMember(key, member, radius, unit) : c2j(jedisObj).georadiusByMember(key, member, radius, unit);
             }
         });
     }
 
-    /**
-     * 订阅消息
-     * @param listener			订阅监听器
-     * @param channels		订阅渠道
-     */
-    /*
-    public static void subscribe2(final RedisListener listener, final List<String> channels ) {
-		if (channels.isEmpty())
-			throw new NullPointerException("channels is null");
-		final CountDownLatch latch = new CountDownLatch(1);
-		final String[] channelsArray = channels.toArray(new String[] {});
-		try {
-		ThreadPool.execute(new Thread() {
-			public void run() {
-		call(new ICacheAction<Boolean>() {
-			public Boolean execute(final IJedisCache jedis) {
-				if (isCluster(jedisObj)) {
-					try {
-						ThreadPool.execute(new Thread() {
-							public void run() {
-								c2jc(jedisObj).subscribe(listener, channelsArray);
-							}
-						});
-						latch.countDown();
-					} catch (Exception e) {
-						e.printStackTrace();
-						return false;
-					}
-				} else {
-					try {
-						ThreadPool.execute(new Thread() {
-							public void run() {
-								c2j(jedisObj).subscribe(listener, channelsArray);
-							}
-						});
-						latch.countDown();
-					} catch (Exception e) {
-						e.printStackTrace();
-						return false;
-					}
-				}
-				try {
-					latch.await();
-					logger.warn("#############: subscribe " + channels + " done!");
-					return true;
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-					return false;
-				}
-			}
-		});
-			}
-		});
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+/**
+ * 订阅消息
+ * @param listener			订阅监听器
+ * @param channels		订阅渠道
+ */
+/*
+public void subscribe2(final RedisListener listener, final List<String> channels ) {
+    if (channels.isEmpty())
+        throw new NullPointerException("channels is null");
+    final CountDownLatch latch = new CountDownLatch(1);
+    final String[] channelsArray = channels.toArray(new String[] {});
+    try {
+    ThreadPool.execute(new Thread() {
+        public void run() {
+    call(new JedisAction<Boolean>() {
+        public Boolean execute(final Object jedisObj) {
+            if (isCluster(jedisObj)) {
+                try {
+                    ThreadPool.execute(new Thread() {
+                        public void run() {
+                            c2jc(jedisObj).subscribe(listener, channelsArray);
+                        }
+                    });
+                    latch.countDown();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            } else {
+                try {
+                    ThreadPool.execute(new Thread() {
+                        public void run() {
+                            c2j(jedisObj).subscribe(listener, channelsArray);
+                        }
+                    });
+                    latch.countDown();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return false;
+                }
+            }
+            try {
+                latch.await();
+                logger.warn("#############: subscribe " + channels + " done!");
+                return true;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+    });
+        }
+    });
+    }catch(Exception e){
+        e.printStackTrace();
     }
+}
 
-    public static void subscribe3(final RedisListener listener, final List<String> channels) {
-    	if (channels.isEmpty())
-			throw new NullPointerException("channels is null");
-		try {
-			ThreadPool.execute(new Thread() {
-				public void run() {
-					call(new ICacheAction<Boolean>() {
-						public Boolean execute(final IJedisCache jedis) {
-							final String[] channelsArray = channels.toArray(new String[] {});
-							logger.warn("#############: subscribe " + channels + " done!");
-							if (isCluster(jedisObj)) {
-								c2jc(jedisObj).subscribe(listener, channelsArray);
-							} else {
-								c2j(jedisObj).subscribe(listener, channelsArray);
-							}
-							return true;
-						}
-					});
-				}
-			});
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
+public void subscribe3(final RedisListener listener, final List<String> channels) {
+    if (channels.isEmpty())
+        throw new NullPointerException("channels is null");
+    try {
+        ThreadPool.execute(new Thread() {
+            public void run() {
+                call(new JedisAction<Boolean>() {
+                    public Boolean execute(final Object jedisObj) {
+                        final String[] channelsArray = channels.toArray(new String[] {});
+                        logger.warn("#############: subscribe " + channels + " done!");
+                        if (isCluster(jedisObj)) {
+                            c2jc(jedisObj).subscribe(listener, channelsArray);
+                        } else {
+                            c2j(jedisObj).subscribe(listener, channelsArray);
+                        }
+                        return true;
+                    }
+                });
+            }
+        });
+    } catch (Exception e1) {
+        e1.printStackTrace();
     }
-    */
+}
+*/
     /**
      * 订阅消息
      * @param listener			订阅监听器
      * @param channels		订阅渠道
      */
-    public static void subscribe(final RedisListener listener, final List<String> channels) {
+    public void subscribe(final RedisListener listener, final List<String> channels) {
         if (channels.isEmpty()) {
             throw new NullPointerException("channels is null");
         }
@@ -1140,7 +1257,7 @@ public class RedisClient extends AbstractRedisClient {
             ThreadPoolKit.execute(new Runnable() {
                 @Override
                 public void run() {
-                    if(!isCluster()) {
+                    if(!RedisClient.isCluster()) {
                         Jedis jedis = JedisPoolUtils.getJedis();
                         jedis.subscribe(listener, channelsArray);
                     } else {
@@ -1150,7 +1267,7 @@ public class RedisClient extends AbstractRedisClient {
                 }
             });
         } catch (Exception e1) {
-            logger.warn(e1.getMessage(), e1);
+            e1.printStackTrace();
         } finally {
             logger.warn("#############: subscribe " + channels + " done!");
         }
@@ -1162,7 +1279,7 @@ public class RedisClient extends AbstractRedisClient {
      * @param channels		订阅渠道
      * @return
      */
-    public static void psubscribe(final RedisListener listener, final List<String> channels) {
+    public void psubscribe(final RedisListener listener, final List<String> channels) {
         if (channels.isEmpty()) {
             throw new NullPointerException("channels is null");
         }
@@ -1171,7 +1288,7 @@ public class RedisClient extends AbstractRedisClient {
             ThreadPoolKit.execute(new Runnable() {
                 @Override
                 public void run() {
-                    if(!isCluster()) {
+                    if(!RedisClient.isCluster()) {
                         Jedis jedis = JedisPoolUtils.getJedis();
                         jedis.psubscribe(listener, channelsArray);
                     } else {
@@ -1181,7 +1298,7 @@ public class RedisClient extends AbstractRedisClient {
                 }
             });
         } catch (Exception e1) {
-            logger.warn(e1.getMessage(), e1);
+            e1.printStackTrace();
         } finally {
             logger.warn("#############: psubscribe " + channels + " done!");
         }
@@ -1193,16 +1310,12 @@ public class RedisClient extends AbstractRedisClient {
      * @return
      */
     public long publish(final RedisMessage message ) {
-        return call(new ICacheAction<Long>() {
+        return call(new JedisAction<Long>() {
             @Override
-            public Long execute(IJedisCache jedis) {
-                byte[] bytes = SerializableUtils.serializeByte(message.getBody());
-                try {
-                    return jedis.publish(message.getChannel(), new String(bytes, Protocol.CHARSET));
-                } catch (Exception e) {
-                    logger.warn(e.getMessage(), e);
-                    return 0L;
-                }
+            public Long execute(Object jedisObj) {
+                byte[] channel = SafeEncoder.encode(message.getChannel());
+                byte[] bytes = SerializableUtils.serialize(message.getBody());
+                return isCluster(jedisObj) ? c2jc(jedisObj).publish(channel, bytes) : c2j(jedisObj).publish(channel, bytes);
             }
         });
     }

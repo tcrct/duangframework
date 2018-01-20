@@ -465,16 +465,16 @@ public abstract class BaseController {
         T resultBean = null;
         String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
         try {
-            if(ContentType.JSON.getValue().contains(contentType)) {
+            if (ToolsKit.isEmpty(contentType) || ContentType.FORM.getValue().contains(contentType)) {
+                String paramsJson = ToolsKit.toJsonString(getAllParams());
+                resultBean = ToolsKit.jsonParseObject(paramsJson, tClass);
+            }else if(ContentType.JSON.getValue().contains(contentType)) {
                 resultBean = ToolsKit.jsonParseObject(getJson(), tClass);
             } else  if(ContentType.XML.getValue().contains(contentType)) {
                 resultBean = ToolsKit.xmlParseObject(getXml(), tClass);
-            } else if (ContentType.FORM.getValue().contains(contentType) || ToolsKit.isEmpty(contentType)) {
-                String paramsJson = ToolsKit.toJsonString(getAllParams());
-                resultBean = ToolsKit.jsonParseObject(paramsJson, tClass);
             }
             // 开启验证
-            if(isValidator) {
+            if(isValidator && ToolsKit.isNotEmpty(resultBean)) {
                 ValidatorFactory.validator(resultBean);
             }
         } catch (Exception e) {

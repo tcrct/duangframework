@@ -35,18 +35,6 @@ public class CachePlugin implements IPlugin {
         RedisClient.getInstance().setPassword(pwd);
     }
 
-//    public CachePlugin(RedisEnums enums) {
-//        boolean isClusterRedis = RedisEnums.ECS_CLUSTER.getCode().equalsIgnoreCase(enums.getCode());
-//        //如果集群
-//        if(isClusterRedis) {
-//        } else {
-//            RedisClient.getInstance().setHost(enums.getIp());
-//            RedisClient.getInstance().setPort(enums.getPort());
-//            RedisClient.getInstance().setDatabase(enums.getDataBase());
-//            RedisClient.getInstance().setPassword(enums.getPwd());
-//        }
-//    }
-
     @Override
     public void init() throws Exception {
     }

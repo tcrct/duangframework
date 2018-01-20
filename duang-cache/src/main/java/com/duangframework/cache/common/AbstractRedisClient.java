@@ -1,19 +1,18 @@
 package com.duangframework.cache.common;
 
-import com.duangframework.cache.core.ICache;
-import com.duangframework.cache.core.IJedisCache;
 import com.duangframework.cache.sdk.redis.RedisEnums;
 import com.duangframework.cache.utils.JedisClusterPoolUtils;
 import com.duangframework.cache.utils.JedisPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 
 /**
  * @author Created by laotang
  * @date createed in 2018/1/17.
  */
-public abstract class AbstractRedisClient  implements ICache<ICacheAction> {
+public abstract class AbstractRedisClient {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractRedisClient.class);
 
@@ -77,26 +76,26 @@ public abstract class AbstractRedisClient  implements ICache<ICacheAction> {
         this.port = port;
     }
 
-
-    @Override
-    public <T> T call(ICacheAction cacheAction) {
+    public <T> T call(JedisAction cacheAction) {
         T result = null;
-        if(isCluster()) {
-            logger.info("##############AbstractRedisCache");
+        if(!isCluster()) {
             Jedis jedis = JedisPoolUtils.getJedis();
             try {
-                result = (T) cacheAction.execute((IJedisCache)jedis);
+                result = (T) cacheAction.execute(jedis);
             } catch (Exception e) {
-                JedisPoolUtils.returnBrokenResource(jedis);
+//                JedisPoolUtils.returnBrokenResource(jedis);
                 logger.warn(e.getMessage(), e);
-            } finally {
-                JedisPoolUtils.returnResource(jedis);
             }
+//            finally {
+//                JedisPoolUtils.returnResource(jedis);
+//            }
         } else {
-            logger.info("##############AbstractRedisClusterCache");
-            IJedisCache jedisCluster = (IJedisCache)JedisClusterPoolUtils.getJedisCluster();
+            JedisCluster jedisCluster = JedisClusterPoolUtils.getJedisCluster();
             result = (T) cacheAction.execute(jedisCluster);
         }
         return result;
     }
+
+
+
 }

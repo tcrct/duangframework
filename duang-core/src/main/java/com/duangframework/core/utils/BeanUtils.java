@@ -14,20 +14,20 @@ public class BeanUtils {
     /**
      *  根据Class取出对应的Bean
      */
-    public static Object getBean(Class<?> clazz, Object targetObj) {
+    public static <T> T getBean(Class<?> clazz, Object targetObj) {
         if (!allBeanMap.containsKey(clazz)) {
             if(!targetObj.getClass().equals(Class.class)) {
                 throw new MvcStartUpException(targetObj.getClass().getName() + " 无法根据类名获取实例: " + clazz + " , 请检查是否后缀名是否正确！");
             }
         }
-        return allBeanMap.get(clazz);
+        return (T)allBeanMap.get(clazz);
     }
 
     /**
      *  根据Class取出对应的Bean
      */
-    public static Object getBean(Class<?> clazz) {
-        return allBeanMap.get(clazz);
+    public static <T> T getBean(Class<?> clazz) {
+        return (T)allBeanMap.get(clazz);
     }
 
     /**
