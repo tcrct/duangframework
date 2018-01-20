@@ -16,7 +16,6 @@ import redis.clients.jedis.exceptions.JedisException;
 import redis.clients.jedis.params.geo.GeoRadiusParam;
 import redis.clients.util.SafeEncoder;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -67,7 +66,7 @@ public class RedisClient extends AbstractRedisClient {
      * @param key
      * @return
      */
-    public <T extends Serializable> T get(final String key, final Class<T> typeReference){
+    public <T> T get(final String key, final Class<T> typeReference){
         return call(new JedisAction<T>(){            
             @Override
             public T execute(Object jedisObj) {
@@ -101,7 +100,7 @@ public class RedisClient extends AbstractRedisClient {
      * @param type		泛型
      * @return
      */
-    public <T extends Serializable> T get(final String key, final TypeReference<T> type){
+    public <T> T get(final String key, final TypeReference<T> type){
         return call(new JedisAction<T>(){
             @Override
             public T execute(Object jedisObj) {
@@ -115,7 +114,7 @@ public class RedisClient extends AbstractRedisClient {
     }
 
 
-    public <T extends Serializable> List<T> getArray(final String key, final Class<T> typeReference){
+    public <T> List<T> getArray(final String key, final Class<T> typeReference){
         return call(new JedisAction<List<T>>(){
             @Override
             public List<T> execute(Object jedisObj) {
@@ -1016,7 +1015,7 @@ public class RedisClient extends AbstractRedisClient {
     }
 
     @SuppressWarnings("unused")
-    private <T extends Serializable> T batctGet(final Set<String> keys) {
+    private <T> T batctGet(final Set<String> keys) {
         return call(new JedisAction<T>(){
             @Override
             @SuppressWarnings("unchecked")
