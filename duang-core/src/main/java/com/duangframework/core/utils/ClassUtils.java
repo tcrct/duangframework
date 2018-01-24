@@ -1,6 +1,7 @@
 package com.duangframework.core.utils;
 
 import com.duangframework.core.annotation.db.Entity;
+import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,16 +41,7 @@ public class ClassUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> T newInstance(String className, Object[] values, Class<?>... parameterTypes ) {
-        T instance;
-        try {
-            Class<?> commandClass = Class.forName(className);
-            Constructor<?> constructor = commandClass.getConstructor(parameterTypes);
-            instance = (T) constructor.newInstance(values);
-        } catch (Exception e) {
-            logger.error("创建实例出错！", e);
-            throw new RuntimeException(e);
-        }
-        return instance;
+        return ObjectKit.newInstance(className, values, parameterTypes);
     }
 
     public static <T> T newInstance(Class<?> clazz) {
