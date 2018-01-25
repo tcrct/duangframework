@@ -1,5 +1,6 @@
 package com.duangframework.core.common.classes;
 
+import com.duangframework.core.common.Const;
 import com.duangframework.core.kit.PathKit;
 import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
@@ -54,6 +55,11 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
 
     protected AbstractClassTemplate(Set<Class<? extends Annotation>> annotationSet, Set<String> packageSet) {
         this(annotationSet, packageSet, null, null);
+    }
+
+
+    protected  void reload() {
+
     }
 
     /**
@@ -134,6 +140,10 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
                             doAddClass(classList, filePkg, fileName, suffix);
                         }
                     }
+                }
+                if(!Const.IS_RELOAD_SCANNING) {
+                    //将所有URL添加到集合
+                    Const.URL_LIST.add(url);
                 }
             }
         }

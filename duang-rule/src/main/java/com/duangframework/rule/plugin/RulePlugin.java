@@ -9,7 +9,7 @@ import com.duangframework.rule.core.RuleFactory;
  */
 public class RulePlugin implements IPlugin {
 
-    private String ruleDir = "/rule";
+    private String ruleDir = "/rules";
 
     public RulePlugin() {
 

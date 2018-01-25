@@ -1,5 +1,9 @@
 package com.duangframework.core.common;
 
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *  常量类
  * @author laotang
@@ -85,4 +89,14 @@ public class Const {
     public final static String FORWARDED_FOR= "X-Forwarded-For";
     public final static String FORWARDED_PROTO = "X-Forwarded-Proto";
     public final static String REAL_IP = "X-Real-IP";
+
+    /**
+     * 所有指定扫描类的URL集合
+     */
+    public final static List<URL> URL_LIST = new ArrayList<>();
+
+   /**
+     * 是否重复扫描, 用于热加载
+     */
+    public static boolean IS_RELOAD_SCANNING = false;
 }

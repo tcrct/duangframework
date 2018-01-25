@@ -1,10 +1,14 @@
 package com.duangframework.rule.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Created by laotang
  * @date createed in 2018/1/24.
  */
-public class RuleParam<T> {
+public class RuleParam {
 
     /**
      * 规则名称 <br/>
@@ -13,21 +17,22 @@ public class RuleParam<T> {
      */
     private String ruleName;
     /**
-     * 要验证规则的字段名称
+     * 需要验证的字段名与缓存值对象
      */
-    private String key;
-    /**
-     *  要验证规则的内容值
-     */
-    private T value;
+    private List<ParamItem<?>> paramItemList;
 
     public RuleParam() {
     }
 
-    public RuleParam(String ruleName, String key, T value) {
+    public RuleParam(String ruleName, ParamItem<?> paramItem) {
         this.ruleName = ruleName;
-        this.key = key;
-        this.value = value;
+        this.paramItemList = new ArrayList<>(1);
+        this.paramItemList.add(paramItem);
+    }
+
+    public RuleParam(String ruleName, List<ParamItem<?>> paramItemList) {
+        this.ruleName = ruleName;
+        this.paramItemList = paramItemList;
     }
 
     public String getRuleName() {
@@ -38,19 +43,22 @@ public class RuleParam<T> {
         this.ruleName = ruleName;
     }
 
-    public String getKey() {
-        return key;
+    public List<ParamItem<?>> getParamItemList() {
+        return paramItemList;
     }
 
-    public void setKey(String key) {
-        this.key = key;
+    public void setParamItemList(List<ParamItem<?>> paramItemList) {
+        this.paramItemList = paramItemList;
     }
 
-    public T getValue() {
-        return value;
-    }
-
-    public void setValue(T value) {
-        this.value = value;
+    public Map<String, Object> toMap() {
+        if(null != paramItemList && !paramItemList.isEmpty()) {
+            Map<String, Object> map = new java.util.TreeMap<>();
+            for(ParamItem paramItem : paramItemList) {
+                map.put(paramItem.getKey(), paramItem.getValue());
+            }
+            return map;
+        }
+        return null;
     }
 }

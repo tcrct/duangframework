@@ -1,11 +1,14 @@
 package com.duangframework.rule.kit;
 
+import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.rule.core.RuleFactory;
+import com.duangframework.rule.entity.ParamItem;
 import com.duangframework.rule.entity.RuleParam;
 import com.duangframework.rule.entity.RuleResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -48,12 +51,10 @@ public class RuleKit {
         ruleParam.setRuleName(ruleName);
         return this;
     }
-    public RuleKit key(String key) {
-        ruleParam.setKey(key);
-        return this;
-    }
-    public RuleKit vlaue(Object value) {
-        ruleParam.setValue(value);
+    public RuleKit param(ParamItem<?> paramItem) {
+        List<ParamItem<?>> paramItemList = new ArrayList<>(1);
+        paramItemList.add(paramItem);
+        ruleParam.setParamItemList(paramItemList);
         return this;
     }
     /**
@@ -61,17 +62,20 @@ public class RuleKit {
      * @param ruleParamList
      * @return
      */
-    public RuleKit params(List<RuleParam<?>> ruleParamList) {
+    public RuleKit params(List<RuleParam> ruleParamList) {
         _ruleParamList.addAll(ruleParamList);
         return this;
     }
 
-    public RuleKit param(RuleParam<?> ruleParam) {
+    public RuleKit param(RuleParam ruleParam) {
         _ruleParamList.add(ruleParam);
         return this;
     }
 
     public RuleResult result() {
+        if(ToolsKit.isNotEmpty(ruleParam.getRuleName()) && ToolsKit.isNotEmpty(ruleParam.getParamItemList())) {
+            _ruleParamList.add(ruleParam);
+        }
         return RuleFactory.execute(_ruleParamList);
     }
 

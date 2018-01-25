@@ -13,6 +13,8 @@ import org.kie.api.builder.Message;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.io.ResourceFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.net.URL;
  */
 public class KieSessionHolder {
 
+    private static Logger logger = LoggerFactory.getLogger(KieSessionHolder.class);
 
     private static KieContainer kieContainer = null;
     private String ruleDir;
@@ -59,10 +62,11 @@ public class KieSessionHolder {
     }
 
     private File[] getRuleFiles() throws IOException {
-        URL rootPathUrl = PathKit.duang().resource("/").path();
-        File ruleFileDir = new File(rootPathUrl.getPath() + ruleDir);
+        URL rootPathUrl = PathKit.duang().resource(ruleDir).path();
+        File ruleFileDir = new File(rootPathUrl.getPath());
         if(!ruleFileDir.exists()) {
             ruleFileDir.mkdir();
+            logger.warn("drools file dir ["+ ruleFileDir.getAbsolutePath() + "] is not exites! create it...");
         }
         File[] files = ruleFileDir.listFiles();
         return files;
@@ -72,8 +76,9 @@ public class KieSessionHolder {
         KieFileSystem kieFileSystem = getKieServices().newKieFileSystem();
         // 读取规则文件
         File[] files = getRuleFiles();
+        ruleDir = ruleDir.startsWith("/") ? ruleDir.substring(1, ruleDir.length()) : ruleDir;
         for (File file : files) {
-            kieFileSystem.write(ResourceFactory.newClassPathResource(file.getAbsolutePath(), "UTF-8"));
+            kieFileSystem.write(ResourceFactory.newClassPathResource(ruleDir+"/"+file.getName(), "UTF-8"));
         }
         return kieFileSystem;
     }
@@ -88,7 +93,7 @@ public class KieSessionHolder {
             throw new RuntimeException("Build Errors: " + kb.getResults().toString());
         }
         final KieContainer kContainer = ks.newKieContainer(kr.getDefaultReleaseId());
-
+        logger.warn("init kie container success");
         return kContainer;
     }
 

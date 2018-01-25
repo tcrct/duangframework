@@ -104,7 +104,6 @@ public class BeanHelper {
         } else {
             instanceObj = ClassUtils.newInstance(cls);
         }
-
         return instanceObj;
     }
 

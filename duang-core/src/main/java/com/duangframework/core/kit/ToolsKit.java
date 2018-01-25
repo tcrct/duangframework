@@ -8,6 +8,8 @@ import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.DuangId;
 import com.duangframework.core.common.dto.result.HeadDto;
+import com.duangframework.core.common.dto.result.ReturnDto;
+import com.duangframework.core.common.enums.IEnums;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.utils.DuangThreadLocal;
 import com.duangframework.core.utils.IpUtils;
@@ -316,5 +318,29 @@ public class ToolsKit {
                 System.out.println(toJsonString(message));
             }
         }
+    }
+
+    /**
+     *
+     * @param enums
+     * @param obj
+     * @return
+     */
+    public static ReturnDto<Object> buildReturnDto(IEnums enums, Object obj) {
+        ReturnDto<Object> dto = new ReturnDto<Object>();
+        HeadDto head = getThreadLocalDto();
+        if(isEmpty(head)) {
+            head = new HeadDto();
+        }
+        if (ToolsKit.isEmpty(enums)) {
+            head.setRet(IEnums.IENUMS_SUCCESS_CODE);
+            head.setMsg(IEnums.IENUMS_SUCCESS_MESSAGE);
+        } else {
+            head.setRet(enums.getCode());
+            head.setMsg(enums.getMessage());
+        }
+        dto.setHead(head);
+        dto.setData(obj);
+        return dto;
     }
 }

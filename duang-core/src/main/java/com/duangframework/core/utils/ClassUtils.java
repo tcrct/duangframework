@@ -6,7 +6,6 @@ import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -25,12 +24,27 @@ public class ClassUtils {
 
     private static final ConcurrentMap<String, Field[]> FIELD_MAPPING_MAP = new ConcurrentHashMap<String, Field[]>();
 
+    private static Thread mainThread;
+
+
+
     /**
      * 获取类加载器
      */
     public static ClassLoader getClassLoader() {
 //        ClassLoader classLoader = new URLClassLoader();
+//        ClassLoader.getSystemClassLoader().clearAssertionStatus();
         return Thread.currentThread().getContextClassLoader();
+//        if(!Const.IS_RELOAD_SCANNING) {
+//            mainThread = Thread.currentThread();
+//            System.out.println("ClassUtils getClassLoader1111111: " + mainThread.getName());
+//            return mainThread.getContextClassLoader();
+//        } else {
+//            mainThread = null;
+//            URLClassLoader urlClassLoader = new URLClassLoader(Const.URL_LIST.toArray(new URL[]{}));
+//            System.out.println("ClassUtils getClassLoader2222222: " + urlClassLoader+"          "+urlClassLoader.hashCode());
+//            return urlClassLoader;
+//        }
     }
 
     /**

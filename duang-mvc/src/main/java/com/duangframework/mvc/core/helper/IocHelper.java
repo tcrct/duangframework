@@ -23,11 +23,10 @@ public class IocHelper {
     private static Map<Class<?>, Object> beanMap = new HashMap<>();
 
     public static void duang() throws Exception {
+        beanMap.clear();
         // 取出所有类实例
-        beanMap = BeanUtils.getAllBeanMap();
-
+        beanMap.putAll(BeanUtils.getAllBeanMap());
         if(ToolsKit.isEmpty(beanMap)) { return; }
-
         /**
          * 遍历所有存在beanMap里的类对象
          * 先根据类方法是否有代理注解，如果有，则先将该类对类转换成代理类后再重新设置到beanMap里

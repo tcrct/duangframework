@@ -34,6 +34,6 @@ public class RuleResult {
     }
 
     public boolean isSuccess() {
-        return code != 200;
+        return code == 200;
     }
 }

@@ -1,10 +1,13 @@
 package com.duangframework.mvc.listener;
 
+import com.duangframework.core.common.Const;
 import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.utils.BeanUtils;
+import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mvc.core.IDuang;
 import com.duangframework.mvc.core.InstanceFactory;
 import com.duangframework.mvc.core.helper.BeanHelper;
@@ -63,6 +66,10 @@ public class ContextLoaderListener implements IContextLoaderListener{
     public static void contextDestroyed() {
         PluginHelper.stop();
         InstanceFactory.getHandles().clear();
+        duangFrameword = null;
+        ClassUtils.getAllClassMaps().clear();
+        BeanUtils.getAllBeanMaps().clear();
+        logger.warn("##############contextDestroyed is success......");
 //        ThreadPoolKit.shutdown();
     }
 
@@ -93,16 +100,17 @@ public class ContextLoaderListener implements IContextLoaderListener{
         if (ToolsKit.isEmpty(configClass)) {
             throw new MvcStartUpException("IDuang子类路径不能为空!");
         }
-        try {
-            duangFrameword = ObjectKit.newInstance(configClass);
-            duangFrameword.addHandlers();
-            duangFrameword.addPlugins();
-            logger.warn("initContext success");
-        } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
-            throw new MvcStartUpException("不能创建类: " + configClass, e);
+        if(null == duangFrameword) {
+            try {
+                duangFrameword = ObjectKit.newInstance(configClass);
+                duangFrameword.addHandlers();
+                duangFrameword.addPlugins();
+                logger.warn("initContext success");
+            } catch (Exception e) {
+                logger.warn(e.getMessage(), e);
+                throw new MvcStartUpException("不能创建类: " + configClass, e);
+            }
         }
-
     }
 
     /**
@@ -114,18 +122,24 @@ public class ContextLoaderListener implements IContextLoaderListener{
         Handles.init();
         logger.warn("instance " + duangFrameword.getClass().getName() + " success!");
 
-//        long halfTimeOut = 10000L;
-//        new Timer().schedule(new TimerTask() {
-//                @Override
-//                public void run() {
-//                    try {
-//                        contextDestroyed();
-//                        contextInitialized();
-//                    } catch (Exception e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//        }, halfTimeOut, halfTimeOut);
 
+    }
+
+    public void reload() {
+        //// delay为long,period为long：从现在起过delay毫秒以后，每隔period  毫秒执行一次。
+        long halfTimeOut = 20000L;
+        new java.util.Timer().schedule(new java.util.TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    Const.IS_RELOAD_SCANNING = true;
+                    contextDestroyed();
+                    contextInitialized();
+//                        BeanHelper.duang();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }, halfTimeOut, halfTimeOut);
     }
 }

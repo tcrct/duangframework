@@ -1,5 +1,6 @@
 package com.duangframework.mvc.core;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.dto.http.head.HttpHeaders;
@@ -9,7 +10,9 @@ import com.duangframework.core.common.dto.http.response.HttpResponse;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.common.dto.result.ReturnDto;
+import com.duangframework.core.common.enums.IEnums;
 import com.duangframework.core.exceptions.DuangMvcException;
+import com.duangframework.core.exceptions.ServiceException;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
@@ -93,7 +96,7 @@ public abstract class BaseController {
      * @return
      */
     private Map<String, Object> getAllParams() {
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         Map<String, String[]> requestParams = request.getParameterMap();
         if (ToolsKit.isNotEmpty(requestParams)) {
             for (Iterator<String> iter = requestParams.keySet().iterator(); iter.hasNext();) {
@@ -298,7 +301,7 @@ public abstract class BaseController {
                 }
             }
         }
-        return -1l;
+        return -1L;
     }
 
     /**
@@ -483,4 +486,71 @@ public abstract class BaseController {
         }
         return resultBean;
     }
+
+
+    protected void returnSuccessJson(Object obj) {
+        returnSuccessJson(null, obj , null);
+    }
+
+    protected void returnSuccessJson(IEnums enums, Object obj) {
+        returnJson(ToolsKit.buildReturnDto(enums, obj), null);
+    }
+
+    protected void returnSuccessJson(IEnums enums, Object obj, Set<String> fieldFilterSet) {
+        returnJson(ToolsKit.buildReturnDto(enums, obj), fieldFilterSet);
+    }
+
+
+    /**
+     * 返回错误信息到客户端
+     *
+     * @param ex
+     *            自定义ServiceException异常
+     */
+    protected void returnFailJson(Exception ex) {
+        String message = ex.getMessage();
+        int code = IEnums.IENUMS_FAIL_CODE;
+        if (ex instanceof ServiceException) {
+            ServiceException se = (ServiceException) ex;
+            IEnums enums = se.getEnums();
+            if (ToolsKit.isEmpty(enums)) {
+                code = ToolsKit.isEmpty(se.getCode()) ? IEnums.IENUMS_FAIL_CODE : se.getCode();
+                message = ToolsKit.isEmpty(se.getMessage()) ? IEnums.IENUMS_FAIL_MESSAGE : se.getMessage();
+            } else {
+                code = enums.getCode();
+                message = enums.getMessage();
+            }
+            ToolsKit.console("returnFail：" + se.getStackTrace()[0].getClassName() + "-->"
+                    + se.getStackTrace()[0].getMethodName() + "-->" + se.getStackTrace()[0].getLineNumber() + "："
+                    + message + "：" + request.getRequestURI() + "：" + JSON.toJSONString(getAllParams()));
+        } else {
+            logger.warn(ex.getMessage(), ex);
+        }
+        ReturnDto<Map<String, Object>> dto = new ReturnDto<Map<String, Object>>();
+        HeadDto head = ToolsKit.getThreadLocalDto();
+        if(ToolsKit.isEmpty(head)) {
+            head = new HeadDto();
+            head.setUri(request.getRequestURI());
+        }
+        head.setRet(code);
+        head.setMsg(message);
+        dto.setHead(head);
+        dto.setData(getAllParams());
+        returnJson(dto);
+    }
+
+    protected void returnFailJson(int ret, String msg, Object dto) {
+        ReturnDto<Object> returnDto = new ReturnDto<Object>();
+        HeadDto head = ToolsKit.getThreadLocalDto();
+        if(ToolsKit.isEmpty(head)) {
+            head = new HeadDto();
+            head.setUri(request.getRequestURI());
+        }
+        head.setMsg(msg);
+        head.setRet(ret);
+        returnDto.setHead(head);
+        returnDto.setData(dto);
+        returnJson(returnDto);
+    }
+
 }

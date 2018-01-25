@@ -41,7 +41,7 @@ public class PathKit {
     }
 
     public PathKit resource(String resPath) {
-        resourcePath = resPath;
+        resourcePath = resPath.startsWith("/") ? resPath.substring(1, resPath.length()) : resPath;
         return _pathKit;
     }
 
