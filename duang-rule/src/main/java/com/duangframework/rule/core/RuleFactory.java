@@ -6,12 +6,14 @@ import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.rule.entity.RuleParam;
 import com.duangframework.rule.entity.RuleResult;
+import com.duangframework.rule.entity.generate.DrlModel;
 import org.drools.core.base.RuleNameEndsWithAgendaFilter;
 import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Created by laotang
@@ -22,7 +24,20 @@ public class RuleFactory {
     private static Logger logger = LoggerFactory.getLogger(RuleFactory.class);
     private static KieSessionHolder kieSessionHolder = null;
 
+    /**
+     * 初始化 kie 容器对象
+     * @param ruleDir       规则文件目录
+     */
     public static void init(final String ruleDir) {
+        init(ruleDir, null);
+    }
+
+    /**
+     * 初始化 kie 容器对象
+     * @param ruleDir       规则文件目录
+     * @param drlModel   drl文件对象
+     */
+    public static void init(final String ruleDir, final DrlModel drlModel) {
         if(ToolsKit.isEmpty(kieSessionHolder)) {
             ThreadPoolKit.execute(new Runnable() {
                 @Override
@@ -33,6 +48,11 @@ public class RuleFactory {
         }
     }
 
+    /**
+     * 执行规则验证
+     * @param ruleParams
+     * @return
+     */
     public static RuleResult  execute(List<RuleParam> ruleParams) {
         if(ToolsKit.isEmpty(ruleParams)) {
             throw new EmptyNullException("ruleParams is null");
@@ -44,7 +64,8 @@ public class RuleFactory {
         RuleResult ruleResult = new RuleResult(200, "success");
         try {
             for (RuleParam ruleParam : ruleParams) {
-                kieSession.insert(ruleParam.toMap());
+                Map<String, Object> ruleParamsMap = ruleParam.toMap();
+                kieSession.insert(ruleParamsMap);
                 int ruleFiredCount = kieSession.fireAllRules(new RuleNameEndsWithAgendaFilter(ruleParam.getRuleName()));
                 if (ruleFiredCount <  0) {
                     throw new ServiceException("验证[" + ruleParam.getRuleName() + "]不通过");
@@ -57,6 +78,10 @@ public class RuleFactory {
         }
         kieSession.destroy();
         return ruleResult;
+    }
+
+    public static boolean  reload() {
+        return kieSessionHolder.reload();
     }
 
 }

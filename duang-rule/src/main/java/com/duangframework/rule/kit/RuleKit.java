@@ -47,10 +47,21 @@ public class RuleKit {
         ruleParam = new RuleParam();
     }
 
+    /**
+     * 规则名称
+     * @param ruleName
+     * @return
+     */
     public RuleKit name(String ruleName) {
         ruleParam.setRuleName(ruleName);
         return this;
     }
+
+    /**
+     *  要验证规则的字段及值对象
+     * @param paramItem
+     * @return
+     */
     public RuleKit param(ParamItem<?> paramItem) {
         List<ParamItem<?>> paramItemList = new ArrayList<>(1);
         paramItemList.add(paramItem);
@@ -67,18 +78,32 @@ public class RuleKit {
         return this;
     }
 
+    /**
+     * 要验证的规则
+     * @param ruleParam
+     * @return
+     */
     public RuleKit param(RuleParam ruleParam) {
         _ruleParamList.add(ruleParam);
         return this;
     }
 
+    /**
+     * 重载DRL规则文件
+     * @return
+     */
+    public boolean reload() {
+        return RuleFactory.reload();
+    }
+
+    /**
+     * 返回执行结果
+     * @return
+     */
     public RuleResult result() {
         if(ToolsKit.isNotEmpty(ruleParam.getRuleName()) && ToolsKit.isNotEmpty(ruleParam.getParamItemList())) {
             _ruleParamList.add(ruleParam);
         }
         return RuleFactory.execute(_ruleParamList);
     }
-
-
-
 }

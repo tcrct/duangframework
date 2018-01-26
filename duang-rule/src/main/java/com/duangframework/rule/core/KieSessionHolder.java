@@ -5,6 +5,8 @@ package com.duangframework.rule.core;
 
 import com.duangframework.core.kit.PathKit;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.rule.entity.generate.DrlModel;
+import com.duangframework.rule.utils.RuleUtils;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -32,13 +34,19 @@ public class KieSessionHolder {
 
     private static KieContainer kieContainer = null;
     private String ruleDir;
+    private DrlModel drlModel;
 
     public static final class Builder {
             String rulesDir = "/rules";
+            DrlModel drlModel;
             public Builder ruleDir(String rulesDir) {
                 this.rulesDir = rulesDir;
                 return this;
             }
+        public Builder ruleDir(DrlModel drlModel) {
+            this.drlModel = drlModel;
+            return this;
+        }
             public KieSessionHolder builder() {
                 return new KieSessionHolder(this);
             }
@@ -46,6 +54,7 @@ public class KieSessionHolder {
 
     public KieSessionHolder(Builder builder) {
         ruleDir = builder.rulesDir;
+        drlModel = builder.drlModel;
         init();
     }
 
@@ -74,11 +83,16 @@ public class KieSessionHolder {
 
     private KieFileSystem kieFileSystem() throws IOException {
         KieFileSystem kieFileSystem = getKieServices().newKieFileSystem();
-        // 读取规则文件
-        File[] files = getRuleFiles();
-        ruleDir = ruleDir.startsWith("/") ? ruleDir.substring(1, ruleDir.length()) : ruleDir;
-        for (File file : files) {
-            kieFileSystem.write(ResourceFactory.newClassPathResource(ruleDir+"/"+file.getName(), "UTF-8"));
+        if(ToolsKit.isNotEmpty(drlModel)) {
+            String body = RuleUtils.createDrlFile(drlModel);
+            kieFileSystem.write("src/main/resources/"+ruleDir+"/" + body.hashCode() + ".drl", body);
+        } else {
+            // 读取规则文件
+            File[] files = getRuleFiles();
+            ruleDir = ruleDir.startsWith("/") ? ruleDir.substring(1, ruleDir.length()) : ruleDir;
+            for (File file : files) {
+                kieFileSystem.write(ResourceFactory.newClassPathResource(ruleDir + "/" + file.getName(), "UTF-8"));
+            }
         }
         return kieFileSystem;
     }
@@ -102,5 +116,16 @@ public class KieSessionHolder {
             init();
         }
         return kieContainer.newKieSession();
+    }
+
+    public boolean reload() {
+        try {
+            kieFileSystem();
+            return true;
+        } catch (Exception e) {
+            logger.warn("reload if fail: " + e.getMessage(), e);
+            return false;
+        }
+
     }
 }
