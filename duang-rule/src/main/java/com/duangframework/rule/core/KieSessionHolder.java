@@ -101,7 +101,6 @@ public class KieSessionHolder {
         final KieServices ks = getKieServices();
         final KieRepository kr = ks.getRepository();
         final KieBuilder kb = ks.newKieBuilder(kieFileSystem());
-
         kb.buildAll();
         if (kb.getResults().hasMessages(Message.Level.ERROR)) {
             throw new RuntimeException("Build Errors: " + kb.getResults().toString());
