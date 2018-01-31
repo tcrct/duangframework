@@ -19,12 +19,18 @@ public class AutoCreateDrlFile {
 
     private static final String TAB_FIELD = "    ";
     private static final String ENTER_FIELD = "\n";
+    private static final String EXCEUTE_FUNCTION_FIELD = "exceute";
 
     public static String builder(DrlModel drlModel) throws Exception {
         StringBuilder drlString = new StringBuilder();
         drlString.append("package ").append(createDrlPackageName(drlModel.getPackageName())).append(ENTER_FIELD).append(ENTER_FIELD);
         drlString.append(createImportPackage(drlModel.getImportPackageSet())).append(ENTER_FIELD);
+        drlString.append("function void ").append(EXCEUTE_FUNCTION_FIELD).append("(String ruleName) {").append(ENTER_FIELD)
+                .append(TAB_FIELD).append(IRuleFuction.class.getSimpleName()).append(".")
+                .append(EXCEUTE_FUNCTION_FIELD).append("(ruleName);").append(ENTER_FIELD)
+                .append("}").append(ENTER_FIELD).append(ENTER_FIELD);
         drlString.append(createRuleInfo(drlModel.getRuleInfoModelList())).append(ENTER_FIELD);
+        System.out.println(drlString);
         return drlString.toString();
     }
 
@@ -46,7 +52,7 @@ public class AutoCreateDrlFile {
         }
 //        String ruleUtilePath = RuleUtils.class.getPackage().getName() +"." +RuleUtils.class.getSimpleName();
 //        if(!importPackageSet.contains(ruleUtilePath)) {
-//            importPackageString.append("import ").append(ruleUtilePath).append(";").append(ENTER_FIELD);
+//            importPackageString.append("import static").append(ruleUtilePath).append(".exceute;").append(ENTER_FIELD);
 //        }
         String ruleFunctionPath = IRuleFuction.class.getPackage().getName() +"." +IRuleFuction.class.getSimpleName();
         if(!importPackageSet.contains(ruleFunctionPath)) {
@@ -83,7 +89,7 @@ public class AutoCreateDrlFile {
         int size = paramItemList.size();
         for (int i=0; i<size; i++) {
             ParamItem paramItem = paramItemList.get(i);
-            paramItemString.append("$ruleMap : Map([\"").append(paramItem.getKey()).append("\"]");
+            paramItemString.append("$ruleMap_").append(paramItem.getKey()).append(" : Map(this[\"").append(paramItem.getKey()).append("\"]");
             paramItemString.append(" "+ paramItem.getOperatorEnum().getValue()+" ");
             Object valueObj = paramItem.getValue();
             if(valueObj instanceof  String) {
@@ -100,6 +106,6 @@ public class AutoCreateDrlFile {
     }
 
     private static String createRuleThen(RuleInfoModel ruleInfoModel) {
-        return "eval(exceute(\""+ruleInfoModel.getRuleName()+"\"));";
+        return EXCEUTE_FUNCTION_FIELD + "(\""+ruleInfoModel.getRuleName()+"\");";
     }
 }

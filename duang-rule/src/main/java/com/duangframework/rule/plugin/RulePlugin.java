@@ -9,14 +9,14 @@ import com.duangframework.rule.core.RuleFactory;
  */
 public class RulePlugin implements IPlugin {
 
-    private String ruleDir = "/rules";
+
 
     public RulePlugin() {
 
     }
 
     public RulePlugin(String ruleDir) {
-        this.ruleDir = ruleDir;
+        RuleFactory.RULE_DIR = ruleDir;
     }
 
 
@@ -27,7 +27,7 @@ public class RulePlugin implements IPlugin {
 
     @Override
     public void start() throws Exception {
-        RuleFactory.init(ruleDir);
+        RuleFactory.start();
     }
 
     @Override

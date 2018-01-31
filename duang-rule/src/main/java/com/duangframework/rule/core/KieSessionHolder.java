@@ -7,6 +7,9 @@ import com.duangframework.core.kit.PathKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.rule.entity.generate.DrlModel;
 import com.duangframework.rule.utils.RuleUtils;
+import org.drools.core.event.DebugAgendaEventListener;
+import org.drools.core.event.DebugProcessEventListener;
+import org.drools.core.event.DebugRuleRuntimeEventListener;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -43,7 +46,7 @@ public class KieSessionHolder {
                 this.rulesDir = rulesDir;
                 return this;
             }
-        public Builder ruleDir(DrlModel drlModel) {
+        public Builder model(DrlModel drlModel) {
             this.drlModel = drlModel;
             return this;
         }
@@ -72,27 +75,35 @@ public class KieSessionHolder {
 
     private File[] getRuleFiles() throws IOException {
         URL rootPathUrl = PathKit.duang().resource(ruleDir).path();
+        if(ToolsKit.isEmpty(rootPathUrl)) {
+            return null;
+        }
         File ruleFileDir = new File(rootPathUrl.getPath());
         if(!ruleFileDir.exists()) {
             ruleFileDir.mkdir();
             logger.warn("drools file dir ["+ ruleFileDir.getAbsolutePath() + "] is not exites! create it...");
         }
         File[] files = ruleFileDir.listFiles();
-        return files;
+        return ToolsKit.isEmpty(files) ? null : files;
     }
 
     private KieFileSystem kieFileSystem() throws IOException {
         KieFileSystem kieFileSystem = getKieServices().newKieFileSystem();
-        if(ToolsKit.isNotEmpty(drlModel)) {
+        ruleDir = ruleDir.startsWith("/") ? ruleDir.substring(1, ruleDir.length()) : ruleDir;
+        if(ToolsKit.isNotEmpty(drlModel) && ToolsKit.isNotEmpty(drlModel.getRuleInfoModelList())) {
             String body = RuleUtils.createDrlFile(drlModel);
             kieFileSystem.write("src/main/resources/"+ruleDir+"/" + body.hashCode() + ".drl", body);
         } else {
             // 读取规则文件
             File[] files = getRuleFiles();
-            ruleDir = ruleDir.startsWith("/") ? ruleDir.substring(1, ruleDir.length()) : ruleDir;
-            for (File file : files) {
-                kieFileSystem.write(ResourceFactory.newClassPathResource(ruleDir + "/" + file.getName(), "UTF-8"));
+            int index =0;
+            if(ToolsKit.isNotEmpty(files)) {
+                for (File file : files) {
+                    kieFileSystem.write(ResourceFactory.newClassPathResource(ruleDir + "/" + file.getName(), "UTF-8"));
+                    index++;
+                }
             }
+            logger.warn("read "+ index +" drl file is success;");
         }
         return kieFileSystem;
     }
@@ -114,10 +125,15 @@ public class KieSessionHolder {
         if(ToolsKit.isEmpty(kieContainer)){
             init();
         }
-        return kieContainer.newKieSession();
+        KieSession session =  kieContainer.newKieSession();
+        session.addEventListener(new DebugRuleRuntimeEventListener());
+        session.addEventListener(new DebugProcessEventListener());
+        session.addEventListener(new DebugAgendaEventListener());
+        return session;
     }
 
-    public boolean reload() {
+    public boolean reload(DrlModel drlModel) {
+        this.drlModel = drlModel;
         try {
             kieFileSystem();
             return true;
@@ -128,3 +144,4 @@ public class KieSessionHolder {
 
     }
 }
+

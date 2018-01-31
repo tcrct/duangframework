@@ -66,6 +66,12 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		init(db, database, cls);
 	}
 
+    /**
+     * 初始化引用实例
+     * @param db            数据库实例
+     * @param database  数据库名称
+     * @param cls             集合类对象
+     */
 	private void init(DB db, MongoDatabase database, Class<T> cls){
 		boolean isExtends = ClassUtils.isExtends(cls, IdEntity.class.getCanonicalName());
 		if(!isExtends){
@@ -100,7 +106,13 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		}
 		return doSaveOrUpdate(idEntity);
 	}
-	
+
+    /**
+     * 实际执行保存及更新的方法
+     * @param entity        要操作的对象
+     * @return  成功返回true
+     * @throws Exception
+     */
 	private boolean doSaveOrUpdate(IdEntity entity) throws Exception {
 		Document document = MongoUtils.toBson(entity);
 		String id = entity.getId();
@@ -126,7 +138,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	/**
 	 * 根据条件查询记录
 	 * @param mongoQuery		查询条件对象
-	 * @return
+	 * @return 泛型对象
 	 * @throws Exception
 	 */
 	@Override
@@ -145,7 +157,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	/**
 	 * 根据查询条件查找记录
 	 * @param mongoQuery	查询条件
-	 * @return
+	 * @return 集合对象
 	 * @throws Exception
 	 */
 	@Override
@@ -158,7 +170,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 
 	/**
 	 * 查找所有，数据量大时会导致性能问题，务必谨慎使用
-	 * @return
+	 * @return  集合对象
 	 * @throws Exception
 	 */
 	public List<T> findAll() throws Exception {
@@ -169,7 +181,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	/**
 	 * 查找所有
 	 * @param mongoQuery		查询条件
-	 * @return
+	 * @return 结果集合，元素为指定的泛型
 	 * @throws Exception
 	 */
 	private List<T> findAll(MongoQuery mongoQuery) throws Exception {
@@ -194,7 +206,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	/**
 	 * 分页查找记录，按Page对象返回
 	 * @param mongoQuery		查询条件
-	 * @return
+	 * @return	分页DTO对象
 	 * @throws Exception
 	 */
 	public PageDto<T> findPage(MongoQuery mongoQuery) throws Exception {
@@ -228,7 +240,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	/**
 	 * 根据查询条件进行汇总
 	 * @param query		查询条件
-	 * @return
+	 * @return  记录数
 	 */
 	public long count(MongoQuery query){
 		CountOptions options = new CountOptions();
@@ -241,8 +253,8 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	/**
 	 * 新增记录时，必须要保证有ID值
 	 * 即由外部指定ObjectId值再新增
-	 * @param entity
-	 * @return
+	 * @param idEntity
+	 * @return 新增时是否成功
 	 * @throws Exception
 	 */
 	public boolean insert(IdEntity idEntity) throws Exception {
@@ -265,7 +277,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 *  根据ID字段值更新记录
 	 * @param id			要更新的记录ID
 	 * @param bson		更新内容
-	 * @return
+	 * @return 布尔值，是否更新
 	 * @throws Exception
 	 */
 	private boolean update(String id, Bson bson) throws Exception {
@@ -293,6 +305,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		if(ToolsKit.isEmpty(queryBson) || ToolsKit.isEmpty(updateBson)) {
 			throw new MongodbException("Mongodb Update is Fail: queryBson or updateBson is null");
 		}
+		// 3.5以上的版体写法，为了支持3.5以下的版本，故注释掉
 //		BsonDocument bsonDocument = document.toBsonDocument(cls, collection.getCodecRegistry());
 		//查询记录不存在时，不新增记录
 		UpdateOptions options = new UpdateOptions();
@@ -305,7 +318,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * 求最大值
 	 * @param key			求最大值的字段
 	 * @param query			查询条件
-	 * @return
+	 * @return 最大值
 	 */
 	@SuppressWarnings("static-access")
 	public double max(String key, MongoQuery query) {
@@ -336,7 +349,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * 求最小值
 	 * @param key			求最大值的字段
 	 * @param query			查询条件
-	 * @return
+	 * @return	最小值
 	 */
 	@SuppressWarnings("static-access")
 	public double min(String key, MongoQuery query) {
@@ -374,7 +387,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * @param key		要分组查询的字段
 	 * @param query		查询条件
 	 * @param sort		结果集排序方向
-	 * @return
+	 * @return  分组查询集合
 	 */
 	public List<Map>  group(String key, MongoQuery query, final String sort){
 		List<String> keys = new ArrayList<String>();
@@ -389,7 +402,6 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * @param sort		结果集排序方向
 	 * @return
 	 */
-	@SuppressWarnings({ "unchecked", "static-access" })
 	public List<Map> group(List<String> keys, MongoQuery query, final String sort){
 		DBObject groupFields = new BasicDBObject();
 		for(String key : keys){groupFields.put(key, true);}
@@ -400,7 +412,10 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		}catch (Exception ex){
 			logger.error(ex.getMessage(), ex);
 		}
-		if(null == dbo) return null;
+		if(null == dbo) {
+			logger.warn("根据条件分组时， dbo值为null, 返回null且退出");
+			return null;
+		}
 		java.util.List<Map> list = new ArrayList<Map>();
 		for(Iterator<String> it = dbo.keySet().iterator(); it.hasNext();){
 			String key = it.next();
@@ -436,7 +451,6 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * @param query		查询条件
 	 * @return			去重关键字的集合
 	 */
-	@SuppressWarnings({ "unchecked", "static-access" })
 	public List<String> distinct(String key, MongoQuery query) {
 		final List<String> distinctList = new ArrayList<>();
 		collection.distinct(key, query.getQueryBson(), String.class).forEach(new Block<String>() {
@@ -452,36 +466,42 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * 根据查询条件更新
 	 * @param query   查询对象
 	 * @param update  更新对象
+	 * @return 返回操作受影响数
 	 */
-	public void set(MongoQuery query, MongoUpdate update) {
-		coll.updateMulti(query.getQueryObj(), update.getUpdateObj());
+	public int set(MongoQuery query, MongoUpdate update) {
+		WriteResult result = coll.updateMulti(query.getQueryObj(), update.getUpdateObj());
+		return result.getN();
 	}
 
 	/**
 	 * 向array/list/set添加值
 	 * @param query				查询对象
 	 * @param update			添加/更新对象
+	  *@return 返回操作受影响数
 	 */
 	@Deprecated
-	public void push(MongoQuery query, MongoUpdate update) {
-		coll.updateMulti(query.getQueryObj(), update.getUpdateObj());
+	public int push(MongoQuery query, MongoUpdate update) {
+		WriteResult result = coll.updateMulti(query.getQueryObj(), update.getUpdateObj());
+		return result.getN();
 	}
 
 	/**
 	 * 向array/list/set删除值
 	 * @param query				查询对象
 	 * @param update			删除对象
+	 * @return 返回操作受影响数
 	 */
 	@Deprecated
-	public void pull(MongoQuery query, MongoUpdate update) {
-		coll.updateMulti(query.getQueryObj(), update.getUpdateObj());
+	public int pull(MongoQuery query, MongoUpdate update) {
+		WriteResult result = coll.updateMulti(query.getQueryObj(), update.getUpdateObj());
+		return result.getN();
 	}
 
 	/**
 	 * 根据查询条件及分组字段统计大小
 	 * @param key				要分组的字段
 	 * @param query			查询条件
-	 * @return
+	 * @return		分组统计后的值
 	 */
 	@SuppressWarnings("static-access")
 	public int groupBySize(String key, MongoQuery query){
@@ -503,7 +523,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	/**
 	 * 根据类的字段属性类型查询Mongodb对应的类型
 	 * @param fieldName		类字段名
-	 * @return
+	 * @return  类型字符串
 	 */
 	public String type(final String fieldName) {
 		final DataTypeEnum[] typeEnums = DataTypeEnum.values();

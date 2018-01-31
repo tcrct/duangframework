@@ -23,13 +23,22 @@ public class RuleFactory {
 
     private static Logger logger = LoggerFactory.getLogger(RuleFactory.class);
     private static KieSessionHolder kieSessionHolder = null;
+    public static String RULE_DIR = "/rules";
+    private static boolean isRunPlugin = false;
+    /**
+     * 是启有启动插件
+     */
+    public static void start() {
+        isRunPlugin = true;
+    }
+
 
     /**
      * 初始化 kie 容器对象
-     * @param ruleDir       规则文件目录
+     * @param drlModel   drl文件对象
      */
-    public static void init(final String ruleDir) {
-        init(ruleDir, null);
+    public static void init(final DrlModel drlModel) {
+        init(RULE_DIR, drlModel);
     }
 
     /**
@@ -38,11 +47,15 @@ public class RuleFactory {
      * @param drlModel   drl文件对象
      */
     public static void init(final String ruleDir, final DrlModel drlModel) {
+        // 如果没运行插件则抛出异常
+        if(!isRunPlugin) {
+            throw  new RuntimeException("RulePlugin is not start!");
+        }
         if(ToolsKit.isEmpty(kieSessionHolder)) {
             ThreadPoolKit.execute(new Runnable() {
                 @Override
                 public void run() {
-                    kieSessionHolder = new KieSessionHolder.Builder().ruleDir(ruleDir).builder();
+                    kieSessionHolder = new KieSessionHolder.Builder().ruleDir(ruleDir).model(drlModel).builder();
                 }
             });
         }
@@ -67,11 +80,11 @@ public class RuleFactory {
                 Map<String, Object> ruleParamsMap = ruleParam.toMap();
                 kieSession.insert(ruleParamsMap);
                 int ruleFiredCount = kieSession.fireAllRules(new RuleNameEndsWithAgendaFilter(ruleParam.getRuleName()));
-                if (ruleFiredCount <  0) {
-                    throw new ServiceException("验证[" + ruleParam.getRuleName() + "]不通过");
+                if (ruleFiredCount <=  0) {
+                    throw new ServiceException().setMessage("verification [" + ruleParam.getRuleName() + "] is not pass!");
                 }
             }
-        } catch (Exception e) {
+        } catch (ServiceException e) {
             ruleResult.setCode(500);
             ruleResult.setMessage(e.getMessage());
             logger.warn(e.getMessage(), e);
@@ -81,7 +94,11 @@ public class RuleFactory {
     }
 
     public static boolean  reload() {
-        return kieSessionHolder.reload();
+        return reload(null);
+    }
+
+    public static boolean  reload(DrlModel drlModel) {
+        return kieSessionHolder.reload(drlModel);
     }
 
 }
