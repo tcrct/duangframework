@@ -1,7 +1,11 @@
 package com.duangframework.rule.core;
 
+import com.duangframework.core.annotation.rule.Rule;
+import com.duangframework.core.annotation.rule.RuleAction;
+import com.duangframework.core.common.classes.CustomizeClassTemplate;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.ServiceException;
+import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.rule.entity.RuleParam;
@@ -12,6 +16,8 @@ import org.kie.api.runtime.KieSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +31,36 @@ public class RuleFactory {
     private static KieSessionHolder kieSessionHolder = null;
     public static String RULE_DIR = "/rules";
     private static boolean isRunPlugin = false;
+    private static String ruleActionPackagePath = "";
     /**
      * 是启有启动插件
+     *
      */
     public static void start() {
+        String basePackagePath = PropertiesKit.duang().key("base.package.path").asString();
+        CustomizeClassTemplate template = new CustomizeClassTemplate(Rule.class, basePackagePath, "", "");
+        try {
+            List<Class<?>> classList = template.getList();
+            if (ToolsKit.isNotEmpty(classList)) {
+                for(Class<?> cls : classList) {
+                    if(cls.isAnnotationPresent(Rule.class)) {
+                        ruleActionPackagePath = "import static " + cls.getName();
+                        Method[] methods = cls.getMethods();
+                        if(ToolsKit.isNotEmpty(methods)) {
+                            for(Method method : methods) {
+                                if(method.isAnnotationPresent(RuleAction.class)){
+                                    ruleActionPackagePath += "."+method.getName()+";";
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+        }
         isRunPlugin = true;
     }
 
@@ -50,6 +82,17 @@ public class RuleFactory {
         // 如果没运行插件则抛出异常
         if(!isRunPlugin) {
             throw  new RuntimeException("RulePlugin is not start!");
+        }
+        if(ToolsKit.isEmpty(ruleActionPackagePath)) {
+            throw  new EmptyNullException("规则回调方法没有设置，请设置@Rule @RuleAction");
+        }
+        if(ToolsKit.isNotEmpty(drlModel)) {
+            List<String> importList = drlModel.getImportPackageList();
+            if(ToolsKit.isEmpty(importList)) {
+                importList= new ArrayList<>();
+            }
+            importList.add(0,ruleActionPackagePath);
+            drlModel.setImportPackageList(importList);
         }
         if(ToolsKit.isEmpty(kieSessionHolder)) {
             ThreadPoolKit.execute(new Runnable() {

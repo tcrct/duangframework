@@ -21,6 +21,7 @@
         <mq.version>1.0-SNAPSHOT</mq.version>
         <server.version>1.0-SNAPSHOT</server.version>
         <validation.version>1.0-SNAPSHOT</validation.version>
+        <cache.version>1.0-SNAPSHOT</cache.version>
     </properties>
 
     <dependencies>
@@ -48,6 +49,11 @@
             <groupId>com.duangframework.validation</groupId>
             <artifactId>duang-validation</artifactId>
             <version>${validation.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.duangframework.cache</groupId>
+            <artifactId>duang-cache</artifactId>
+            <version>${cache.version}</version>
         </dependency>
     </dependencies>
 </project>

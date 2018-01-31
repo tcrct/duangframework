@@ -2,14 +2,13 @@ package com.duangframework.rule.utils;
 
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.rule.core.IRuleFuction;
 import com.duangframework.rule.entity.ParamItem;
 import com.duangframework.rule.entity.generate.DrlModel;
 import com.duangframework.rule.entity.generate.RuleInfoModel;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * @author Created by laotang
@@ -19,16 +18,14 @@ public class AutoCreateDrlFile {
 
     private static final String TAB_FIELD = "    ";
     private static final String ENTER_FIELD = "\n";
-    private static final String EXCEUTE_FUNCTION_FIELD = "exceute";
+    private static final String EXCEUTE_FUNCTION_FIELD = "_duangRuleExceute";
 
     public static String builder(DrlModel drlModel) throws Exception {
         StringBuilder drlString = new StringBuilder();
         drlString.append("package ").append(createDrlPackageName(drlModel.getPackageName())).append(ENTER_FIELD).append(ENTER_FIELD);
-        drlString.append(createImportPackage(drlModel.getImportPackageSet())).append(ENTER_FIELD);
-        drlString.append("function void ").append(EXCEUTE_FUNCTION_FIELD).append("(String ruleName) {").append(ENTER_FIELD)
-                .append(TAB_FIELD).append(IRuleFuction.class.getSimpleName()).append(".")
-                .append(EXCEUTE_FUNCTION_FIELD).append("(ruleName);").append(ENTER_FIELD)
-                .append("}").append(ENTER_FIELD).append(ENTER_FIELD);
+        List<String> packageList = drlModel.getImportPackageList();
+        drlString.append(createImportPackage(packageList)).append(ENTER_FIELD);
+        drlString.append(createFunctionString(packageList)).append(ENTER_FIELD).append(ENTER_FIELD);
         drlString.append(createRuleInfo(drlModel.getRuleInfoModelList())).append(ENTER_FIELD);
         System.out.println(drlString);
         return drlString.toString();
@@ -39,7 +36,19 @@ public class AutoCreateDrlFile {
         return packagePathString.toLowerCase().replace("package", "");
     }
 
-    private static String createImportPackage(Set<String> importPackageSet) {
+    private static String createFunctionString(List<String> packageList) {
+        String importPackageString = packageList.get(0);
+        int startIndex = importPackageString.lastIndexOf(".")+1;
+        int endIndex = importPackageString.endsWith(";") ? importPackageString.length()-1 : importPackageString.length();
+        String ruleActionName = importPackageString.substring(startIndex, endIndex);
+        StringBuilder functionString = new StringBuilder();
+        functionString.append("function void ").append(EXCEUTE_FUNCTION_FIELD).append("(String ruleName) {").append(ENTER_FIELD)
+                .append(TAB_FIELD).append(ruleActionName).append("(ruleName);").append(ENTER_FIELD)
+                .append("}");
+        return functionString.toString();
+    }
+
+    private static String createImportPackage(List<String> importPackageSet) {
         StringBuilder importPackageString = new StringBuilder();
         if(ToolsKit.isNotEmpty(importPackageSet)){
             for (String importPackage : importPackageSet) {
@@ -50,14 +59,14 @@ public class AutoCreateDrlFile {
                 }
             }
         }
-//        String ruleUtilePath = RuleUtils.class.getPackage().getName() +"." +RuleUtils.class.getSimpleName();
-//        if(!importPackageSet.contains(ruleUtilePath)) {
-//            importPackageString.append("import static").append(ruleUtilePath).append(".exceute;").append(ENTER_FIELD);
-//        }
-        String ruleFunctionPath = IRuleFuction.class.getPackage().getName() +"." +IRuleFuction.class.getSimpleName();
-        if(!importPackageSet.contains(ruleFunctionPath)) {
-            importPackageString.append("import ").append(ruleFunctionPath).append(";").append(ENTER_FIELD);
+        String mapPath = Map.class.getName();
+        if(!importPackageSet.contains(mapPath)) {
+            importPackageString.append("import ").append(mapPath).append(";").append(ENTER_FIELD);
         }
+//        String ruleFunctionPath = IRuleFuction.class.getPackage().getName() +"." +IRuleFuction.class.getSimpleName();
+//        if(!importPackageSet.contains(ruleFunctionPath)) {
+//            importPackageString.append("import ").append(ruleFunctionPath).append(";").append(ENTER_FIELD);
+//        }
         return importPackageString.toString();
     }
 

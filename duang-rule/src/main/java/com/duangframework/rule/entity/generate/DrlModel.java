@@ -1,7 +1,6 @@
 package com.duangframework.rule.entity.generate;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Created by laotang
@@ -15,7 +14,7 @@ public class DrlModel {
     /**
      * 导入的包集合,全路径
      */
-    private Set<String> importPackageSet;
+    private List<String> importPackageList;
     /**
      * 规则名称
      */
@@ -24,9 +23,9 @@ public class DrlModel {
     public DrlModel() {
     }
 
-    public DrlModel(String packageName, Set<String> importPackageSet, List<RuleInfoModel> ruleInfoModelList) {
+    public DrlModel(String packageName, List<String> importPackageList, List<RuleInfoModel> ruleInfoModelList) {
         this.packageName = packageName;
-        this.importPackageSet = importPackageSet;
+        this.importPackageList = importPackageList;
         this.ruleInfoModelList = ruleInfoModelList;
     }
 
@@ -38,12 +37,12 @@ public class DrlModel {
         this.packageName = packageName;
     }
 
-    public Set<String> getImportPackageSet() {
-        return importPackageSet;
+    public List<String> getImportPackageList() {
+        return importPackageList;
     }
 
-    public void setImportPackageSet(Set<String> importPackageSet) {
-        this.importPackageSet = importPackageSet;
+    public void setImportPackageList(List<String> importPackageList) {
+        this.importPackageList = importPackageList;
     }
 
     public List<RuleInfoModel> getRuleInfoModelList() {

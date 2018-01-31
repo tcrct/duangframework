@@ -553,22 +553,22 @@ public abstract class BaseController {
         returnJson(returnDto);
     }
 
-    /**
-     * 保存记录
-     */
-    protected  abstract  void add();
-    /**
-     * 删除记录
-     */
-    protected  abstract  void delete();
-    /**
-     * 更改记录
-     */
-    protected  abstract  void update();
-    /**
-     * 查找记录
-     */
-    protected  abstract  void find();
+//    /**
+//     * 保存记录
+//     */
+//    protected  abstract  void add();
+//    /**
+//     * 删除记录
+//     */
+//    protected  abstract  void delete();
+//    /**
+//     * 更改记录
+//     */
+//    protected  abstract  void update();
+//    /**
+//     * 查找记录
+//     */
+//    protected  abstract  void find();
 
 
 }

@@ -19,10 +19,12 @@ public class ServiceException extends RuntimeException {
 
     public ServiceException(String msg) {
         super(msg);
+        setMessage(msg);
     }
 
     public ServiceException(String msg , Throwable cause) {
         super(msg, cause);
+        setMessage(msg);
     }
 
     public ServiceException setCode(int code) {

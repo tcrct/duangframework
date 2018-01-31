@@ -99,4 +99,9 @@ public class Const {
      * 是否重复扫描, 用于热加载
      */
     public static boolean IS_RELOAD_SCANNING = false;
+
+    /**
+     *系统用户ID
+     */
+    public static String DUANG_SYSTEM_USERID = "57bead16c6396d11707ee174";
 }
