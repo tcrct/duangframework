@@ -85,10 +85,15 @@ public class Const {
      */
     public static final String CONFIG_NODENAMES = "config.node.names";
 
-
+    /**
+     * 自定义用户代理标识
+     */
     public final static String FORWARDED_FOR= "X-Forwarded-For";
     public final static String FORWARDED_PROTO = "X-Forwarded-Proto";
     public final static String REAL_IP = "X-Real-IP";
+    public static final String DUANG_USER_AGENT = "Duang-User-Agent";
+    public final static String LOG_EXCEPTION_FILED = "exception";
+    public final static String LOG_RESULE_FILED = "result";
 
     /**
      * 所有指定扫描类的URL集合

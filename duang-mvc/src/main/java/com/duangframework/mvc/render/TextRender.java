@@ -32,7 +32,7 @@ public class TextRender extends Render {
 			logger.warn("request or response is null");
 			return;
 		}
-		setDefaultValue2Obj();
+		setDefaultValue2Response();
 		try {
 	        if (contentType == null) {
 	        	response.setContentType(defaultContentType);

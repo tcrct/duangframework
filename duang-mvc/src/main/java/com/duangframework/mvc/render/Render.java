@@ -4,8 +4,6 @@ import com.duangframework.core.common.Const;
 import com.duangframework.core.common.dto.http.head.HttpHeaders;
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
-import com.duangframework.core.common.dto.result.HeadDto;
-import com.duangframework.core.common.dto.result.ReturnDto;
 import com.duangframework.core.kit.PropertiesKit;
 
 import java.io.Serializable;
@@ -52,18 +50,11 @@ public abstract class Render implements Serializable {
 		this.obj = obj;
 	}
 	
-	protected void setDefaultValue2Obj() {
+	protected void setDefaultValue2Response() {
 		response.setHeader(HttpHeaders.PRAGMA, "no-cache");
 		response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
 		response.setHeader(HttpHeaders.EXPIRES, "0");
 		response.setHeader(Const.OWNER_FILED, Const.OWNER);
-		if(obj instanceof ReturnDto) {
-			ReturnDto<?> returnDto = (ReturnDto<?>)obj;
-			HeadDto headDto = returnDto.getHead();
-			headDto.setMethod(request.getMethod());
-			headDto.setRequestId((String)request.getAttribute(Const.DUANG_REQUEST_ID));
-			headDto.setClientId(response.getHeader(Const.REMOTE_CLIENT_IP));
-		}
 	}
 
 	public abstract void render();

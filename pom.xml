@@ -106,6 +106,7 @@
         <module>duang-log</module>
         <module>duang-cache</module>
         <module>duang-rule</module>
+        <module>duang-ext</module>
     </modules>
 
     <dependencies>

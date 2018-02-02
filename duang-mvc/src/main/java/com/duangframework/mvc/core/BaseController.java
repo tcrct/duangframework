@@ -142,7 +142,7 @@ public abstract class BaseController {
 
     public void returnJson(int ret, String msg, Object obj) {
         ReturnDto<Object> dto = new ReturnDto<>();
-        HeadDto head = new HeadDto();
+        HeadDto head = ToolsKit.getThreadLocalDto();
         head.setRet(ret);
         head.setMsg(msg);
         head.setUri(request.getRequestURI());

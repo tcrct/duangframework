@@ -61,7 +61,7 @@
 //	@Override
 //	public void render() {
 //		if(null == request || null == response) return;
-//		setDefaultValue2Obj();
+//		setDefaultValue2Response();
 //		OutputStream dataOutputSeream = null;
 //		try {
 ////			response.setHeader(HttpHeaders.PRAGMA, "no-cache");
