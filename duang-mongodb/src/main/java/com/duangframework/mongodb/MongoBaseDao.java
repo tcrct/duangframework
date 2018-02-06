@@ -280,7 +280,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * @return 布尔值，是否更新
 	 * @throws Exception
 	 */
-	private boolean update(String id, Bson bson) throws Exception {
+	public boolean update(String id, Bson bson) throws Exception {
 		if(!ObjectId.isValid(id)){
 			throw new MongodbException("id is not ObjectId!");
 		}

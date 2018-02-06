@@ -35,7 +35,7 @@ import java.util.*;
  * @date on 2017/11/17.
  * @since 1.0
  */
-public abstract class BaseController {
+public abstract class BaseController{
 
     private static Logger logger = LoggerFactory.getLogger(BaseController.class);
 

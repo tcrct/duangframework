@@ -20,10 +20,20 @@
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>3.8.1</version>
-            <scope>test</scope>
+            <groupId>com.duangframework.mvc</groupId>
+            <artifactId>duang-mvc</artifactId>
+            <version>${mvc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.duangframework.mongodb</groupId>
+            <artifactId>duang-mongodb</artifactId>
+            <version>${mongo.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.duangframework.cache</groupId>
+            <artifactId>duang-cache</artifactId>
+            <version>${cache.version}</version>
+        </dependency>
+
     </dependencies>
 </project>

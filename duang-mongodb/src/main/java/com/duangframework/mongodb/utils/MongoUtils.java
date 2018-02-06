@@ -33,20 +33,28 @@ public class MongoUtils {
     private static Logger logger = LoggerFactory.getLogger(MongoUtils.class);
 
 
-    /**
-     *
-     * @param values
-     * @return
-     */
-    public static List<ObjectId> toObjectIds(Object... values) {
-        List<ObjectId> idList = new ArrayList<>();
-        int len = values.length;
-        for (int i = 0; i < len; i++) {
-            if (values[i] != null) {
-                idList.add(toObjectId(values[i].toString()));
+    public static Object toObjectIds(Object values) {
+        if(values instanceof Object[]){
+            List<ObjectId> idList = new ArrayList<ObjectId>();
+            Object[] tmp = (Object[]) values;
+            for (Object value : tmp) {
+                if (value != null) {
+                    boolean isObjectId = ToolsKit.isValidDuangId(value.toString());
+                    if (isObjectId) {
+                        ObjectId dbId = new ObjectId(value.toString());
+                        idList.add(dbId);
+                    }
+                }
+            }
+            return idList;
+        } else {
+            boolean isObjectId = ToolsKit.isValidDuangId(values.toString());
+            if (isObjectId) {
+                return new ObjectId(values.toString());
+            } else {
+                throw new IllegalArgumentException("toObjectIds is fail");
             }
         }
-        return idList;
     }
 
     public static ObjectId toObjectId(String objId) {

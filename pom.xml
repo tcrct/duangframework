@@ -18,6 +18,9 @@
         <cglib.version>3.1</cglib.version>
         <configuration.version>1.10</configuration.version>
         <core.version>1.0-SNAPSHOT</core.version>
+        <mongo.version>1.0-SNAPSHOT</mongo.version>
+        <cache.version>1.0-SNAPSHOT</cache.version>
+        <mvc.version>1.0-SNAPSHOT</mvc.version>
         <zk.version>1.0-SNAPSHOT</zk.version>
     </properties>
 

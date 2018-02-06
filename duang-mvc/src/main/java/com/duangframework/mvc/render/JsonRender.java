@@ -79,7 +79,7 @@ public class JsonRender extends Render {
 				  serializer.setDateFormat("yyyy-MM-dd HH:mm:ss");
 				  serializer.getPropertyFilters().add(customFieldPropertyFilter);	
 				  //https://github.com/alibaba/fastjson/wiki/Class_Level_SerializeFilter
-//				  SerializeConfig.getGlobalInstance().addFilter(A.class, customFieldPropertyFilter);c
+//				  SerializeConfig.getGlobalInstance().addFilter(A.class, customFieldPropertyFilter);
 				  serializer.write(obj);
 				  response.write(serializeWriter.toString());
 				  fieldFilterSet.clear();
