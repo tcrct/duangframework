@@ -1,4 +1,4 @@
-package com.duangframework.ext.crud;
+package com.duangframework.ext.curd;
 
 import com.duangframework.cache.kit.CacheKit;
 import com.duangframework.core.annotation.cache.EntityCache;
@@ -17,13 +17,13 @@ import java.util.Map;
  * @author Created by laotang
  * @date createed in 2018/1/31.
  */
-public class CRUDCacheService<T extends IdEntity>  {
+public class CurdCacheService<T extends IdEntity>  {
 
-    private static final Logger logger = LoggerFactory.getLogger(CRUDCacheService.class);
-    private static final CRUDCacheService CRUD_CACHE_SERVICE = new CRUDCacheService();
+    private static final Logger logger = LoggerFactory.getLogger(CurdCacheService.class);
+    private static final CurdCacheService CRUD_CACHE_SERVICE = new CurdCacheService();
     private static final Map<String, EntityCache> ENTITY_CACHE_MAP = new HashMap<>();
     private static String keyPrefix = "";
-    public CRUDCacheService getCacheDao() {
+    public CurdCacheService getCacheDao() {
         init();
         return CRUD_CACHE_SERVICE;
     }

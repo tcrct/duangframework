@@ -5,6 +5,7 @@
  * @see  https://github.com/tcrct/duangframework.git
  */
 package com.duangframework.mongodb;
+import com.duangframework.core.annotation.db.Id;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.EmptyNullException;
@@ -24,6 +25,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
@@ -122,11 +124,12 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 				collection.insertOne(document);
 				entity.setId(document.get(IdEntity.ID_FIELD)+"");
 			} else {
-				Document filterDoc = new Document();
-				filterDoc.put(IdEntity.ID_FIELD, new ObjectId(id));
-				document.remove(IdEntity.ENTITY_ID_FIELD);
-//				replaceOne该方法仅支持mongodb3.0以上的版本
-				collection.replaceOne(filterDoc, document);
+                update(id, document);
+//				Document filterDoc = new Document();
+//				filterDoc.put(IdEntity.ID_FIELD, new ObjectId(id));
+//				document.remove(IdEntity.ENTITY_ID_FIELD);
+//				//replaceOne该方法仅支持mongodb3.0以上的版本
+//				collection.replaceOne(filterDoc, document);
 			}
 			return true;
 		}catch (Exception e) {
@@ -273,6 +276,20 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		}
 	}
 
+    private boolean update(String id, Document document) throws Exception {
+        if(!ObjectId.isValid(id)){
+            throw new MongodbException("id is not ObjectId!");
+        }
+        Document query = new Document(IdEntity.ID_FIELD, new ObjectId(id));
+        //查询记录不存在时，不新增记录
+        UpdateOptions options = new UpdateOptions();
+        options.upsert(false);
+        document.remove(IdEntity.ENTITY_ID_FIELD);
+        BasicDBObject updateDbo = new BasicDBObject(Operator.SET, document);
+        return collection.updateOne(query, updateDbo, options).isModifiedCountAvailable();
+
+    }
+
 	/**
 	 *  根据ID字段值更新记录
 	 * @param id			要更新的记录ID
@@ -280,15 +297,8 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * @return 布尔值，是否更新
 	 * @throws Exception
 	 */
-	public boolean update(String id, Bson bson) throws Exception {
-		if(!ObjectId.isValid(id)){
-			throw new MongodbException("id is not ObjectId!");
-		}
-		Document query = new Document(IdEntity.ID_FIELD, new ObjectId(id));
-		//查询记录不存在时，不新增记录
-		UpdateOptions options = new UpdateOptions();
-		options.upsert(false);
-		return collection.updateOne(query, bson, options).isModifiedCountAvailable();
+	public boolean update(String id, IdEntity entity) throws Exception {
+	    return update(id, (Document) MongoUtils.toBson(entity));
 	}
 
 	/**

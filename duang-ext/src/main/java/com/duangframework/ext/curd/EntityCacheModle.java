@@ -1,4 +1,4 @@
-package com.duangframework.ext.crud;
+package com.duangframework.ext.curd;
 
 /**
  * @author Created by laotang

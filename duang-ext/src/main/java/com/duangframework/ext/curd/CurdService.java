@@ -1,9 +1,10 @@
-package com.duangframework.ext.crud;
+package com.duangframework.ext.curd;
 
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.ServiceException;
+import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.PropertiesKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
@@ -11,7 +12,6 @@ import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.common.MongoQuery;
 import com.duangframework.mongodb.common.MongoUpdate;
 import com.duangframework.mongodb.utils.MongoUtils;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,15 +23,15 @@ import java.util.Date;
  * @author Created by laotang
  * @date createed in 2018/1/31.
  */
-class CRUDService<T extends IdEntity> extends CRUDCacheService<T> {
+class CurdService<T extends IdEntity> extends CurdCacheService<T> {
 
-    private static final Logger logger = LoggerFactory.getLogger(CRUDService.class);
+    private static final Logger logger = LoggerFactory.getLogger(CurdService.class);
 
     private MongoDao<T> mongoDao;
 
     private Class<T> entityClass;
 
-    CRUDService(Class<T> entityClass) {
+    CurdService(Class<T> entityClass) {
         this.entityClass =entityClass;
     }
 
@@ -52,12 +52,9 @@ class CRUDService<T extends IdEntity> extends CRUDCacheService<T> {
         return entityClass;
     }
 
-    private void addIdEntityData(T entity, boolean isSave) {
-        if(!isSave && ToolsKit.isEmpty(entity.getId())) {
+    private void addIdEntityData(T entity) {
+        if(ToolsKit.isEmpty(entity.getId())) {
             entity.setId(new ObjectId().toString());
-        }
-        if(isSave){
-            entity.setId(null);
         }
         String createUserId = entity.getCreateuserid();
         if(ToolsKit.isEmpty(createUserId)) {
@@ -80,11 +77,7 @@ class CRUDService<T extends IdEntity> extends CRUDCacheService<T> {
         if(ToolsKit.isEmpty(entity.getId())) {
             throw new EmptyNullException("entity id field is null");
         }
-        if(ToolsKit.isEmpty(entity.getUpdateuserid())) {
-            throw new EmptyNullException("entity updateuserid field is null");
-        }
-        Date currentDate = new Date();
-        entity.setUpdatetime(currentDate);
+        entity.setUpdatetime(new Date());
     }
 
     /**
@@ -95,7 +88,7 @@ class CRUDService<T extends IdEntity> extends CRUDCacheService<T> {
      */
     public boolean add(T entity) throws ServiceException {
         try {
-            addIdEntityData(entity, false);
+            addIdEntityData(entity);
             if (getMongoDao().insert(entity)) {
                 if (getCacheDao() != null) {
                     getCacheDao().save(entity);
@@ -134,9 +127,32 @@ class CRUDService<T extends IdEntity> extends CRUDCacheService<T> {
     public boolean update(T entity) throws ServiceException {
         try {
             updateIdEntityData(entity);
-            boolean isOk = getMongoDao().update(entity.getId(), (Document)MongoUtils.toBson(entity));
+            boolean isOk = getMongoDao().update(entity.getId(), entity);
             if(isOk && (getCacheDao() != null)) {
-                getCacheDao().save(entity);
+                T cacheEntity = (T)getCacheDao().findById(entity.getId(), getEntityClass());
+                ObjectKit.copyFields(entity, cacheEntity);
+                if(ToolsKit.isNotEmpty(entity.getCreateuserid())) {
+                    cacheEntity.setCreateuserid(entity.getCreateuserid());
+                }
+                if(ToolsKit.isNotEmpty(entity.getCreatetime())) {
+                    cacheEntity.setCreatetime(entity.getCreatetime());
+                }
+                if(ToolsKit.isNotEmpty(entity.getId())) {
+                    cacheEntity.setId(entity.getId());
+                }
+                if(ToolsKit.isNotEmpty(entity.getSource())) {
+                    cacheEntity.setSource(entity.getSource());
+                }
+                if(ToolsKit.isNotEmpty(entity.getStatus())) {
+                    cacheEntity.setStatus(entity.getStatus());
+                }
+                if(ToolsKit.isNotEmpty(entity.getUpdatetime())) {
+                    cacheEntity.setUpdatetime(entity.getUpdatetime());
+                }
+                if(ToolsKit.isNotEmpty(entity.getUpdateuserid())) {
+                    cacheEntity.setUpdateuserid(entity.getUpdateuserid());
+                }
+                getCacheDao().save(cacheEntity);
             }
             return true;
         } catch (Exception e) {
@@ -147,15 +163,14 @@ class CRUDService<T extends IdEntity> extends CRUDCacheService<T> {
     /**
      * 查找记录
      */
-    @Override
-    public <T> T findById(String id, Class<T> clazz) throws ServiceException{
+    public <T> T findById(String id) throws ServiceException{
         if(!ToolsKit.isValidDuangId(id)) {
             throw new ServiceException("it is not ObjectId");
         }
         T recordObj = null;
         try {
             if (getCacheDao() != null) {
-                recordObj = (T)getCacheDao().findById(id, clazz);
+                recordObj = (T)getCacheDao().findById(id, getEntityClass());
                 if(ToolsKit.isNotEmpty(recordObj)) {
                     return recordObj;
                 }
@@ -169,7 +184,7 @@ class CRUDService<T extends IdEntity> extends CRUDCacheService<T> {
                 }
             }
         } catch (Exception e) {
-            throw new ServiceException("delete id["+id+"] record is fail: " + e.getMessage(), e);
+            throw new ServiceException("findById id["+id+"] record is fail: " + e.getMessage(), e);
         }
         return recordObj;
     }
@@ -179,22 +194,18 @@ class CRUDService<T extends IdEntity> extends CRUDCacheService<T> {
      */
     @Override
     public boolean save(T entity) throws ServiceException {
+        boolean isOk;
         try {
             String id = entity.getId();
             if(ToolsKit.isEmpty(id)) {
-                addIdEntityData(entity, true);
+                isOk = add(entity);
             } else {
-                updateIdEntityData(entity);
+                isOk= update(entity);
             }
-            if(getMongoDao().save(entity)) {
-                if(getCacheDao() != null) {
-                    getCacheDao().save(entity);
-                }
-            }
-            return true;
         } catch (Exception e) {
             throw new ServiceException("save entity["+entity.getId()+"] record is fail: " + e.getMessage(), e);
         }
+        return isOk;
     }
 
 }
