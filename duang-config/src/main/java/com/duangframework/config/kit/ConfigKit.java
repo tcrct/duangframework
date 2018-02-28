@@ -1,15 +1,16 @@
 package com.duangframework.config.kit;
 
-import com.duangframework.config.core.ConfigFactory;
-import com.duangframework.core.common.enums.IConfigKeyEnums;
-import com.duangframework.core.interfaces.IConfig;
+
+import com.duangframework.config.apollo.api.SimpleApolloConfig;
+import com.duangframework.config.plugin.ConfigPlugin;
+import com.duangframework.core.common.Const;
+import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.utils.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Date;
 
 /**
  * 用作整个系统的配置
@@ -21,33 +22,20 @@ public class ConfigKit {
     private static Logger logger = LoggerFactory.getLogger(ConfigKit.class);
 
     private static ConfigKit _configKit;
-    private static Lock _configKitLock = new ReentrantLock();
-    private static IConfig _configuration;
-    private static String _key;
-    private static Object _defaultValue;
+    private static SimpleApolloConfig apolloConfig;
+    private String _key;
+    private Object _defaultValue;
 
     public static ConfigKit duang() {
-        if(null == _configKit) {
-            try {
-                _configKitLock.lock();
-                _configKit = new ConfigKit();
-                _configuration = ConfigFactory.getClient();
-            } catch (Exception e) {
-                logger.warn(e.getMessage(), e);
-            } finally {
-                _configKitLock.unlock();
-            }
-        }
-        clear();
-        return _configKit;
+        return new ConfigKit();
     }
 
-    private static void clear() {
-        _key = "";
-        _defaultValue = null;
-    }
 
     private ConfigKit() {
+        apolloConfig = ConfigPlugin.getApolloConfig();
+        if(ToolsKit.isEmpty(apolloConfig)) {
+            throw new EmptyNullException("请先启动ConfigPlugin插件");
+        }
     }
 
     public ConfigKit key(String key) {
@@ -55,72 +43,76 @@ public class ConfigKit {
         return this;
     }
 
-    public ConfigKit key(IConfigKeyEnums keyEnums) {
-        _key = keyEnums.getValue();
-        return this;
-    }
-
-
 
     public ConfigKit defaultValue(Object defaultValue) {
         _defaultValue = defaultValue;
         return this;
     }
 
-    public String asString() {
-        try {
-            return _configuration.getString(_key, _defaultValue+"");
-        } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
-            return null;
+    private Object getConfigValue(Class type) {
+        String value = apolloConfig.getConfig(_key);
+        if(DataType.isString(type)) {
+            return  ToolsKit.isEmpty(value) ? _defaultValue : value;
+        }
+        else if(DataType.isInteger(type) || DataType.isIntegerObject(type)) {
+            return ToolsKit.isEmpty(value)? Integer.parseInt(_defaultValue+"") : Integer.parseInt(value);
+        }
+        else if(DataType.isFloat(type) || DataType.isFloatObject(type)) {
+            return ToolsKit.isEmpty(value)? Float.parseFloat(_defaultValue+"") : Float.parseFloat(value);
+        }
+        else if(DataType.isDouble(type) || DataType.isDoubleObject(type)) {
+            return ToolsKit.isEmpty(value)? Double.parseDouble(_defaultValue+"") : Double.parseDouble(value);
+        }
+        else if(DataType.isDate(type)) {
+            return ToolsKit.isEmpty(value)? ToolsKit.parseDate(_defaultValue+"", Const.DEFAULT_DATE_FORM) :
+                    ToolsKit.parseDate(value, Const.DEFAULT_DATE_FORM);
+        } else {
+            return value;
         }
     }
 
-    public int asInt() {
+    public String asString() {
         try {
-            return _configuration.getInt(_key, Integer.parseInt(_defaultValue + ""));
+            return (String)getConfigValue(String.class);
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+            return "";
+        }
+    }
+
+    public Integer asInt() {
+        try {
+            return (Integer) getConfigValue(int.class);
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
             return -1;
         }
     }
 
-    public long asLong() {
+    public Long asLong() {
         try {
-            return _configuration.getLong(_key, Long.parseLong(_defaultValue + ""));
+            return (Long) getConfigValue(Long.class);
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
             return -1L;
         }
     }
 
-    public double asDouble() {
+    public Double asDouble() {
         try {
-            return _configuration.getDouble(_key, Double.parseDouble(_defaultValue + ""));
+            return (Double) getConfigValue(Double.class);
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
             return -1d;
         }
     }
 
-    public String[] asArray() {
+    public Date asDate() {
         try {
-            return _configuration.getStringArray(_key);
+            return (Date) getConfigValue(Date.class);
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
             return null;
         }
     }
-
-    public List<String> asList() {
-        try {
-            return  _configuration.getList(_key, new ArrayList());
-        } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
-            return null;
-        }
-    }
-
-
-
 }

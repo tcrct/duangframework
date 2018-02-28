@@ -16,7 +16,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <apollo-client.version>0.10.0</apollo-client.version>
     </properties>
+
+    <scm>
+        <url>https://github.com/ctripcorp/apollo</url>
+        <connection>scm:git:git://github.com/ctripcorp/apollo.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com/ctripcorp/apollo.git</developerConnection>
+    </scm>
 
     <dependencies>
         <dependency>
@@ -25,9 +32,29 @@
             <version>${core.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.duangframework.zookeeper</groupId>
-            <artifactId>duang-zookeeper</artifactId>
-            <version>${zk.version}</version>
+            <groupId>com.ctrip.framework.apollo</groupId>
+            <artifactId>apollo-core</artifactId>
+            <version>${apollo-client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ctrip.framework.apollo</groupId>
+            <artifactId>apollo-client</artifactId>
+            <version>${apollo-client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>4.1.0</version>
         </dependency>
     </dependencies>
 </project>
