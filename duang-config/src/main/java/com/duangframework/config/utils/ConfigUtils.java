@@ -1,11 +1,9 @@
 package com.duangframework.config.utils;
 
-import com.duangframework.core.exceptions.EmptyNullException;
-import com.duangframework.core.kit.ThreadPoolKit;
-import com.duangframework.core.kit.ToolsKit;
-
+import java.text.ParseException;
+import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Created by laotang
@@ -13,40 +11,74 @@ import java.util.Set;
  */
 public class ConfigUtils {
 
-    private static final String MAVEN_ITEM_PATH = "/src/main/java";
+    public static final String DEFAULT_DATE_FORM = "yyyy-MM-dd HH:mm:ss";
 
-    /**
+    /***
+     * 判断传入的对象是否为空
      *
-     * @param name
-     * @param key
-     * @return
+     * @param obj
+     *            待检查的对象
+     * @return 返回的布尔值,为空或等于0时返回true
      */
-    public static String createMapKey(String name, String key) {
-        return name+"_"+ key;
+    public static boolean isEmpty(Object obj) {
+        return checkObjectIsEmpty(obj, true);
     }
 
+    /***
+     * 判断传入的对象是否不为空
+     *
+     * @param obj
+     *            待检查的对象
+     * @return 返回的布尔值,不为空或不等于0时返回true
+     */
+    public static boolean isNotEmpty(Object obj) {
+        return checkObjectIsEmpty(obj, false);
+    }
 
+    @SuppressWarnings("rawtypes")
+    private static boolean checkObjectIsEmpty(Object obj, boolean bool) {
+        if (null == obj)
+            return bool;
+        else if (obj == "" || "".equals(obj))
+            return bool;
+        else if (obj instanceof Integer || obj instanceof Long || obj instanceof Double) {
+            try {
+                Double.parseDouble(obj + "");
+            } catch (Exception e) {
+                return bool;
+            }
+        } else if (obj instanceof String) {
+            if (((String) obj).length() <= 0)
+                return bool;
+            if ("null".equalsIgnoreCase(obj+""))
+                return bool;
+        } else if (obj instanceof Map) {
+            if (((Map) obj).size() == 0)
+                return bool;
+        } else if (obj instanceof Collection) {
+            if (((Collection) obj).size() == 0)
+                return bool;
+        } else if (obj instanceof Object[]) {
+            if (((Object[]) obj).length == 0)
+                return bool;
+        }
+        return !bool;
+    }
 
     /**
-     * 根据Key创建枚举文件
+     *  将字符串日期根据format格式化字段转换成日期类型
+     * @param stringDate    字符串日期
+     * @param format           格式化日期
+     * @return
      */
-    public static void createNumsFile(String filePathTmp, Map<String, Object>  valueMap) {
-        final Set<String> keySet = valueMap.keySet();
-        if(ToolsKit.isEmpty(keySet)) {
-            throw new EmptyNullException("AbstractConfig createNumsFile is fail:  keySet is null");
+    public static Date parseDate(String stringDate, String format) {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat(format);
+        try {
+            return sdf.parse(stringDate);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
         }
-        //TODO 这里取路径有问题，只能支持Maven格式的目录结构
-//        String webPath = PathKit.duang().resource("").path().getPath();
-//        String filePathTmp = new File(webPath).getParentFile().getParentFile().getAbsolutePath();
-        filePathTmp = filePathTmp.contains(MAVEN_ITEM_PATH) ? filePathTmp.replace(MAVEN_ITEM_PATH, "") : filePathTmp;
-        filePathTmp += MAVEN_ITEM_PATH;
-        final String filePath = filePathTmp;
-        ThreadPoolKit.execute(new Runnable() {
-            @Override
-            public void run() {
-                CreateConfigEnum.create(filePath, keySet);
-            }
-        });
     }
 
 }

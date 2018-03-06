@@ -2,11 +2,9 @@ package com.duangframework.config.kit;
 
 
 import com.duangframework.config.apollo.api.SimpleApolloConfig;
-import com.duangframework.config.plugin.ConfigPlugin;
-import com.duangframework.core.common.Const;
-import com.duangframework.core.exceptions.EmptyNullException;
-import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.core.utils.DataType;
+import com.duangframework.config.client.ConfigClient;
+import com.duangframework.config.utils.ConfigUtils;
+import com.duangframework.config.utils.DataType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +19,6 @@ public class ConfigKit {
 
     private static Logger logger = LoggerFactory.getLogger(ConfigKit.class);
 
-    private static ConfigKit _configKit;
     private static SimpleApolloConfig apolloConfig;
     private String _key;
     private Object _defaultValue;
@@ -32,9 +29,9 @@ public class ConfigKit {
 
 
     private ConfigKit() {
-        apolloConfig = ConfigPlugin.getApolloConfig();
-        if(ToolsKit.isEmpty(apolloConfig)) {
-            throw new EmptyNullException("请先启动ConfigPlugin插件");
+        apolloConfig = ConfigClient.getApolloConfig();
+        if(ConfigUtils.isEmpty(apolloConfig)) {
+            throw new NullPointerException("请先启动ConfigPlugin插件");
         }
     }
 
@@ -52,20 +49,20 @@ public class ConfigKit {
     private Object getConfigValue(Class type) {
         String value = apolloConfig.getConfig(_key);
         if(DataType.isString(type)) {
-            return  ToolsKit.isEmpty(value) ? _defaultValue : value;
+            return  ConfigUtils.isEmpty(value) ? _defaultValue : value;
         }
         else if(DataType.isInteger(type) || DataType.isIntegerObject(type)) {
-            return ToolsKit.isEmpty(value)? Integer.parseInt(_defaultValue+"") : Integer.parseInt(value);
+            return ConfigUtils.isEmpty(value)? Integer.parseInt(_defaultValue+"") : Integer.parseInt(value);
         }
         else if(DataType.isFloat(type) || DataType.isFloatObject(type)) {
-            return ToolsKit.isEmpty(value)? Float.parseFloat(_defaultValue+"") : Float.parseFloat(value);
+            return ConfigUtils.isEmpty(value)? Float.parseFloat(_defaultValue+"") : Float.parseFloat(value);
         }
         else if(DataType.isDouble(type) || DataType.isDoubleObject(type)) {
-            return ToolsKit.isEmpty(value)? Double.parseDouble(_defaultValue+"") : Double.parseDouble(value);
+            return ConfigUtils.isEmpty(value)? Double.parseDouble(_defaultValue+"") : Double.parseDouble(value);
         }
         else if(DataType.isDate(type)) {
-            return ToolsKit.isEmpty(value)? ToolsKit.parseDate(_defaultValue+"", Const.DEFAULT_DATE_FORM) :
-                    ToolsKit.parseDate(value, Const.DEFAULT_DATE_FORM);
+            return ConfigUtils.isEmpty(value)? ConfigUtils.parseDate(_defaultValue+"", ConfigUtils.DEFAULT_DATE_FORM) :
+                    ConfigUtils.parseDate(value, "");
         } else {
             return value;
         }
