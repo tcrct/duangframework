@@ -15,6 +15,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,13 +32,14 @@ public class MongodbPlugin implements IPlugin {
 
     @Override
     public void start() throws Exception {
+        List<String> replicasetList = ConfigKit.duang().key("mongodb.replicaset").asList();
         MongoClientKit.duang().connect(new MongoConnect(
                 ConfigKit.duang().key("mongodb.host").defaultValue("127.0.0.1").asString(),
                 ConfigKit.duang().key("mongodb.port").defaultValue("27017").asInt(),
-                ConfigKit.duang().key("mongodb.databasename").defaultValue("local").asString(),
+                ConfigKit.duang().key("mongodb.databaseName").defaultValue("local").asString(),
                 ConfigKit.duang().key("mongodb.username").defaultValue("").asString(),
                 ConfigKit.duang().key("mongodb.password").defaultValue("").asString(),
-                ConfigKit.duang().key("mongodb.replicaset").asList()
+                replicasetList
         )).getClient();
 
         importDao();
