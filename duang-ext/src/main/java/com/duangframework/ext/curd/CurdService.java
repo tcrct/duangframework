@@ -5,7 +5,7 @@ import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.ServiceException;
 import com.duangframework.core.kit.ObjectKit;
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mongodb.MongoDao;
@@ -23,7 +23,7 @@ import java.util.Date;
  * @author Created by laotang
  * @date createed in 2018/1/31.
  */
-class CurdService<T extends IdEntity> extends CurdCacheService<T> {
+public class CurdService<T extends IdEntity> extends CurdCacheService<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(CurdService.class);
 
@@ -63,7 +63,7 @@ class CurdService<T extends IdEntity> extends CurdCacheService<T> {
         Date currentDate = new Date();
         String source = entity.getSource();
         if(ToolsKit.isEmpty(source)) {
-            source = PropertiesKit.duang().key("default.source").defaultValue("phone").asString();
+            source = ConfigKit.duang().key("default.source").defaultValue("phone").asString();
         }
         entity.setCreatetime(currentDate);
         entity.setCreateuserid(createUserId);

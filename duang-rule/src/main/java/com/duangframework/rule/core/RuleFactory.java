@@ -5,7 +5,7 @@ import com.duangframework.core.annotation.rule.RuleAction;
 import com.duangframework.core.common.classes.CustomizeClassTemplate;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.ServiceException;
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.rule.entity.RuleParam;
@@ -37,7 +37,7 @@ public class RuleFactory {
      *
      */
     public static void start() {
-        String basePackagePath = PropertiesKit.duang().key("base.package.path").asString();
+        String basePackagePath = ConfigKit.duang().key("base.package.path").asString();
         CustomizeClassTemplate template = new CustomizeClassTemplate(Rule.class, basePackagePath, "", "");
         try {
             List<Class<?>> classList = template.getList();

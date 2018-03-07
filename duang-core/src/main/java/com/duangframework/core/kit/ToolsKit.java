@@ -194,7 +194,7 @@ public class ToolsKit {
     public static boolean isAliyunHost() {
         String  clientIp = IpUtils.getLocalHostIP(false).trim();
         if(isEmpty(clientIp)) throw new EmptyNullException("getLocalHostIP Fail: Ip is Empty!");
-        String preFixIp = PropertiesKit.duang().key("ip.prefix").defaultValue("10").asString();
+        String preFixIp = ConfigKit.duang().key("ip.prefix").defaultValue("10").asString();
         return  clientIp.startsWith(preFixIp) ? true : false;
     }
 
@@ -311,7 +311,7 @@ public class ToolsKit {
      * @param message       要打印的信息
      */
     public static void console(Object message) {
-        if(PropertiesKit.duang().key("debug").defaultValue(false).asBoolean()) {
+        if(ConfigKit.duang().key("debug").defaultValue(false).asBoolean()) {
             if(message instanceof String) {
                 System.out.println(message);
             } else {

@@ -7,7 +7,7 @@ import com.duangframework.core.annotation.rpc.Rpc;
 import com.duangframework.core.common.classes.CustomizeClassTemplate;
 import com.duangframework.core.exceptions.RpcException;
 import com.duangframework.core.interfaces.IPlugin;
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
@@ -28,7 +28,7 @@ public class RpcPlugin implements IPlugin {
     private static final Logger logger = LoggerFactory.getLogger(RpcPlugin.class);
     @Override
     public void init() throws Exception {
-        String rpcModulePath = PropertiesKit.duang().key("rpc.module.path").asString();
+        String rpcModulePath = ConfigKit.duang().key("rpc.module.path").asString();
         if(ToolsKit.isEmpty(rpcModulePath)) {
             throw new RpcException("rpc module path is empty");
         }

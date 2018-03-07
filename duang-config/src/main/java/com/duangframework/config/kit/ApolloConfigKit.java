@@ -15,33 +15,33 @@ import java.util.Date;
  * @author laotang
  * @date 2017/11/16 0016
  */
-public class ConfigKit {
+public class ApolloConfigKit {
 
-    private static Logger logger = LoggerFactory.getLogger(ConfigKit.class);
+    private static Logger logger = LoggerFactory.getLogger(ApolloConfigKit.class);
 
     private static SimpleApolloConfig apolloConfig;
     private String _key;
     private Object _defaultValue;
 
-    public static ConfigKit duang() {
-        return new ConfigKit();
+    public static ApolloConfigKit duang() {
+        return new ApolloConfigKit();
     }
 
 
-    private ConfigKit() {
+    private ApolloConfigKit() {
         apolloConfig = ConfigClient.getApolloConfig();
         if(ConfigUtils.isEmpty(apolloConfig)) {
             throw new NullPointerException("请先启动ConfigPlugin插件");
         }
     }
 
-    public ConfigKit key(String key) {
+    public ApolloConfigKit key(String key) {
         _key = key;
         return this;
     }
 
 
-    public ConfigKit defaultValue(Object defaultValue) {
+    public ApolloConfigKit defaultValue(Object defaultValue) {
         _defaultValue = defaultValue;
         return this;
     }
@@ -59,6 +59,9 @@ public class ConfigKit {
         }
         else if(DataType.isDouble(type) || DataType.isDoubleObject(type)) {
             return ConfigUtils.isEmpty(value)? Double.parseDouble(_defaultValue+"") : Double.parseDouble(value);
+        }
+        else if(DataType.isBoolean(type) || DataType.isBooleanObject(type)) {
+            return ConfigUtils.isEmpty(value)? Boolean.parseBoolean(_defaultValue+"") : Boolean.parseBoolean(value);
         }
         else if(DataType.isDate(type)) {
             return ConfigUtils.isEmpty(value)? ConfigUtils.parseDate(_defaultValue+"", ConfigUtils.DEFAULT_DATE_FORM) :
@@ -104,9 +107,31 @@ public class ConfigKit {
         }
     }
 
+    public Boolean asBoolean() {
+        try {
+            return (Boolean) getConfigValue(Boolean.class);
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+            return false;
+        }
+    }
+
     public Date asDate() {
         try {
             return (Date) getConfigValue(Date.class);
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+            return null;
+        }
+    }
+
+    public String[] asArray() {
+        try {
+            String tmpStr = (String)getConfigValue(String.class);
+            if(tmpStr.startsWith("[") && tmpStr.endsWith("]")) {
+                tmpStr = tmpStr.substring(1, tmpStr.length()-1);
+            }
+            return tmpStr.split(",");
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
             return null;

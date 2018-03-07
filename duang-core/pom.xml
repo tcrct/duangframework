@@ -16,5 +16,14 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <config.version>1.0-SNAPSHOT</config.version>
     </properties>
+    <dependencies>
+        <!-- 引入duang-config.jar -->
+        <dependency>
+            <groupId>com.duangframework.config</groupId>
+            <artifactId>duang-config</artifactId>
+            <version>${config.version}</version>
+        </dependency>
+    </dependencies>
 </project>

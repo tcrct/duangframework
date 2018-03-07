@@ -18,14 +18,14 @@ public class ConfigClient {
     private static Logger logger = LoggerFactory.getLogger(ConfigClient.class);
 
     // 客户端类名
-    private SimpleApolloConfig apolloConfig;
+    private volatile static SimpleApolloConfig apolloConfig;
     private ApolloModel model;
 
     /**
      * 构造函数
      * @ model  ApolloModel对象实例
      */
-    public ConfigClient(IConfigModel model) {
+    public ConfigClient(IApolloConfig model) {
         this(model.getAppId(), model.getNameSpaces(), model.getEnv(), model.getMetaUrl());
     }
 
@@ -53,7 +53,7 @@ public class ConfigClient {
         logger.warn("ConfigClient start success...");
     }
 
-    public SimpleApolloConfig getApolloConfig() {
+    public static SimpleApolloConfig getApolloConfig() {
         return apolloConfig;
     }
 }

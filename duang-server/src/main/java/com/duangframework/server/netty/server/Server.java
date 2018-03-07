@@ -30,8 +30,13 @@ public class Server implements IServer {
     public Server(String host, int port) {
         this.host = host;
         this.httpPort = port;
-        // http端口 + 1 为rpc请求端口
-        this.rpcPort = port + 1;
+        this.rpcPort = -1;
+    }
+
+    public Server(String host, int port, int rpcPort) {
+        this.host = host;
+        this.httpPort = port;
+        this.rpcPort = rpcPort;
     }
 
     @Override
@@ -50,6 +55,7 @@ public class Server implements IServer {
             }
         });
 
+//        if(rpcPort > -1) {
 //        ThreadPoolKit.execute(new Runnable() {
 //            @Override
 //            public void run() {
@@ -62,6 +68,7 @@ public class Server implements IServer {
 //                }
 //            }
 //        });
+//        }
 
     }
 

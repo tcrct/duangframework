@@ -1,6 +1,6 @@
 package com.duangframework.log.utils;
 
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.IpUtils;
 import com.duangframework.core.utils.MD5;
@@ -34,7 +34,7 @@ public class LogUtils {
 
     public static SLSAccessEnum getSLSAccessEnum() {
         if(ToolsKit.isEmpty(slsAccessEnum)) {
-            String productCode = PropertiesKit.duang().key("product.code").asString();
+            String productCode = ConfigKit.duang().key("product.code").asString();
             for(SLSAccessEnum accessEnum : SLSAccessEnum.values()) {
                 if(productCode.equalsIgnoreCase(accessEnum.getProductCode())) {
                     slsAccessEnum = accessEnum;

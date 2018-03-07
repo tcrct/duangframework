@@ -1,7 +1,7 @@
 package com.duangframework.mysql.utils;
 
 import com.duangframework.core.exceptions.MysqlException;
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mysql.common.IConnect;
@@ -53,9 +53,9 @@ public class MysqlUtils {
 
     public static DataSource getDataSource() {
         IConnect connect = new MySqlConnect(
-                PropertiesKit.duang().key("mysql.host").defaultValue("127.0.0.1").asString(),
-                PropertiesKit.duang().key("mysql.port").defaultValue("3306").asInt(),
-                PropertiesKit.duang().key("mysql.jdbc.url").defaultValue("").asString()
+                ConfigKit.duang().key("mysql.host").defaultValue("127.0.0.1").asString(),
+                ConfigKit.duang().key("mysql.port").defaultValue("3306").asInt(),
+                ConfigKit.duang().key("mysql.jdbc.url").defaultValue("").asString()
         );
         return getDataSource(connect);
     }
@@ -63,7 +63,7 @@ public class MysqlUtils {
     public static DataSource getDataSource(IConnect connect) {
         if (ToolsKit.isEmpty(dataSource)) {
             IDataSourceFactory dsFactory = null;
-            String dataSourceFactoryClassName = PropertiesKit.duang().key("mysql.datasource").asString();
+            String dataSourceFactoryClassName = ConfigKit.duang().key("mysql.datasource").asString();
             if (ToolsKit.isEmpty(dataSourceFactoryClassName)) {
                 dsFactory = ObjectKit.newInstance(DruidDataSourceFactory.class);
             } else {

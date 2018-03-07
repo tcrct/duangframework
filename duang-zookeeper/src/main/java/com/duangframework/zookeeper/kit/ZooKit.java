@@ -1,6 +1,6 @@
 package com.duangframework.zookeeper.kit;
 
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.zookeeper.core.DuangZkSerializer;
 import com.duangframework.zookeeper.core.IZkListener;
@@ -52,12 +52,12 @@ public class ZooKit {
 	}
 
 	private ZooKit() {
-		String zkServers = PropertiesKit.duang().key("zk.servers").defaultValue("").asString();
+		String zkServers = ConfigKit.duang().key("zk.servers").defaultValue("").asString();
 		if(ToolsKit.isEmpty(zkServers)) {
 			throw new ZooKeeperException("zkServers is null");
 		}
-		int sessionTimeOut = PropertiesKit.duang().key("zk.session.timeout").defaultValue(DEFAULT_SESSION_TIMEOUT).asInt();
-		int connectionTimeout = PropertiesKit.duang().key("zk.connection.timeout").defaultValue(DEFAULT_CONNECTION_TIMEOUT).asInt();
+		int sessionTimeOut = ConfigKit.duang().key("zk.session.timeout").defaultValue(DEFAULT_SESSION_TIMEOUT).asInt();
+		int connectionTimeout = ConfigKit.duang().key("zk.connection.timeout").defaultValue(DEFAULT_CONNECTION_TIMEOUT).asInt();
 		/**
 		 * zk服务器地址<ip:port>（有多个以分号分隔）, 会话超时时间，连接超时时间，自定义序列化实例
 		 */

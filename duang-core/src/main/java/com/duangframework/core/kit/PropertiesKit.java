@@ -1,5 +1,6 @@
 package com.duangframework.core.kit;
 
+
 import com.duangframework.core.common.Properties;
 import org.apache.commons.configuration.Configuration;
 import org.slf4j.Logger;
@@ -116,7 +117,5 @@ public class PropertiesKit {
             return null;
         }
     }
-
-
 
 }

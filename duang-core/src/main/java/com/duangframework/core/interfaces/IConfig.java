@@ -42,6 +42,14 @@ public interface IConfig {
      * @param defaultValue
      * @return
      */
+    boolean getBoolean(String key, boolean defaultValue);
+
+    /**
+     *
+     * @param key
+     * @param defaultValue
+     * @return
+     */
     double getDouble(String key, double defaultValue);
 
     /**
@@ -57,5 +65,5 @@ public interface IConfig {
      * @param defaultValue
      * @return
      */
-    List<String> getList(String key, List<?> defaultValue);
+    <T> T getList(String key, List<T> defaultValue);
 }

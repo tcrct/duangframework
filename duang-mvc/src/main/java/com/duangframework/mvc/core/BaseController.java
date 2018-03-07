@@ -14,7 +14,7 @@ import com.duangframework.core.common.enums.IEnums;
 import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.exceptions.ServiceException;
 import com.duangframework.core.kit.ObjectKit;
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.render.JsonRender;
 import com.duangframework.mvc.render.Render;
@@ -46,7 +46,7 @@ public abstract class BaseController{
     public void init(IRequest request, IResponse response) {
         this.request = request;
         this.response = response;
-        if(PropertiesKit.duang().key("debug").defaultValue(false).asBoolean()) {
+        if(ConfigKit.duang().key("debug").defaultValue(false).asBoolean()) {
             printRequest();
         }
     }
@@ -62,7 +62,7 @@ public abstract class BaseController{
     private void printRequest() {
         String contentType = request.getContentType();
         logger.info("******************************************************************************");
-        logger.info("###########RequestDate:   " + ToolsKit.formatDate(getRequestDate(), PropertiesKit.duang().key("default.date.format").defaultValue("yyyy-MM-dd HH:mm:ss").asString()));
+        logger.info("###########RequestDate:   " + ToolsKit.formatDate(getRequestDate(), ConfigKit.duang().key("default.date.format").defaultValue("yyyy-MM-dd HH:mm:ss").asString()));
         logger.info("###########RequestHeader: " + request.getHeader(HttpHeaders.USER_AGENT));
         logger.info("###########RequestURL:    " + request.getRequestURL());
         logger.info("###########RemoteMethod:  " + request.getMethod());
@@ -87,7 +87,7 @@ public abstract class BaseController{
         try {
             return new Date(Long.parseLong(d));
         } catch (Exception e) {
-            return ToolsKit.parseDate(d, PropertiesKit.duang().key("default.date.format").defaultValue("yyyy-MM-dd HH:mm:ss").asString());
+            return ToolsKit.parseDate(d, ConfigKit.duang().key("default.date.format").defaultValue("yyyy-MM-dd HH:mm:ss").asString());
         }
     }
 
@@ -439,7 +439,7 @@ public abstract class BaseController{
         Object inputStreamObj = getBodyString();
         try{
             if(ToolsKit.isNotEmpty(inputStreamObj)) {
-                is = IOUtils.toInputStream((String)inputStreamObj, PropertiesKit.duang().key("encoding").defaultValue("UTF-8").asString());
+                is = IOUtils.toInputStream((String)inputStreamObj, ConfigKit.duang().key("encoding").defaultValue("UTF-8").asString());
             }
         }catch(Exception e) {
             logger.warn("Controller.getInputStream() fail: " + e.getMessage() + " return null...", e);

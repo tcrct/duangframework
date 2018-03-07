@@ -31,7 +31,7 @@ public class RuleKit {
             try {
                 _ruleKitLock.lock();
                 _ruleKit = new RuleKit();
-                _ruleParamList = new java.util.ArrayList<>();
+                _ruleParamList = new java.util.Vector<>();
             } catch (Exception e) {
                 logger.warn(e.getMessage(), e);
             } finally {

@@ -3,7 +3,7 @@ package com.duangframework.mvc.handles;
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.interfaces.IHandle;
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 
 import java.util.*;
@@ -87,7 +87,7 @@ public class CORSHandle implements IHandle {
             String allowString = "Accept,Content-Type,Access-Control-Allow-Headers,Authorization,X-Requested-With,Authoriza,duang-token-id";
             if(ToolsKit.isEmpty(accessControlAllowHeaders)) {
                 accessControlAllowHeaders = allowString;
-                String[] arrayItem = PropertiesKit.duang().key("allow.host.headers").asArray();
+                String[] arrayItem = ConfigKit.duang().key("allow.host.headers").asArray();
                 if (ToolsKit.isNotEmpty(arrayItem)) {
                     for (String allowItem : arrayItem) {
                         accessControlAllowHeaders += "," + allowItem;

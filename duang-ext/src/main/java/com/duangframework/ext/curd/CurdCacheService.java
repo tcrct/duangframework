@@ -4,7 +4,7 @@ import com.duangframework.cache.kit.CacheKit;
 import com.duangframework.core.annotation.cache.EntityCache;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.ServiceException;
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ public class CurdCacheService<T extends IdEntity>  {
 
     private void init() {
         if(ToolsKit.isEmpty(keyPrefix)) {
-            keyPrefix = PropertiesKit.duang().key("product.code").asString();
+            keyPrefix = ConfigKit.duang().key("product.code").asString();
         }
     }
 

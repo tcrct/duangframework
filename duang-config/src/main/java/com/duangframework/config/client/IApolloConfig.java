@@ -6,7 +6,7 @@ import java.util.List;
  * @author Created by laotang
  * @date createed in 2018/3/6.
  */
-public interface IConfigModel {
+public interface IApolloConfig {
     /**
      * 应用APPID
      * @return

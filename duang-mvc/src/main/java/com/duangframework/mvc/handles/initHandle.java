@@ -6,7 +6,7 @@ import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.interfaces.IHandle;
-import com.duangframework.core.kit.PropertiesKit;
+import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.IpUtils;
 
@@ -33,7 +33,7 @@ public class initHandle implements IHandle {
         // 设置请求ID
         String requestId = (String) request.getAttribute(Const.DUANG_REQUEST_ID);
         if (ToolsKit.isEmpty(requestId)) {
-            requestId = PropertiesKit.duang().key("product.code").asString() + "_" + DuangId.get();
+            requestId = ConfigKit.duang().key("product.code").asString() + "_" + DuangId.get();
             request.setAttribute(Const.DUANG_REQUEST_ID, requestId);
         }
 
