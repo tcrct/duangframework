@@ -21,10 +21,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by laotang on 2017/10/31.
@@ -200,23 +197,40 @@ public class ToolsKit {
 
 
     /**
-     * 使用环境，分内测(local)，外测(obt)，正式(api)
+     * 使用环境，分内测(local)，外测(obt)，正式(api), 如果不设置，默认为api
      * @return
      */
     public static String getUseEnv() {
         if (ToolsKit.isEmpty(Const.USE_ENV)) {
             String ip = IpUtils.getLocalHostIP();
+            String fatIp = "", uatIp = "";
+            try { fatIp = getEnvIp("fat.ips"); } catch (Exception e) { logger.warn(e.getMessage(), e); }
+            try { uatIp = getEnvIp("uat.ips"); } catch (Exception e) { logger.warn(e.getMessage(), e); }
             if (ip.startsWith("192.168") || ip.startsWith("127")) {
-                Const.USE_ENV = "local";
-            } else if (ip.equals("42.96.139.238") || ip.equals("10.129.20.220")) {
-                Const.USE_ENV = "slb";
-            } else if (ip.equals("118.190.44.13") || ip.equals("10.29.179.13")) {
-                Const.USE_ENV = "obt";
+                Const.USE_ENV = "dev";
+            } else if (Arrays.asList(fatIp.split(",")).contains(ip)) {
+                Const.USE_ENV = "fat";  // fat
+            } else if (Arrays.asList(uatIp.split(",")).contains(ip)) {
+                Const.USE_ENV = "uat";  // uat
             } else {
-                Const.USE_ENV = "api";
+                Const.USE_ENV = "pro";
             }
         }
         return Const.USE_ENV;
+    }
+
+    private static String getEnvIp(String envKey) {
+        String ipAddress = "";
+        try {
+            ipAddress = ConfigKit.duang().key(envKey).asString();
+        } catch (Exception e) {
+            ipAddress = PropertiesKit.duang().key(envKey).asString();
+        }
+        logger.warn("getEnvIp: " + ipAddress);
+        if(ToolsKit.isEmpty(ipAddress)) {
+            throw new EmptyNullException("取环境机器IP时失败，请先在配置文件里设置: " + envKey);
+        }
+        return ipAddress;
     }
 
     public static DuangId message2DuangId(String id) {

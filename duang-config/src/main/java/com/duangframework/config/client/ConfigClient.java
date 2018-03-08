@@ -37,6 +37,15 @@ public class ConfigClient {
      * @param metaUrl  Apollo Config服务器地址
      */
     public ConfigClient(String appid, List<String> nameSpaceList, String env, String metaUrl) {
+        if(null == appid || appid.length() ==0) {
+            throw new NullPointerException("配置中心应用ID不能为空!");
+        }
+        if(null == env || env.length() ==0) {
+            throw new NullPointerException("环境变量不能为空!");
+        }
+        if(null == metaUrl || metaUrl.length() ==0) {
+            throw new NullPointerException("Apollo Config服务器地址不能为空!");
+        }
         String commonNameSpace = "SG.common";
         if(nameSpaceList.isEmpty()) { nameSpaceList = new ArrayList<>(); }
         if(!nameSpaceList.contains(commonNameSpace)) {

@@ -29,7 +29,7 @@ public class Const {
     /**
      * 使用环境
      */
-    public static String USE_ENV = "local";
+    public static String USE_ENV = "";
 
     public static final String DUANG_REQUEST_ID = "duang-request-id";
     public static final String REMOTE_CLIENT_IP  = "duang-client-ip";
