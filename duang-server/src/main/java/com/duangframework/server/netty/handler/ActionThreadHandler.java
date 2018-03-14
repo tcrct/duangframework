@@ -47,7 +47,6 @@ public class ActionThreadHandler extends AbstractHttpHandler implements Runnable
             // 调用MCV模块的主入口方法
             response = bootStrap.getMainProcess().doWork(request, response);
             // 返回到客户端
-            System.out.println("###########SSSSSSSSS###############");
             response(ctx, keepAlive, response);
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);

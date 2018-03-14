@@ -85,6 +85,7 @@ public abstract class AbstractAsyncContext implements AsyncContext {
         headDto.setMethod(asyncRequest.getMethod());
         returnDto.setHead(headDto);
         httpResponse.write(returnDto);
+        httpResponse.setHeader("status", (headDto.getRet() == 0) ? "200" : "500");
         return httpResponse;
     }
 

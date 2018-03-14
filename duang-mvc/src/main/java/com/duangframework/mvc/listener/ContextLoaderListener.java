@@ -121,8 +121,6 @@ public class ContextLoaderListener implements IContextLoaderListener{
         // 用于设置框架必要的Handle处理器， 如将ActionHandle添加到最后等
         Handles.init();
         logger.warn("instance " + duangFrameword.getClass().getName() + " success!");
-
-
     }
 
     public void reload() {

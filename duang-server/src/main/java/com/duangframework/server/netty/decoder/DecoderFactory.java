@@ -25,18 +25,18 @@ public class DecoderFactory {
             decoder = new GetDecoder(request);
         }
         else if(HttpMethod.POST.name().equalsIgnoreCase(method)) {
-            if(ContentType.JSON.getValue().contains(contentType)) {
+            if(contentType.contains(ContentType.JSON.getValue())) {
                 decoder = new JsonDecoder(request);
-            }
-            else if(ContentType.XML.getValue().contains(contentType)) {
+            } else if(contentType.contains(ContentType.XML.getValue())) {
                 decoder = new XmlDecoder(request);
-            }
-            else if (ContentType.FORM.getValue().contains(contentType)) {
+            } else if (contentType.contains(ContentType.MULTIPART.getValue())) {
+                decoder = new MultiPartPostDecoder(request.copy());
+            } else {
+                // 都不符合以上的默认为post form表单提交
                 decoder = new PostDecoder(request.copy());
             }
-            else if (ContentType.MULTIPART.getValue().contains(contentType)) {
-                decoder = new MultiPartPostDecoder(request.copy());
-            }
+        } else if (HttpMethod.OPTIONS.name().equalsIgnoreCase(method)) {
+            decoder = new OptionsDecoder(request);
         }
 
         return decoder;

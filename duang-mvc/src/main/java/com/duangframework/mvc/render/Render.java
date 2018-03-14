@@ -55,6 +55,7 @@ public abstract class Render implements Serializable {
 		response.setHeader(HttpHeaders.CACHE_CONTROL, "no-cache");
 		response.setHeader(HttpHeaders.EXPIRES, "0");
 		response.setHeader(Const.OWNER_FILED, Const.OWNER);
+		response.setHeader(Const.STATUS, "200");
 	}
 
 	public abstract void render();

@@ -57,7 +57,11 @@ public class HttpResponse implements IResponse {
 
     @Override
     public int getStatus() {
-        return 0;
+        try {
+            return Integer.parseInt(headers.get("status"));
+        } catch (Exception e) {
+            return 500;
+        }
     }
 
     @Override

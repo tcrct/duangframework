@@ -8,21 +8,23 @@ import com.duangframework.core.common.DBConnect;
 public class MySqlConnect  extends DBConnect  implements IConnect {
 
     private String jdbcUrl;
+    private String dataSourceFactoryClassName;
 
-    public MySqlConnect(String host, int port, String dataBase) {
-        this(host, port, dataBase, null,null, null);
-    }
 
-    public MySqlConnect(String host, int port, String dataBase, String userName, String passWord, String jdbcUrl) {
-        super(host, port, dataBase, userName, passWord);
+    public MySqlConnect(String userName, String passWord, String jdbcUrl, String dataSourceFactoryClassName) {
+        super("127.0.0.1", 3306, "", userName, passWord);
         this.jdbcUrl = jdbcUrl;
+        this.dataSourceFactoryClassName = dataSourceFactoryClassName;
     }
 
+    @Override
     public String getJdbcUrl() {
         return jdbcUrl;
     }
 
-    public void setJdbcUrl(String jdbcUrl) {
-        this.jdbcUrl = jdbcUrl;
+    @Override
+    public String getDataSourceFactoryClassName() {
+        return dataSourceFactoryClassName;
     }
+
 }

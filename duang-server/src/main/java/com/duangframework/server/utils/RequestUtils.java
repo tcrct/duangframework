@@ -68,6 +68,7 @@ public class RequestUtils {
                 Map.Entry<String,String> entry = it.next();
                 headerMap.put(entry.getKey(), entry.getValue());
             }
+            headerMap.put("method", request.method().toString());
         }
         return headerMap;
     }
@@ -77,7 +78,7 @@ public class RequestUtils {
             AbstractDecoder<Map<String, String[]>> decoder = DecoderFactory.create(request.method().toString(), request.headers().get(CONTENT_TYPE)+"", request);
             return decoder.decoder();
         } catch (Exception e) {
-            throw new DecoderException(e.getMessage(), e);
+            throw new DecoderException("decoder request is fail: " + e.getMessage(), e);
         }
     }
     /**

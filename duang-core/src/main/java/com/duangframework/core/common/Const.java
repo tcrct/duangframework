@@ -37,6 +37,7 @@ public class Const {
     public static final String RENDER_TYPE_FILED  = "duang-render-type";
     public static final String OWNER_FILED  = "duang-x-owenr";
     public static final String OWNER  = "duangframework";
+    public static final String STATUS = "status";
 
     /**
      * 请求超时默认时间，3秒

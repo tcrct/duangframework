@@ -2,7 +2,6 @@ package com.duangframework.mysql.core;
 
 import com.duangframework.core.exceptions.MysqlException;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.mysql.kit.MysqlKit;
 import com.duangframework.mysql.utils.MysqlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +81,7 @@ public class DBSession {
 	 * @param params			参数数组
 	 * @return
 	 */
-	public static List<Map<String,Object>> query(final String querySql, final Object... params){
+	public static List<Map<String,Object>> query(final String querySql, final Object... params) throws Exception{
 		return call(new DBAction<List<Map<String,Object>>>(){
 			@Override
 			public List<Map<String,Object>> execute(DBRunner dbRunner) throws SQLException {
@@ -97,7 +96,7 @@ public class DBSession {
 	 * @param params
 	 * @return
 	 */
-	public static int execute(final String sql, final Object... params)  {
+	public static int execute(final String sql, final Object... params)  throws Exception {
 		return call(new DBAction<Integer>(){
 			@Override
 			public Integer execute(DBRunner dbRunner) throws SQLException {

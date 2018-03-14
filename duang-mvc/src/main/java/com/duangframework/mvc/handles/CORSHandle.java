@@ -2,11 +2,16 @@ package com.duangframework.mvc.handles;
 
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
+import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.interfaces.IHandle;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.mvc.render.TextRender;
+import com.duangframework.server.common.enums.HttpMethod;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * 请求跨域处理器
@@ -56,6 +61,10 @@ public class CORSHandle implements IHandle {
         String host = "";
         boolean isAllowAccess = false;
         String allowhost =  request.getHeader("Origin"); //httpRequest.getRequestURL().toString();
+        // postman提交则清空内容
+        if(ToolsKit.isNotEmpty(allowhost) && allowhost.startsWith("chrome-extension")) {
+            allowhost = "";
+        }
         if(ToolsKit.isEmpty(allowhost)) {
             allowhost = request.getHeader("Referer");
             if (ToolsKit.isEmpty(allowhost)) {
@@ -65,24 +74,24 @@ public class CORSHandle implements IHandle {
                 String key = request.getParameter("allowhost");
                 allowhost = allowHostMap.get(key);
             }
+            if (ToolsKit.isEmpty(allowhost)) {
+                allowhost = request.getRequestURL().toString();
+            }
         }
 
         if(ToolsKit.isNotEmpty(allowhost)) {
             host = allowhost.toLowerCase().replace(PROTOCOL,"").replace(PROTOCOLS,"").replace("*","");
-            isAllowAccess = allowHostMap.containsValue(host);
-            if(!isAllowAccess) {
-                for(Iterator<Map.Entry<String,String>> it = allowHostMap.entrySet().iterator(); it.hasNext();) {
-                    Map.Entry<String, String> entry = it.next();
-                    if(allowhost.endsWith(entry.getValue())) {
-                        isAllowAccess = true;
-                        break;
-                    }
-                }
+            int endIndex = host.indexOf(":");
+            host = host.substring(0, endIndex > -1 ? endIndex : host.length());
+            if(host.startsWith("127.0") || host.startsWith("192.168")) {
+                isAllowAccess = true;
+            } else {
+                isAllowAccess = allowHostMap.containsValue(host);
             }
         }
 
         if(isAllowAccess) {
-            response.setHeader("Access-Control-Allow-Origin", host.endsWith("/") ? host.substring(0, host.length()-1) : host);
+            response.setHeader("Access-Control-Allow-Origin", allowhost);
             response.setHeader("Access-Control-Allow-Credentials", "true");
             String allowString = "Accept,Content-Type,Access-Control-Allow-Headers,Authorization,X-Requested-With,Authoriza,duang-token-id";
             if(ToolsKit.isEmpty(accessControlAllowHeaders)) {
@@ -95,6 +104,14 @@ public class CORSHandle implements IHandle {
                 }
             }
             response.setHeader("Access-Control-Allow-Headers", accessControlAllowHeaders);
+            // 如果是OPTIONS请求且符合CORS规则，则返回200
+            if(HttpMethod.OPTIONS.name().equalsIgnoreCase(request.getMethod())) {
+                TextRender render = new TextRender("200");
+                render.setContext(request, response).render();
+                return;
+            }
+        } else {
+            throw new DuangMvcException("the reqeust is not allow");
         }
     }
 

@@ -6,7 +6,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <groupId>com.duangframework.mysql</groupId>
     <artifactId>duang-mysql</artifactId>
     <packaging>jar</packaging>
 
@@ -17,6 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <code.version>1.0-SNAPSHOT</code.version>
         <druid.version>1.0.15</druid.version>
+        <mysql.connector.version>5.1.36</mysql.connector.version>
     </properties>
 
     <dependencies>
@@ -29,6 +30,11 @@
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
             <version>${druid.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.connector.version}</version>
         </dependency>
     </dependencies>
 </project>

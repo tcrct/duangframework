@@ -28,6 +28,7 @@ public class ActionHandle implements IHandle {
 
     @Override
     public void execute(String target, IRequest request, IResponse response) throws Exception {
+
         // 请求的URL中如果包含有.  则全部当作是静态文件的请求处理，直接返回
         if (target.contains(".")) { return; }
         // 分号后的字符截断

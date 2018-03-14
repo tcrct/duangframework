@@ -1,7 +1,7 @@
 package com.duangframework.mysql.utils;
 
+import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.MysqlException;
-import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mysql.common.IConnect;
@@ -12,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by laotang on 2017/11/25 0025.
@@ -22,6 +25,7 @@ public class MysqlUtils {
     private static final Logger logger = LoggerFactory.getLogger(MysqlUtils.class);
 
     private static DataSource dataSource = null;
+    private static IConnect connect = null;
 
     /**
      *
@@ -51,19 +55,24 @@ public class MysqlUtils {
         return (T)resultList;
     }
 
-    public static DataSource getDataSource() {
-        IConnect connect = new MySqlConnect(
-                ConfigKit.duang().key("mysql.host").defaultValue("127.0.0.1").asString(),
-                ConfigKit.duang().key("mysql.port").defaultValue("3306").asInt(),
-                ConfigKit.duang().key("mysql.jdbc.url").defaultValue("").asString()
-        );
+    public static DataSource getDataSource(String userNaem, String passWord, String jdbcUrl, String dataSourceFactoryClassName) throws Exception {
+        if(null == connect) {
+            connect = new MySqlConnect( userNaem, passWord,jdbcUrl,dataSourceFactoryClassName);
+        }
+        return getDataSource(connect);
+    }
+
+    public static DataSource getDataSource() throws Exception {
+        if(null == connect) {
+          throw new EmptyNullException("请先启动MysqlPlugin插件");
+        }
         return getDataSource(connect);
     }
 
     public static DataSource getDataSource(IConnect connect) {
         if (ToolsKit.isEmpty(dataSource)) {
             IDataSourceFactory dsFactory = null;
-            String dataSourceFactoryClassName = ConfigKit.duang().key("mysql.datasource").asString();
+            String dataSourceFactoryClassName = connect.getDataSourceFactoryClassName();
             if (ToolsKit.isEmpty(dataSourceFactoryClassName)) {
                 dsFactory = ObjectKit.newInstance(DruidDataSourceFactory.class);
             } else {

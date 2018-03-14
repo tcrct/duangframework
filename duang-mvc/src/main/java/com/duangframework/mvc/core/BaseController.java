@@ -468,12 +468,12 @@ public abstract class BaseController{
         T resultBean = null;
         String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
         try {
-            if (ToolsKit.isEmpty(contentType) || ContentType.FORM.getValue().contains(contentType)) {
+            if (ToolsKit.isEmpty(contentType) || contentType.contains(ContentType.FORM.getValue())) {
                 String paramsJson = ToolsKit.toJsonString(getAllParams());
                 resultBean = ToolsKit.jsonParseObject(paramsJson, tClass);
-            }else if(ContentType.JSON.getValue().contains(contentType)) {
+            }else if(contentType.contains(ContentType.JSON.getValue())) {
                 resultBean = ToolsKit.jsonParseObject(getJson(), tClass);
-            } else  if(ContentType.XML.getValue().contains(contentType)) {
+            } else if(contentType.contains(ContentType.XML.getValue())) {
                 resultBean = ToolsKit.xmlParseObject(getXml(), tClass);
             }
             // 开启验证

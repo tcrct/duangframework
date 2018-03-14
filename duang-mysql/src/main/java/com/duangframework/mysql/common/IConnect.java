@@ -24,4 +24,10 @@ public interface IConnect {
      * @return
      */
     String getJdbcUrl();
+
+    /**
+     *
+     * @return
+     */
+    String getDataSourceFactoryClassName();
 }

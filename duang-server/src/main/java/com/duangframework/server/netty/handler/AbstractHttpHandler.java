@@ -16,7 +16,6 @@ import java.util.Map;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaderNames.TRANSFER_ENCODING;
-import static io.netty.handler.codec.http.HttpResponseStatus.OK;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
@@ -32,8 +31,8 @@ public abstract class AbstractHttpHandler {
 
     protected void response(ChannelHandlerContext ctx, boolean keepAlive, IResponse response) throws Exception {
         // 构建请求返回对象，并设置返回主体内容结果
-        // TODO 这里返回的OK状态码应该根据response这个来确定，待处理
-        FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, OK, Unpooled.copiedBuffer(response.toString(), HttpConstants.DEFAULT_CHARSET));
+        HttpResponseStatus status = response.getStatus() == 200 ? HttpResponseStatus.OK : HttpResponseStatus.INTERNAL_SERVER_ERROR;
+        FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer(response.toString(), HttpConstants.DEFAULT_CHARSET));
         builderResponseHeader(fullHttpResponse, response.getHeaders());
         HttpHeaders.setKeepAlive(fullHttpResponse, keepAlive);
         ChannelFuture channelFutureListener = ctx.channel().writeAndFlush(fullHttpResponse);

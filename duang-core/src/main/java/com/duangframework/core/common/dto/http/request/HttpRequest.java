@@ -179,7 +179,7 @@ public class HttpRequest implements IRequest {
 
     @Override
     public String getMethod() {
-        return headers.get("");
+        return headers.get("method");
     }
 
     @Override

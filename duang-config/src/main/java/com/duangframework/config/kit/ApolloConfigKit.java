@@ -128,6 +128,9 @@ public class ApolloConfigKit {
     public String[] asArray() {
         try {
             String tmpStr = (String)getConfigValue(String.class);
+            if(null == tmpStr || "".equals(tmpStr)) {
+                return null;
+            }
             if(tmpStr.startsWith("[") && tmpStr.endsWith("]")) {
                 tmpStr = tmpStr.substring(1, tmpStr.length()-1);
             }
