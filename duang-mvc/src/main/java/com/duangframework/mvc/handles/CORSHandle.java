@@ -86,7 +86,14 @@ public class CORSHandle implements IHandle {
             if(host.startsWith("127.0") || host.startsWith("192.168")) {
                 isAllowAccess = true;
             } else {
-                isAllowAccess = allowHostMap.containsValue(host);
+//                isAllowAccess = allowHostMap.containsValue(host);
+                for(Iterator<Map.Entry<String,String>> iterator = allowHostMap.entrySet().iterator(); iterator.hasNext();) {
+                    Map.Entry<String,String> entry = iterator.next();
+                    if(host.contains(entry.getValue())) {
+                        isAllowAccess = true;
+                        break;
+                    }
+                }
             }
         }
 

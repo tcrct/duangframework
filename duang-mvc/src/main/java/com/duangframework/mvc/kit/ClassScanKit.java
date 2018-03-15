@@ -70,6 +70,11 @@ public class ClassScanKit {
      * 添加要扫描类文件的包路径，若有多个时，重复调用
      * @return
      */
+    public ClassScanKit packages(String[] packageName) {
+        packageSet.addAll(Arrays.asList(packageName));
+        return _classScanKit;
+    }
+
     public ClassScanKit packages(String packageName) {
         packageSet.add(packageName);
         return _classScanKit;
@@ -79,6 +84,11 @@ public class ClassScanKit {
      * 添加要扫描类文件的所在的jar文件名，若有多个时，重复调用
      * @return
      */
+    public ClassScanKit jarname(String[] jarName) {
+        jarNameSet.addAll(Arrays.asList(jarName));
+        return _classScanKit;
+    }
+
     public ClassScanKit jarname(String jarName) {
         jarNameSet.add(jarName);
         return _classScanKit;

@@ -11,7 +11,6 @@ import com.duangframework.core.utils.BeanUtils;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mvc.core.InstanceFactory;
 import com.duangframework.mvc.kit.ClassScanKit;
-import com.duangframework.mvc.proxy.AbstractProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +32,10 @@ public class BeanHelper {
         //扫描指定包路径下的类文件，类文件包含有指定的注解类或文件名以指定的字符串结尾的
         Map<String, List<Class<?>>> classMap =  ClassScanKit.duang()
                 .annotations(InstanceFactory.MVC_ANNOTATION_SET)
-                .packages(ConfigKit.duang().key("base.package.path").asString())
-                .jarname(ConfigKit.duang().key("jar.prefix").asString())
+                .packages(ConfigKit.duang().key("base.package.path").asArray())
+                .jarname(ConfigKit.duang().key("jar.prefix").asArray())
                 // 增加MVC固定扫描的包路径
-                .packages(AbstractProxy.class.getPackage().getName())
+                .packages("com.duangframework.mvc")
                 .map();
 
         if(ToolsKit.isNotEmpty(classMap)) {
@@ -68,8 +67,10 @@ public class BeanHelper {
                     if(ToolsKit.isEmpty(subBeanMap)) { subBeanMap = new HashMap<>(classList.size());}
                     for(Class<?> cls : classList) {
                         Object clsObj = createBean(annotationMap, cls);
-                        // 实例化后，用类全名作key， 实例化对象作value缓存起来
-                        subBeanMap.put(cls, clsObj);
+                        if(clsObj != null) {
+                            // 实例化后，用类全名作key， 实例化对象作value缓存起来
+                            subBeanMap.put(cls, clsObj);
+                        }
                     }
                     BeanUtils.setAllBeanMaps(key, subBeanMap);
                 }

@@ -61,6 +61,9 @@ public class ClassUtils {
     }
 
     public static <T> T newInstance(Class<?> clazz) {
+        if(null == clazz) {
+            return null;
+        }
         try {
             logger.debug("\t>>{}", clazz.getCanonicalName());
             return (T)loadClass(clazz.getCanonicalName(), true).newInstance();

@@ -74,7 +74,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
      * @param database  数据库名称
      * @param cls             集合类对象
      */
-	private void init(DB db, MongoDatabase database, Class<T> cls){
+	private void init(DB db, MongoDatabase database, final Class<T> cls){
 		boolean isExtends = ClassUtils.isExtends(cls, IdEntity.class.getCanonicalName());
 		if(!isExtends){
 			throw new RuntimeException("the "+cls.getCanonicalName()+" is not extends "+ IdEntity.class.getCanonicalName() +", exit...");
@@ -88,7 +88,17 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 		coll = mongoDB.getCollection(entityName);
 			collection = mongoDatabase.getCollection(entityName);
 			keys = MongoUtils.convert2DBFields(ClassUtils.getFields(cls));
-			MongoIndexUtils.createIndex(coll, cls);
+			ThreadPoolKit.execute(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						MongoIndexUtils.createIndex(coll, cls);
+					} catch (Exception e) {
+						logger.warn(e.getMessage(), e);
+					}
+				}
+			});
+
 		} catch(Exception e){
 			e.printStackTrace();
 			logger.error(coll.getFullName()+" Create Index Fail: " + e.getMessage());

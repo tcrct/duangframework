@@ -1,6 +1,7 @@
 package com.duangframework.core.common.classes;
 
 import com.duangframework.core.common.Const;
+import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.kit.PathKit;
 import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
@@ -106,8 +107,6 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
     @Override
     public List<Class<?>> getList() throws Exception{
         List<Class<?>> classList = new ArrayList<>();
-//        String classesRootPath = PathKit.duang().resource("").web();
-//        String libRootPath = PathKit.duang().resource("").lib();
         for(String packageName : packageSet) {
             Enumeration<URL> urls = PathKit.duang().resource(packageName).paths();
             while (urls.hasMoreElements()) {
@@ -124,20 +123,36 @@ public abstract class AbstractClassTemplate implements IClassTemplate {
                     // 若在 jar 包中，则解析 jar 包中的 entry
                     JarURLConnection jarURLConnection = (JarURLConnection) url.openConnection();
                     JarFile jarFile = jarURLConnection.getJarFile();
+                    String jarFileName = jarFile.getName();
+                    int indexOf = jarFileName.lastIndexOf("/");
+                    if(indexOf == -1) {
+                        indexOf = jarFileName.lastIndexOf("\\");
+                    }
+                    if(indexOf == -1) {
+                        throw new MvcStartUpException("取jar包取时出错");
+                    }
+                    jarFileName = jarFileName.substring(indexOf+1, jarFileName.length());
+                    boolean isContains = false;
+                    for(String key : jarNameSet) {
+                        if(jarFileName.contains(key)) {
+                            isContains = true;
+                            break;
+                        }
+                    }
+                    if (!isContains) {
+                        continue;
+                    }
                     Enumeration<JarEntry> jarEntries = jarFile.entries();
                     while (jarEntries.hasMoreElements()) {
                         JarEntry jarEntry = jarEntries.nextElement();
                         String fileName = jarEntry.getName();
-                        if (!jarNameSet.contains(fileName)) {
-                            continue;
-                        }
-                        // 包含有.且不是.或/结尾的文件名
-                        if(fileName.contains(".") && !fileName.endsWith("/") && !fileName.endsWith(".") && !fileName.endsWith(File.separator)) {
+                        // 是class文件
+                        if(fileName.endsWith(".class")) {
                             String suffix = fileName.substring(fileName.lastIndexOf("."));
                             String subFileName = fileName.substring(fileName.lastIndexOf("/") + 1, fileName.length() - suffix.length());
                             String filePkg = fileName.contains("/")? fileName.substring(0, fileName.length() - subFileName.length() - suffix.length() - 1).replaceAll("/", ".") : "";
                             // 执行添加类操作
-                            doAddClass(classList, filePkg, fileName, suffix);
+                            doAddClass(classList, filePkg, subFileName, suffix);
                         }
                     }
                 }

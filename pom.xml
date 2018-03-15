@@ -22,6 +22,7 @@
         <cache.version>1.0-SNAPSHOT</cache.version>
         <mvc.version>1.0-SNAPSHOT</mvc.version>
         <zk.version>1.0-SNAPSHOT</zk.version>
+        <dubbo.version>2.6.0</dubbo.version>
     </properties>
 
 
@@ -110,6 +111,8 @@
         <module>duang-cache</module>
         <module>duang-rule</module>
         <module>duang-ext</module>
+        <module>duang-dubbo</module>
+        <module>duang-security</module>
     </modules>
 
     <dependencies>

@@ -99,7 +99,9 @@ public class RouteHelper {
                 mappingKey = mappingKey.replace(CONTROLLER_ENDWITH_NAME, "");
             }
         } else {
-            mappingKey = mapping.value();
+            if(ToolsKit.isNotEmpty(mapping.value())) {
+                mappingKey = mapping.value();
+            }
         }
         return mappingKey.endsWith("/") ? mappingKey.substring(0, mappingKey.length()-1).toLowerCase() : mappingKey.toLowerCase();
     }
