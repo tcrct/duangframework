@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.security</groupId>
-    <artifactId>duang-security</artifactId>
+    <artifactId>duangframework-security</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-security</name>
+    <name>duangframework-security</name>
     <url>http://maven.apache.org</url>
 
     <properties>

@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.mvc</groupId>
-    <artifactId>duang-mvc</artifactId>
+    <artifactId>duangframework-mvc</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-mvc</name>
+    <name>duangframework-mvc</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -27,17 +27,17 @@
     <dependencies>
         <dependency>
             <groupId>com.duangframework.mongodb</groupId>
-            <artifactId>duang-mongodb</artifactId>
+            <artifactId>duangframework-mongodb</artifactId>
             <version>${mongo.version}</version>
         </dependency>
         <dependency>
             <groupId>com.duangframework.server</groupId>
-            <artifactId>duang-server</artifactId>
+            <artifactId>duangframework-server</artifactId>
             <version>${server.version}</version>
         </dependency>
         <dependency>
             <groupId>com.duangframework.rpc</groupId>
-            <artifactId>duang-rpc</artifactId>
+            <artifactId>duangframework-rpc</artifactId>
             <version>${rpc.version}</version>
         </dependency>
         <dependency>
@@ -47,12 +47,12 @@
         </dependency>
         <dependency>
             <groupId>com.duangframework.validation</groupId>
-            <artifactId>duang-validation</artifactId>
+            <artifactId>duangframework-validation</artifactId>
             <version>${validation.version}</version>
         </dependency>
         <dependency>
             <groupId>com.duangframework.cache</groupId>
-            <artifactId>duang-cache</artifactId>
+            <artifactId>duangframework-cache</artifactId>
             <version>${cache.version}</version>
         </dependency>
     </dependencies>

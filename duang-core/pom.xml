@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.core</groupId>
-    <artifactId>duang-core</artifactId>
+    <artifactId>duangframework-core</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-core</name>
+    <name>duangframework-core</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -19,10 +19,10 @@
         <config.version>1.0-SNAPSHOT</config.version>
     </properties>
     <dependencies>
-        <!-- 引入duang-config.jar -->
+        <!-- 引入duangframework-config.jar -->
         <dependency>
             <groupId>com.duangframework.config</groupId>
-            <artifactId>duang-config</artifactId>
+            <artifactId>duangframework-config</artifactId>
             <version>${config.version}</version>
         </dependency>
     </dependencies>

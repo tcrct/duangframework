@@ -7,9 +7,9 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.duangframework.web</groupId>
-    <artifactId>duang-web</artifactId>
+    <artifactId>duangframework-web</artifactId>
     <packaging>war</packaging>
-    <name>duang-web Maven Webapp</name>
+    <name>duangframework-web Maven Webapp</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -20,11 +20,11 @@
     <dependencies>
         <dependency>
            <groupId>com.duangframework.server</groupId>
-            <artifactId>duang-server</artifactId>
+            <artifactId>duangframework-server</artifactId>
             <version>${server.version}</version>
         </dependency>
     </dependencies>
     <build>
-        <finalName>duang-web</finalName>
+        <finalName>duangframework-web</finalName>
     </build>
 </project>

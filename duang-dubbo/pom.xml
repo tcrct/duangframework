@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.dubbo</groupId>
-    <artifactId>duang-dubbo</artifactId>
+    <artifactId>duangframework-dubbo</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-dubbo</name>
+    <name>duangframework-dubbo</name>
     <url>http://maven.apache.org</url>
 
     <properties>

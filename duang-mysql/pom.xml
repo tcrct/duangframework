@@ -7,10 +7,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.duangframework.mysql</groupId>
-    <artifactId>duang-mysql</artifactId>
+    <artifactId>duangframework-mysql</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-mysql</name>
+    <name>duangframework-mysql</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -23,7 +23,7 @@
     <dependencies>
         <dependency>
             <groupId>com.duangframework.core</groupId>
-            <artifactId>duang-core</artifactId>
+            <artifactId>duangframework-core</artifactId>
             <version>${code.version}</version>
         </dependency>
         <dependency>

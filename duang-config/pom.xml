@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.config</groupId>
-    <artifactId>duang-config</artifactId>
+    <artifactId>duangframework-config</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-config</name>
+    <name>duangframework-config</name>
     <url>http://maven.apache.org</url>
 
     <properties>

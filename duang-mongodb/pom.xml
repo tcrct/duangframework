@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.mongodb</groupId>
-    <artifactId>duang-mongodb</artifactId>
+    <artifactId>duangframework-mongodb</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-mongodb</name>
+    <name>duangframework-mongodb</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.duangframework.core</groupId>
-            <artifactId>duang-core</artifactId>
+            <artifactId>duangframework-core</artifactId>
             <version>${core.version}</version>
         </dependency>
     </dependencies>

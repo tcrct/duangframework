@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.rpc</groupId>
-    <artifactId>duang-rpc</artifactId>
+    <artifactId>duangframework-rpc</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-rpc</name>
+    <name>duangframework-rpc</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -24,12 +24,12 @@
     <dependencies>
         <dependency>
             <groupId>com.duangframework.server</groupId>
-            <artifactId>duang-server</artifactId>
+            <artifactId>duangframework-server</artifactId>
             <version>${server.version}</version>
         </dependency>
         <dependency>
             <groupId>com.duangframework.zookeeper</groupId>
-            <artifactId>duang-zookeeper</artifactId>
+            <artifactId>duangframework-zookeeper</artifactId>
             <version>${zk.version}</version>
         </dependency>
         <dependency>

@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.validation</groupId>
-    <artifactId>duang-validation</artifactId>
+    <artifactId>duangframework-validation</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-validation</name>
+    <name>duangframework-validation</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>com.duangframework.core</groupId>
-            <artifactId>duang-core</artifactId>
+            <artifactId>duangframework-core</artifactId>
             <version>${core.version}</version>
         </dependency>
     </dependencies>

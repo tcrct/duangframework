@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.log</groupId>
-    <artifactId>duang-log</artifactId>
+    <artifactId>duangframework-log</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-log</name>
+    <name>duangframework-log</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -24,7 +24,7 @@
     <dependencies>
         <dependency>
             <groupId>com.duangframework.core</groupId>
-            <artifactId>duang-core</artifactId>
+            <artifactId>duangframework-core</artifactId>
             <version>${core.version}</version>
         </dependency>
         <dependency>

@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.rule</groupId>
-    <artifactId>duang-rule</artifactId>
+    <artifactId>duangframework-rule</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-rule</name>
+    <name>duangframework-rule</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -23,7 +23,7 @@
     <dependencies>
         <dependency>
             <groupId>com.duangframework.core</groupId>
-            <artifactId>duang-core</artifactId>
+            <artifactId>duangframework-core</artifactId>
             <version>${core.version}</version>
         </dependency>
         <dependency>

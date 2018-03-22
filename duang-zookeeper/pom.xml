@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.zookeeper</groupId>
-    <artifactId>duang-zookeeper</artifactId>
+    <artifactId>duangframework-zookeeper</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-zookeeper</name>
+    <name>duangframework-zookeeper</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>com.duangframework.core</groupId>
-            <artifactId>duang-core</artifactId>
+            <artifactId>duangframework-core</artifactId>
             <version>${core.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.101tec/zkclient -->

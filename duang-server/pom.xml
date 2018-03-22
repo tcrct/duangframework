@@ -8,10 +8,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.duangframework.server</groupId>
-    <artifactId>duang-server</artifactId>
+    <artifactId>duangframework-server</artifactId>
     <packaging>jar</packaging>
 
-    <name>duang-server</name>
+    <name>duangframework-server</name>
     <url>http://maven.apache.org</url>
 
     <properties>
@@ -22,7 +22,7 @@
     <dependencies>
         <dependency>
             <groupId>com.duangframework.core</groupId>
-            <artifactId>duang-core</artifactId>
+            <artifactId>duangframework-core</artifactId>
             <version>${core.version}</version>
         </dependency>
     </dependencies>
