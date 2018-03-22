@@ -2,6 +2,7 @@ package com.duangframework.mvc.core;
 
 
 import com.duangframework.core.annotation.aop.Proxy;
+import com.duangframework.core.annotation.db.Entity;
 import com.duangframework.core.annotation.mvc.Controller;
 import com.duangframework.core.annotation.mvc.Monitor;
 import com.duangframework.core.annotation.mvc.Service;
@@ -27,6 +28,7 @@ public class InstanceFactory {
         MVC_ANNOTATION_SET.add(Service.class);
         MVC_ANNOTATION_SET.add(Monitor.class);
         MVC_ANNOTATION_SET.add(Proxy.class);
+        MVC_ANNOTATION_SET.add(Entity.class);
     }
 
 
