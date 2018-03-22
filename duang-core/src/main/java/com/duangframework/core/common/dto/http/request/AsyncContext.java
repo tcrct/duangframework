@@ -8,7 +8,7 @@ import com.duangframework.core.common.dto.http.response.IResponse;
  */
 public interface AsyncContext {
 
-    void setTimeout(long timeout);
+    long getTimeout();
 
     void write(IResponse response);
 

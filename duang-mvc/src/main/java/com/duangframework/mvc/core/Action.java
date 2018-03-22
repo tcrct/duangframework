@@ -81,4 +81,9 @@ public class Action {
 	public void setRestfulKey(String restfulKey) {
 		this.restfulKey = restfulKey;
 	}
+
+	public long getTimeout() {
+		com.duangframework.core.annotation.mvc.Timeout timeoutAnnotation = getMethod().getAnnotation(com.duangframework.core.annotation.mvc.Timeout.class);
+		return (ToolsKit.isNotEmpty(timeoutAnnotation)) ?  timeoutAnnotation.value() : 3000L;
+	}
 }

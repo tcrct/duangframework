@@ -189,8 +189,28 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		if(null == mongoQuery) {
 			throw new EmptyNullException("Mongodb findList is Fail: mongoQuery is null");
 		}
-		Bson queryBson = mongoQuery.getQueryBson();
-		FindIterable<Document> documents = collection.find(queryBson);
+		Bson queryDoc = mongoQuery.getQueryBson();
+        PageDto<T> page = mongoQuery.getPage();
+        int pageNo = page.getPageNo();
+        int pageSize = page.getPageSize();
+		FindIterable<Document> documents = collection.find(queryDoc);
+
+        BasicDBObject fieldDbo = (BasicDBObject)mongoQuery.getDBFields();
+        if(ToolsKit.isNotEmpty(fieldDbo) && !fieldDbo.isEmpty()) {
+            documents.projection(fieldDbo);
+        }
+        BasicDBObject orderDbo = (BasicDBObject)mongoQuery.getDBOrder();
+        if(ToolsKit.isNotEmpty(orderDbo) && !orderDbo.isEmpty()) {
+            documents.sort(orderDbo);
+        }
+        if(pageNo>0 && pageSize>1){
+            documents.skip( (pageNo>0 ? (pageNo-1) : pageNo)*pageSize);
+            documents.limit(pageSize);
+        }
+        BasicDBObject hintDbo = (BasicDBObject)mongoQuery.getHintDBObject();
+        if(ToolsKit.isNotEmpty(hintDbo) && !hintDbo.isEmpty()) {
+            documents.hint(hintDbo);
+        }
 		if(ToolsKit.isEmpty(documents)) {
 			return null;
 		}

@@ -8,7 +8,10 @@ import com.duangframework.core.common.dto.http.response.HttpResponse;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.common.dto.result.ReturnDto;
+import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.IpUtils;
+import com.duangframework.mvc.core.Action;
+import com.duangframework.mvc.core.InstanceFactory;
 
 /**
  * @author Created by laotang
@@ -20,7 +23,7 @@ public abstract class AbstractAsyncContext implements AsyncContext {
     private IResponse asyncResponse;
     private String target;
     private String requestId;
-    private long timeout;
+    private long timeout = 3000L;
 
     public AbstractAsyncContext(String target, IRequest request, IResponse response) {
         this(target, request, response, Const.REQUEST_TIMEOUT);
@@ -38,19 +41,18 @@ public abstract class AbstractAsyncContext implements AsyncContext {
         return target;
     }
 
+    @Override
     public long getTimeout() {
+        Action action = InstanceFactory.getActionMapping().get(target);
+        if(ToolsKit.isNotEmpty(action)) {
+            return action.getTimeout();
+        }
         return timeout;
     }
 
     public String getRequestId() {
         return requestId;
     }
-
-    @Override
-    public void setTimeout(long timeout) {
-        this.timeout = timeout;
-    }
-
 
     @Override
     public IRequest getAsyncRequest() {
