@@ -60,13 +60,12 @@ public class CORSHandle implements IHandle {
         }
         String host = "";
         boolean isAllowAccess = false;
-        String allowhost =  request.getHeader("Origin"); //httpRequest.getRequestURL().toString();
-        // postman提交则清空内容
-        if(ToolsKit.isNotEmpty(allowhost) && allowhost.startsWith("chrome-extension")) {
-            allowhost = "";
-        }
+        String allowhost = request.getRequestURL().toString();
         if(ToolsKit.isEmpty(allowhost)) {
-            allowhost = request.getHeader("Referer");
+            allowhost = request.getHeader("Origin");
+            if (ToolsKit.isEmpty(allowhost)) {
+                allowhost = request.getHeader("Referer");
+            }
             if (ToolsKit.isEmpty(allowhost)) {
                 allowhost = request.getHeader("Host");
             }
@@ -74,16 +73,15 @@ public class CORSHandle implements IHandle {
                 String key = request.getParameter("allowhost");
                 allowhost = allowHostMap.get(key);
             }
-            if (ToolsKit.isEmpty(allowhost)) {
-                allowhost = request.getRequestURL().toString();
-            }
         }
 
         if(ToolsKit.isNotEmpty(allowhost)) {
             host = allowhost.toLowerCase().replace(PROTOCOL,"").replace(PROTOCOLS,"").replace("*","");
             int endIndex = host.indexOf(":");
             host = host.substring(0, endIndex > -1 ? endIndex : host.length());
-            if(host.startsWith("127.0") || host.startsWith("192.168")) {
+            if(host.startsWith("127.0")
+                    || host.startsWith("192.168")
+                    || host.toLowerCase().startsWith("localhost")) {
                 isAllowAccess = true;
             } else {
 //                isAllowAccess = allowHostMap.containsValue(host);

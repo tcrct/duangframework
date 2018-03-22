@@ -26,7 +26,7 @@ public class DBSession {
 		T result = null;
 		Connection connection = null; 
 		try{
-			connection  = getConnection();
+			connection  = getConnection(dbAction.dataSourceKey());
 			if(null == connection){ throw new MysqlException("connection is null");}
 			DBRunner dbRunner = new DBRunner(connection);
 			result = dbAction.execute(dbRunner);
@@ -44,7 +44,7 @@ public class DBSession {
 	 * 取出指定库里所有的表
 	 * @return		表名集合
 	 */
-	public static  List<String> getMysqlTables(){
+	public static  List<String> getMysqlTables(final String dataBase){
 		return call(new DBAction<List<String>>(){
 			@Override
 			public List<String> execute(DBRunner dbRunner) throws SQLException {
@@ -54,6 +54,10 @@ public class DBSession {
 				List<String> resultList = MysqlUtils.toList(queryList);
 				return resultList;
 			}
+            @Override
+            public String dataSourceKey() {
+                return dataBase;
+            }
 		});
 	}
 	
@@ -62,7 +66,7 @@ public class DBSession {
 	 * @param tableName		表名
 	 * @return		索引数组集合
 	 */
-	public static List<String> getIndexs(final String tableName) {
+	public static List<String> getIndexs(final String dataBase, final String tableName) {
 		return call(new DBAction<List<String> >(){
 			@Override
 			public List<String> execute(DBRunner dbRunner) throws SQLException {
@@ -72,20 +76,31 @@ public class DBSession {
 				List<String> resultList = MysqlUtils.toList(queryList);
 				return resultList;
 			}
+            @Override
+            public String dataSourceKey() {
+                return dataBase;
+            }
 		});
 	}
 	
 	/**
 	 * 执行查询SQL语句
+	 * @param dataBase	 			数据库名称
 	 * @param querySql		查询SQL语句
 	 * @param params			参数数组
 	 * @return
 	 */
-	public static List<Map<String,Object>> query(final String querySql, final Object... params) throws Exception{
+	public static List<Map<String,Object>> query(final String dataBase, final String querySql, final Object... params) throws Exception{
 		return call(new DBAction<List<Map<String,Object>>>(){
+
 			@Override
 			public List<Map<String,Object>> execute(DBRunner dbRunner) throws SQLException {
 				return  dbRunner.query(querySql, params);
+			}
+
+			@Override
+			public String dataSourceKey() {
+				return dataBase;
 			}
 		});
 	}
@@ -96,22 +111,27 @@ public class DBSession {
 	 * @param params
 	 * @return
 	 */
-	public static int execute(final String sql, final Object... params)  throws Exception {
+	public static int execute(final String dataBase, final String sql, final Object... params)  throws Exception {
 		return call(new DBAction<Integer>(){
 			@Override
 			public Integer execute(DBRunner dbRunner) throws SQLException {
 				return dbRunner.execute(sql, params);
 			}
+
+			@Override
+			public String dataSourceKey() {
+				return dataBase;
+			}
 		});
 	}
 	
 
-	private static Connection getConnection(){
+	private static Connection getConnection(String key){
 		Connection connection = connContainer.get();
 		// 如果在当前线程里不存在连接，则重新取
 		if(null == connection){
 			try {
-				connection = MysqlUtils.getDataSource().getConnection();
+				connection = MysqlUtils.getConnection(key);
 			} catch (Exception e) {
 				throw new MysqlException("connection is null");
 			}
@@ -125,8 +145,8 @@ public class DBSession {
 	/**
 	 * 开启事务
 	 */
-	public static void startTransaction() {
-		Connection connection = getConnection(); 
+	public static void startTransaction(String dataBase) {
+		Connection connection = getConnection(dataBase);
 		try {
 			if(null != connection){
 				connection.setAutoCommit(false);
@@ -139,8 +159,8 @@ public class DBSession {
 	/**
 	 * 提交事务
 	 */
-	public static void commintTransaction() {
-		Connection connection = getConnection(); 
+	public static void commintTransaction(String dataBase) {
+		Connection connection = getConnection(dataBase);
 		try {
 			if(null != connection){
 				connection.commit();
@@ -155,8 +175,8 @@ public class DBSession {
 	/**
 	 * 回滚事务
 	 */
-	public static void rollbakcTransaction() {
-		Connection connection = getConnection(); 
+	public static void rollbakcTransaction(String dataBase) {
+		Connection connection = getConnection(dataBase);
 		try {
 			if(null != connection){
 				connection.rollback();

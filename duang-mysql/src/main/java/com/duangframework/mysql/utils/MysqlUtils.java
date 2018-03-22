@@ -12,10 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.sql.Connection;
+import java.util.*;
 
 /**
  * Created by laotang on 2017/11/25 0025.
@@ -24,9 +22,14 @@ public class MysqlUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(MysqlUtils.class);
 
-    private static DataSource dataSource = null;
+    private static Map<String, DataSource> dataSourceMap = new HashMap<>();
     private static IConnect connect = null;
+    private static String defualDataBase;
 
+
+    public static String getDefualDataBase() {
+        return defualDataBase;
+    }
     /**
      *
      * @param queryResultList
@@ -55,35 +58,44 @@ public class MysqlUtils {
         return (T)resultList;
     }
 
-    public static DataSource getDataSource(String userNaem, String passWord, String jdbcUrl, String dataSourceFactoryClassName) throws Exception {
-        if(null == connect) {
-            connect = new MySqlConnect( userNaem, passWord,jdbcUrl,dataSourceFactoryClassName);
+    public static void initDataSource(List<MySqlConnect> connectList) throws Exception {
+        for(MySqlConnect connect : connectList) {
+            if(ToolsKit.isEmpty(connect.getDataBase())) {
+                throw new NullPointerException("database name is null");
+            }
+            DataSource dataSource = getDataSource(connect);
+            if(null != dataSource) {
+                dataSourceMap.put(connect.getDataBase(), dataSource);
+//                dataSource.getConnection();
+            }
         }
-        return getDataSource(connect);
+        if(ToolsKit.isNotEmpty(connectList)) {
+            defualDataBase = connectList.get(0).getDataBase();
+        }
     }
 
-    public static DataSource getDataSource() throws Exception {
-        if(null == connect) {
+    public static Connection getConnection(String key) throws Exception {
+        if(dataSourceMap.isEmpty()) {
           throw new EmptyNullException("请先启动MysqlPlugin插件");
         }
-        return getDataSource(connect);
+        return dataSourceMap.get(key).getConnection();
     }
 
     public static DataSource getDataSource(IConnect connect) {
-        if (ToolsKit.isEmpty(dataSource)) {
-            IDataSourceFactory dsFactory = null;
-            String dataSourceFactoryClassName = connect.getDataSourceFactoryClassName();
-            if (ToolsKit.isEmpty(dataSourceFactoryClassName)) {
-                dsFactory = ObjectKit.newInstance(DruidDataSourceFactory.class);
-            } else {
-                dsFactory = ObjectKit.newInstance(dataSourceFactoryClassName);
-            }
-            try {
-                dataSource = dsFactory.getDataSource(connect);
-            } catch (Exception e) {
-                throw new MysqlException(e.getMessage(), e);
-            }
+        DataSource dataSource = null;
+        IDataSourceFactory dsFactory = null;
+        String dataSourceFactoryClassName = connect.getDataSourceFactoryClassName();
+        if (ToolsKit.isEmpty(dataSourceFactoryClassName)) {
+            dsFactory = ObjectKit.newInstance(DruidDataSourceFactory.class);
+        } else {
+            dsFactory = ObjectKit.newInstance(dataSourceFactoryClassName);
         }
+        try {
+            dataSource = dsFactory.getDataSource(connect);
+        } catch (Exception e) {
+            throw new MysqlException(e.getMessage(), e);
+        }
+
         return dataSource;
     }
 }

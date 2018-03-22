@@ -16,7 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.duangframework.core.common.http;
+package com.duangframework.core.auth;
+
+
 
 import java.net.URI;
 

@@ -5,7 +5,6 @@
  * @see  https://github.com/tcrct/duangframework.git
  */
 package com.duangframework.mongodb;
-import com.duangframework.core.annotation.db.Id;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.EmptyNullException;
@@ -25,7 +24,6 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CountOptions;
-import com.mongodb.client.model.UpdateOneModel;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
@@ -74,7 +72,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
      * @param database  数据库名称
      * @param cls             集合类对象
      */
-	private void init(DB db, MongoDatabase database, final Class<T> cls){
+	private void init(DB db, MongoDatabase database, Class<T> cls){
 		boolean isExtends = ClassUtils.isExtends(cls, IdEntity.class.getCanonicalName());
 		if(!isExtends){
 			throw new RuntimeException("the "+cls.getCanonicalName()+" is not extends "+ IdEntity.class.getCanonicalName() +", exit...");
@@ -88,17 +86,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 		coll = mongoDB.getCollection(entityName);
 			collection = mongoDatabase.getCollection(entityName);
 			keys = MongoUtils.convert2DBFields(ClassUtils.getFields(cls));
-			ThreadPoolKit.execute(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						MongoIndexUtils.createIndex(coll, cls);
-					} catch (Exception e) {
-						logger.warn(e.getMessage(), e);
-					}
-				}
-			});
-
+			MongoIndexUtils.createIndex(coll, cls);
 		} catch(Exception e){
 			e.printStackTrace();
 			logger.error(coll.getFullName()+" Create Index Fail: " + e.getMessage());
@@ -234,7 +222,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		collection.find(queryDoc)
 				.projection((BasicDBObject)mongoQuery.getDBFields())
 				.sort((BasicDBObject)mongoQuery.getDBOrder())
-				.skip((pageNo-1)*pageSize)
+				.skip( (pageNo>0 ? (pageNo-1) : pageNo)*pageSize)
 				.limit(pageSize)
 				.hint((BasicDBObject)mongoQuery.getHintDBObject())
 				.forEach(new Block<Document>() {
@@ -303,7 +291,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	/**
 	 *  根据ID字段值更新记录
 	 * @param id			要更新的记录ID
-	 * @param bson		更新内容
+	 * @param entity		更新内容
 	 * @return 布尔值，是否更新
 	 * @throws Exception
 	 */

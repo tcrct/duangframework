@@ -1,7 +1,6 @@
 package com.duangframework.core.auth;
 
 import com.duangframework.core.common.enums.FormatTypeEnums;
-import com.duangframework.core.common.http.Endpoint;
 import com.duangframework.core.interfaces.ICredentials;
 
 import java.util.HashMap;

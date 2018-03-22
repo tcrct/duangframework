@@ -1,30 +1,29 @@
 package com.duangframework.mysql.common;
 
 import com.duangframework.core.common.DBConnect;
+import com.duangframework.mysql.core.ds.DruidDataSourceFactory;
 
 /**
  * Created by laotang on 2017/11/25 0025.
  */
 public class MySqlConnect  extends DBConnect  implements IConnect {
 
-    private String jdbcUrl;
-    private String dataSourceFactoryClassName;
-
-
-    public MySqlConnect(String userName, String passWord, String jdbcUrl, String dataSourceFactoryClassName) {
-        super("127.0.0.1", 3306, "", userName, passWord);
-        this.jdbcUrl = jdbcUrl;
-        this.dataSourceFactoryClassName = dataSourceFactoryClassName;
+    public MySqlConnect(String host, int port, String userName, String passWord, String dataBaseName) {
+        super(host, port, dataBaseName, userName, passWord);
     }
 
     @Override
     public String getJdbcUrl() {
-        return jdbcUrl;
+        String host = this.getHost().toLowerCase().replace(PROTOCOL,"").replace(PROTOCOLS,"").replace("*","");
+        int endIndex = host.indexOf(":");
+        host = host.substring(0, endIndex > -1 ? endIndex : host.length());
+        return "jdbc:mysql://"+host+":"+getPort()+"/"+getDataBase();
     }
+
 
     @Override
     public String getDataSourceFactoryClassName() {
-        return dataSourceFactoryClassName;
+        return DruidDataSourceFactory.class.getName();
     }
 
 }

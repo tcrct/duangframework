@@ -13,6 +13,8 @@ public class DBConnect implements java.io.Serializable {
     public static final String DATABASE_FIELD = "dataBase";
     public static final String USERNAME_FIELD = "username";
     public static final String PASSWORD_FIELD = "password";
+    protected final static String PROTOCOL = "http://";
+    protected final static String PROTOCOLS = "https://";
 
     private String host;
     private int port;

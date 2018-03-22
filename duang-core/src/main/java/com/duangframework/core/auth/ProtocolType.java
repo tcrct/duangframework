@@ -16,12 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.duangframework.core.common.http;
+package com.duangframework.core.auth;
 
-public enum PositionType {
-    Host,
-    Path,
-    Query,
-    Header,
-    Body
+public enum ProtocolType {
+
+    HTTP("http"),
+
+    HTTPS("https");
+
+    private final String protocol;
+
+    private ProtocolType(String protocol) {
+        this.protocol = protocol;
+    }
+
+    @Override
+    public String toString() {
+        return protocol;
+    }
 }
