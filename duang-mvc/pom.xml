@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>com.duangframework.mq</groupId>
-            <artifactId>duang-mq</artifactId>
+            <artifactId>duangframework-mq</artifactId>
             <version>${mq.version}</version>
         </dependency>
         <dependency>

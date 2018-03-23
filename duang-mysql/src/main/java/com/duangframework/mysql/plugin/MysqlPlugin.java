@@ -1,19 +1,21 @@
 package com.duangframework.mysql.plugin;
 
+
 import com.duangframework.core.annotation.db.Entity;
-import com.duangframework.core.annotation.db.Index;
+import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.exceptions.MysqlException;
 import com.duangframework.core.interfaces.IPlugin;
+import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mysql.common.IMySql;
 import com.duangframework.mysql.common.MySqlConnect;
 import com.duangframework.mysql.utils.MysqlUtils;
-import io.netty.util.internal.ObjectUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +28,7 @@ import java.util.Map;
  */
 public class MysqlPlugin implements IPlugin {
 
+    private final static Logger logger = LoggerFactory.getLogger(MysqlPlugin.class);
     private List<MySqlConnect> connectList = new ArrayList<>();
 
     /**
@@ -70,28 +73,38 @@ public class MysqlPlugin implements IPlugin {
     public void start() throws Exception {
         try {
             MysqlUtils.initDataSource(connectList);
-            // 创建表与索引
-            Map<Class<?>, Object> entityMap = BeanUtils.getAllBeanMaps().get(Entity.class.getSimpleName());
-            if(ToolsKit.isEmpty(entityMap)) {
-                return;
-            }
-            for(Iterator<Class<?>> iterator = entityMap.keySet().iterator() ; iterator.hasNext();) {
-                Class<?> entityClass = iterator.next();
-                Field[] fields = ClassUtils.getFields(entityClass);
-                if (ToolsKit.isEmpty(fields)) {
-                    return;
-                }
-                for (int i = 0; i < fields.length; i++) {
-                    Index index = fields[i].getAnnotation(Index.class);
-                    if (ToolsKit.isNotEmpty(index)) {
-                        String name = ToolsKit.isEmpty(index.name()) ? "_" + fields[i].getName() + "_" : index.name();
-                        // TODO 创建索引
-                    }
-                }
-            }
         } catch (Exception e) {
             throw new MysqlException("connection is fail: " + e.getMessage(), e);
         }
+        // 创建表与索引
+        final Map<Class<?>, Object> entityMap = BeanUtils.getAllBeanMaps().get(Entity.class.getSimpleName());
+        if(ToolsKit.isEmpty(entityMap)) {
+            return;
+        }
+        ThreadPoolKit.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for (Iterator<Class<?>> iterator = entityMap.keySet().iterator(); iterator.hasNext(); ) {
+                        final Class<? extends IdEntity> entityClass = (Class<? extends IdEntity>) iterator.next();
+                        Entity entityAnnotation = entityClass.getAnnotation(Entity.class);
+                        String database = entityAnnotation.database();
+                        final String tableName = ClassUtils.getEntityName(entityClass);
+                        if (ToolsKit.isEmpty(database)) {
+                            database = MysqlUtils.getDefualDataBase();
+                        }
+                        final String databaseName = database;
+                        // 表
+                        MysqlUtils.createTables(databaseName, tableName, entityClass);
+                        // 索引
+                        MysqlUtils.createIndexs(databaseName, tableName, entityClass);
+                    }
+                } catch (Exception e) {
+                    logger.warn(e.getMessage(), e);
+                }
+            }
+        });
+
     }
 
     @Override

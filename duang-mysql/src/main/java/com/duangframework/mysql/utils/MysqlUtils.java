@@ -1,17 +1,23 @@
 package com.duangframework.mysql.utils;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.duangframework.core.annotation.db.Index;
+import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.MysqlException;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mysql.common.IConnect;
 import com.duangframework.mysql.common.MySqlConnect;
+import com.duangframework.mysql.core.DBSession;
 import com.duangframework.mysql.core.ds.DruidDataSourceFactory;
 import com.duangframework.mysql.core.ds.IDataSourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.*;
 
@@ -23,8 +29,9 @@ public class MysqlUtils {
     private static final Logger logger = LoggerFactory.getLogger(MysqlUtils.class);
 
     private static Map<String, DataSource> dataSourceMap = new HashMap<>();
-    private static IConnect connect = null;
+    private static Map<String, Set<String>> ALL_TABLES = new HashMap<>();
     private static String defualDataBase;
+    private static final Object[] NULL_OBJECT = new Object[0];
 
 
     public static String getDefualDataBase() {
@@ -97,5 +104,91 @@ public class MysqlUtils {
         }
 
         return dataSource;
+    }
+
+    /**
+     * 取表索引
+     * @param dataBase         数据库名
+     * @param entityClass         entity类
+     * @return
+     */
+    public static List<String> getIndexs(String dataBase, Class<? extends IdEntity> entityClass) {
+        String tableName = ClassUtils.getEntityName(entityClass, true);
+        List<String> indexList = DBSession.getIndexs(dataBase, tableName);
+        return ToolsKit.isEmpty(indexList) ? null : indexList;
+    }
+
+    /**
+     * 是否存在表
+     *
+     * @param cls
+     *            Entiey类
+     * @return 存在返回true, 否则反之
+     */
+    public static boolean isExist(String database, Class<? extends IdEntity> cls) throws Exception {
+        String tableName = ClassUtils.getEntityName(cls,true);
+        Set<String> tableNameSet = ALL_TABLES.get(database);
+        if(ToolsKit.isEmpty(tableNameSet)) {
+            logger.warn("get "+ database +" table is empty!" );
+            return false;
+        }
+        return tableNameSet.contains(tableName);
+    }
+
+    /**
+     * 创建表
+     * @param databaseName
+     * @param tableName
+     * @param entityClass
+     */
+    public static void createTables(String databaseName, String tableName, Class<? extends IdEntity> entityClass ) {
+
+    }
+
+    /**
+     * 创建索引
+     * @param databaseName
+     * @param tableName
+     * @param entityClass
+     */
+    public static void createIndexs(String databaseName, String tableName, Class<? extends IdEntity> entityClass ) {
+        // 先去查表里已经存在的索引
+        List<String> indexs = MysqlUtils.getIndexs(databaseName, entityClass);
+        Field[] fields = ClassUtils.getFields(entityClass);
+        if (ToolsKit.isEmpty(fields)) {
+            return;
+        }
+        StringBuilder indexSql = new StringBuilder();
+        for (int i = 0; i < fields.length; i++) {
+            Index index = fields[i].getAnnotation(Index.class);
+            JSONField jsonField = fields[i].getAnnotation(JSONField.class);
+            String columnName = (ToolsKit.isEmpty(jsonField)) ? fields[i].getName() :
+                    (ToolsKit.isEmpty(jsonField.format()) ? jsonField.name() : jsonField.format());
+            if (ToolsKit.isNotEmpty(index)) {
+                indexSql.delete(0,indexSql.length());
+                String indexName = ToolsKit.isEmpty(index.name()) ? "_" + columnName + "_" : index.name();
+                indexName = indexName.toLowerCase();
+                //如果不存在则添加，存在则不作任何处理
+                if(ToolsKit.isNotEmpty(indexs) && !indexs.contains(indexName)){
+                    boolean unique = index.unique();
+                    String order = ToolsKit.isEmpty(index.order()) ? "asc" : index.order();
+                    indexSql.append("create ");
+                    if(unique) {
+                        indexSql.append("unique ");
+                    }
+                    indexSql.append(" index ").append(indexName).append(" on ").append(tableName).append("(").append(columnName);
+                    if("desc".equalsIgnoreCase(order)){
+                        indexSql.append(" ").append(order);
+                    }
+                    indexSql.append(");");
+                    try {
+                        System.out.println("indexSql: " + indexSql.toString());
+//                        DBSession.execute(databaseName, indexSql.toString(), NULL_OBJECT);
+                    } catch (Exception e) {
+                        logger.warn("create["+databaseName+"."+tableName+"."+columnName+"] index["+indexName+"] is fail: " + e.getMessage(), e);
+                    }
+                }
+            }
+        }
     }
 }

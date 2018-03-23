@@ -4,16 +4,23 @@ import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.interfaces.IProcess;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.utils.OS;
 import com.duangframework.server.IServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultMessageSizeEstimator;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.management.ManagementFactory;
 import java.net.DatagramSocket;
 import java.net.ServerSocket;
+import java.nio.charset.Charset;
 
 /**
  *
@@ -100,5 +107,79 @@ public abstract class AbstractNettyServer implements IServer {
             }
         }
         return true;
+    }
+
+    private String pidFile() {
+        String pidFile = System.getProperty("pidfile");
+        if (ToolsKit.isEmpty(pidFile)) {
+            pidFile = "duang.pid";
+        }
+        return pidFile;
+    }
+
+    public void writePidFile() {
+        String pidFile = pidFile();
+        OS os = OS.get();
+        String pid= "";
+        if (os.isLinux()) {
+            File proc_self = new File("/proc/self");
+            if(proc_self.exists()) {
+                try {
+                    pid = proc_self.getCanonicalFile().getName();
+                } catch (Exception e) {
+                    logger.warn(e.getMessage(), e);
+                }
+            }
+            File bash = new File("/bin/sh");
+            if(bash.exists()) {
+                ProcessBuilder pb = new ProcessBuilder("/bin/sh","-c","echo $PPID");
+                try {
+                    Process p = pb.start();
+                    BufferedReader rd = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    pid = rd.readLine();
+                } catch(IOException e) {
+                    pid = String.valueOf(Thread.currentThread().getId());
+                }
+            }
+        } else {
+            try {
+                // see http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id
+                String name = ManagementFactory.getRuntimeMXBean().getName();
+                int pos = name.indexOf('@');
+                if (pos > 0) {
+                    pid = name.substring(0, pos);
+                } else {
+                    logger.warn("Write pid file not supported on non-linux system");
+                    return;
+                }
+            } catch (Exception e) {
+                logger.warn("Write pid file not supported on non-linux system");
+                return;
+            }
+        }
+        try {
+            clearPidFile();
+            FileUtils.writeStringToFile(new File(pidFile), pid, Charset.forName("UTF-8"));
+//            Runtime.getRuntime().addShutdownHook(new Thread() {
+//                @Override
+//                public void run() {
+//                    clearPidFile();
+//                }
+//            });
+        } catch (Exception e) {
+            logger.warn("Error writing pid file: %s", e.getMessage(), e);
+        }
+    }
+
+    public void clearPidFile() {
+        String pidFile = pidFile();
+        try {
+            File file = new File(pidFile);
+            if (!file.delete()) {
+                file.deleteOnExit();
+            }
+        } catch (Exception e) {
+            logger.warn("Error delete pid file: %s", pidFile, e);
+        }
     }
 }

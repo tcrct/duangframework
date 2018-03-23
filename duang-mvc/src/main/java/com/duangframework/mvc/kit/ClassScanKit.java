@@ -118,7 +118,7 @@ public class ClassScanKit {
     }
 
     private void checkClassTemplate() {
-        // 兼容Duang3.0版前的规则
+        // 兼容Duang2.0版前的规则
         if(!annotationSet.isEmpty()) {
             for(Iterator<Class<? extends Annotation>> it = annotationSet.iterator(); it.hasNext();) {
                 Class<? extends Annotation> annotationClass = it.next();
