@@ -1,6 +1,9 @@
 package com.duangframework.core.common;
 
 
+import com.alibaba.fastjson.annotation.JSONCreator;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson.annotation.JSONType;
 import com.duangframework.core.annotation.db.Id;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
@@ -23,7 +26,7 @@ public class IdEntity implements java.io.Serializable {
 	
 	@Id
 	private String id;
-	
+
 	private Date createtime;			//创建时间
 	
 	private String createuserid;		//创建人ID

@@ -52,7 +52,7 @@ public class MongoUpdate<T> {
 		if(null ==value) {
 			throw new NullPointerException("value is null");
 		}
-		append(key, Operator.SET, MongoUtils.toBson(value));
+		append(key, Operator.SET, MongoUtils.toBson(clazz, value));
 		return this;
 	}
 	
@@ -66,7 +66,7 @@ public class MongoUpdate<T> {
 		if(null ==value) {
 			throw new NullPointerException("value is null");
 		}
-		append(key, Operator.PUSH, MongoUtils.toBson(value));
+		append(key, Operator.PUSH, MongoUtils.toBson(clazz, value));
 		return this;
 	}
 	
@@ -80,7 +80,7 @@ public class MongoUpdate<T> {
 		if(null ==value) {
 			throw new NullPointerException("value is null");
 		}
-		append(key, Operator.PULL, MongoUtils.toBson(value));
+		append(key, Operator.PULL, MongoUtils.toBson(clazz, value));
 		return this;
 	}
 	
@@ -96,7 +96,7 @@ public class MongoUpdate<T> {
 			 if (value instanceof DBObject || value instanceof BasicDBObject) {
 				 values.put(entry.getKey(),entry.getValue());
 			} else {
-				values.put(entry.getKey(), MongoUtils.toBson(value));
+				values.put(entry.getKey(), MongoUtils.toBson(clazz, value));
 			}
 		}		
 		DBObject dbo = new BasicDBObject(values);
@@ -111,7 +111,7 @@ public class MongoUpdate<T> {
 	 * @return
 	 */
 	public MongoUpdate<T> inc(String key, Object value) {
-		append(key, Operator.INC, MongoUtils.toBson(value));
+		append(key, Operator.INC, MongoUtils.toBson(clazz, value));
 		return this;
 	}
 	

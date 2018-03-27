@@ -1,8 +1,10 @@
 package com.duangframework;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.duangframework.core.annotation.db.Entity;
 import com.duangframework.core.common.IdEntity;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -15,9 +17,28 @@ public class User extends IdEntity {
 
     private Map<String, String> addressMap ;
     private List<User> typeList;
+    @JSONField(name = "user_age")
     private int age;
     private String name;
+    private long white;
 
+    public long getWhite() {
+        return white;
+    }
+
+    public void setWhite(long white) {
+        this.white = white;
+    }
+
+    public double getHight() {
+        return hight;
+    }
+
+    public void setHight(double hight) {
+        this.hight = hight;
+    }
+
+    private double hight;
 
     public Map<String, String> getAddressMap() {
         return addressMap;

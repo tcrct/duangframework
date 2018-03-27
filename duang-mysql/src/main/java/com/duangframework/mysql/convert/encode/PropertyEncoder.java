@@ -1,5 +1,6 @@
 package com.duangframework.mysql.convert.encode;
 
+import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mysql.utils.MysqlUtils;
 
 import java.lang.reflect.Field;
@@ -16,7 +17,7 @@ public class PropertyEncoder extends Encoder {
 
 	@Override
 	public String getFieldName() {
-        return MysqlUtils.getFieldName(field);
+        return ToolsKit.getFieldName(field);
     }
 
 	@Override

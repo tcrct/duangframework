@@ -37,7 +37,7 @@ public class EncodeConvetor {
             String entityJson = ToolsKit.toJsonString(entity);
             if (ToolsKit.isNotEmpty(entityJson)) {
                 Map<String, Object> map = ToolsKit.jsonParseObject(entityJson, Map.class);
-                String idFieldName = MysqlUtils.getIdFieldName(entityClass);
+                String idFieldName = ToolsKit.getIdFieldName(entityClass);
                 curdSqlModle = MysqlUtils.builderSqlModle(curdEnum, entityClass, map, idFieldName);
             }
         } catch (Exception e) {

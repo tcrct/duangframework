@@ -7,6 +7,7 @@ import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.core.utils.DataType;
 import com.duangframework.mongodb.MongoDao;
+import com.google.gson.stream.JsonWriter;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.bson.Document;
@@ -91,7 +92,7 @@ public class MongoUtils {
         return fieldsObj;
     }
 
-    public static <T> T toBson(Class<?> entityClass, Object obj) {
+    public static <T> T toBson(Object obj) {
         if(null == obj) {
             throw new EmptyNullException("toBson is fail:  obj is null");
         }
@@ -100,6 +101,24 @@ public class MongoUtils {
         if ( DataType.isBaseType(type) ) {
             return (T)obj;
         }
+
+/**
+ *  Document document = Document.parse(jsonText);
+ System.out.println(ToolsKit.toJsonString(document.keySet()));
+ Field[] fields = ClassUtils.getFields(User.class);
+ for (int i = 0; i < fields.length; i++) {
+ String key = ToolsKit.getFieldName(fields[i]);
+ Object valueObj = document.get(key);
+ if(valueObj == null) continue;
+ if(DataType.isListType(valueObj.getClass())) {
+ List list = (List)valueObj;
+ for(Object obj : list) {
+ Document doc = (Document)obj;
+ String value = doc.getString("createtime");
+ doc.put("createtime", ToolsKit.parseDate(value, Const.DEFAULT_DATE_FORM));
+ }
+ }
+ */
 
 
 //        Document document = Document.parse(ToolsKit.toJsonString(obj));
@@ -117,14 +136,22 @@ public class MongoUtils {
 
         try {
 //            T entity = (T)ToolsKit.jsonParseObject(ToolsKit.toJsonString(obj), entityClass);
-            Document document = Document.parse(ToolsKit.toJsonString(obj));
-            Field[] fields = ClassUtils.getFields(entityClass);
-            for (int i = 0; i < fields.length; i++) {
-                if(DataType.isDate(fields[i].getType())) {
-                    String key = ToolsKit.getFieldName(fields[i]);
-                    document.put(key, document.getDate(key));
-                }
-            }
+            String jsonText = ToolsKit.toJsonString(obj);
+            System.out.println(jsonText);
+            Document document = Document.parse(jsonText);
+            System.out.println(ToolsKit.toJsonString(document.keySet()));
+
+//            if(null != entityClass) {
+//                Field[] fields = ClassUtils.getFields(entityClass);
+//
+//                for (int i = 0; i < fields.length; i++) {
+//                    if (DataType.isDate(fields[i].getType())) {
+//                        String key = ToolsKit.getFieldName(fields[i]);
+//                        document.put(key, document.getDate(key));
+//                    }
+//                }
+//            }
+            System.out.println(document.toJson());
 //            ObjectKit.setField(obj, field.getName(), value);
             return (T)document;
         } catch (Exception e) {
