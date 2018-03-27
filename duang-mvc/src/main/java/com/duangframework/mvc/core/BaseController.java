@@ -2,6 +2,7 @@ package com.duangframework.mvc.core;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.dto.http.head.HttpHeaders;
 import com.duangframework.core.common.dto.http.request.HttpRequest;
@@ -412,14 +413,15 @@ public abstract class BaseController{
      */
     protected String getJson() {
         Object inputStreamObj = getBodyString();
+        String jsonString = "";
         if (ToolsKit.isNotEmpty(inputStreamObj)) {
             if(inputStreamObj instanceof String[]) {
-                return ((String[])inputStreamObj)[0];
+                jsonString = ((String[])inputStreamObj)[0];
             } else {
-                return (String) inputStreamObj;
+                jsonString = (String) inputStreamObj;
             }
         }
-        return "";
+        return jsonString;
     }
 
     /**
@@ -454,7 +456,17 @@ public abstract class BaseController{
      * @return
      */
     protected <T> T getBean(Class<T> tClass) {
-        return getBean(tClass, true);
+        return getBean(tClass, ReturnDto.DATA_FIELD);
+    }
+
+    /**
+     * 根据类，取出请求参数并将其转换为Bean对象返回
+     * 默认验证
+     * @param tClass            要转换的类
+     * @return
+     */
+    protected <T> T getBean(Class<T> tClass, String dataKey) {
+        return getBean(tClass, dataKey, true);
     }
 
     /**
@@ -464,7 +476,8 @@ public abstract class BaseController{
      * @param <T>
      * @return
      */
-    protected <T> T getBean(Class<T> tClass, boolean isValidator) {
+    protected <T> T getBean(Class<T> tClass, String dataKey, boolean isValidator) {
+        List<T> resultBeanList = new ArrayList<>();
         T resultBean = null;
         String contentType = request.getHeader(HttpHeaders.CONTENT_TYPE);
         try {
@@ -472,19 +485,43 @@ public abstract class BaseController{
                 String paramsJson = ToolsKit.toJsonString(getAllParams());
                 resultBean = ToolsKit.jsonParseObject(paramsJson, tClass);
             }else if(contentType.contains(ContentType.JSON.getValue())) {
-                resultBean = ToolsKit.jsonParseObject(getJson(), tClass);
+                String jsonString = getJson();
+                JSONObject jsonObject = JSONObject.parseObject(jsonString);
+                String tokenid = jsonObject.getString(ReturnDto.TOKENID_FIELD);
+                if(ToolsKit.isNotEmpty(tokenid)) {
+                    request.setAttribute(ReturnDto.TOKENID_FIELD, tokenid);
+                }
+                Object dataObj = jsonObject.getString(dataKey);
+                if (ToolsKit.isNotEmpty(dataObj)) {
+                    if (dataObj instanceof JSONArray) {
+                        jsonString = ((JSONArray) dataObj).toJSONString();
+                    } else if (dataObj instanceof JSONObject) {
+                        jsonString = ((JSONObject) dataObj).toJSONString();
+                    }
+                }
+                if(ToolsKit.isArrayJsonString(jsonString)) {
+                    resultBeanList.addAll(ToolsKit.jsonParseArray(jsonString, tClass));
+                } else if(ToolsKit.isMapJsonString(jsonString)) {
+                    resultBean = ToolsKit.jsonParseObject(jsonString, tClass);
+                }
             } else if(contentType.contains(ContentType.XML.getValue())) {
                 resultBean = ToolsKit.xmlParseObject(getXml(), tClass);
             }
             // 开启验证
-            if(isValidator && ToolsKit.isNotEmpty(resultBean)) {
-                ValidatorFactory.validator(resultBean);
+            if(isValidator) {
+                if(ToolsKit.isNotEmpty(resultBean)) {
+                    ValidatorFactory.validator(resultBean);
+                } else if(ToolsKit.isNotEmpty(resultBeanList)) {
+                    for(int i=0; i<resultBeanList.size(); i++) {
+                        ValidatorFactory.validator(resultBeanList.get(i));
+                    }
+                }
             }
         } catch (Exception e) {
             logger.warn("getBean is fail : " + e.getMessage(), e);
             throw new IllegalArgumentException(e.getMessage(), e);
         }
-        return resultBean;
+        return ToolsKit.isNotEmpty(resultBeanList) ? (T)resultBeanList : resultBean;
     }
 
 
