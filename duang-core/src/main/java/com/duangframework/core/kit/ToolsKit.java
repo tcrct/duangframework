@@ -2,15 +2,20 @@ package com.duangframework.core.kit;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
+import com.duangframework.core.annotation.db.Entity;
+import com.duangframework.core.annotation.db.Id;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.DuangId;
+import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.common.dto.result.ReturnDto;
 import com.duangframework.core.common.enums.IEnums;
 import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.core.utils.DuangThreadLocal;
 import com.duangframework.core.utils.IpUtils;
 import com.duangframework.core.utils.XmlHelper;
@@ -18,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,10 +47,18 @@ public class ToolsKit {
             return new HeadDto();
         }
     };
-
+    private static SerializerFeature[] serializerFeatureArray = {
+            SerializerFeature.QuoteFieldNames,
+            SerializerFeature.WriteNonStringKeyAsString,
+            SerializerFeature.DisableCircularReferenceDetect,
+//            SerializerFeature.WriteNullListAsEmpty,
+//            SerializerFeature.WriteNullStringAsEmpty,
+//            SerializerFeature.WriteNullNumberAsZero,
+//            SerializerFeature.WriteNullBooleanAsFalse
+            SerializerFeature.NotWriteRootClassName
+    };
     static {
         jsonConfig.put(Date.class, new SimpleDateFormatSerializer("yyyy-MM-dd HH:mm:ss.SSS"));
-        // jsonConfig.put(Charset.class, new CharArraySerializer());
     }
 
     /***
@@ -128,11 +142,11 @@ public class ToolsKit {
 
 
     public static String toJsonString(Object obj) {
-        return JSON.toJSONString(obj, jsonConfig, SerializerFeature.DisableCircularReferenceDetect);
+        return JSON.toJSONString(obj, jsonConfig, serializerFeatureArray);
     }
 
     public static byte[] toJsonBytes(Object obj) {
-        return JSON.toJSONBytes(obj, jsonConfig, SerializerFeature.DisableCircularReferenceDetect);
+        return JSON.toJSONBytes(obj, jsonConfig, serializerFeatureArray);
     }
 
     public static <T> T jsonParseObject(String jsonText, Class<T> clazz) {
@@ -356,5 +370,33 @@ public class ToolsKit {
         dto.setHead(head);
         dto.setData(obj);
         return dto;
+    }
+
+    public static String getFieldName(Field field) {
+        JSONField jsonField = field.getAnnotation(JSONField.class);
+        return (ToolsKit.isEmpty(jsonField)) ? field.getName() :
+                (ToolsKit.isEmpty(jsonField.format()) ? jsonField.name() : jsonField.format());
+    }
+
+    public static String getIdFieldName(Class<?> entityClass) {
+        Field idField = null;
+        Field[] fields = ClassUtils.getFields(entityClass);
+        for(Field field : fields) {
+            if(field.isAnnotationPresent(Id.class)) {
+                idField = field;
+                break;
+            }
+        }
+        return null == idField ? IdEntity.ENTITY_ID_FIELD : idField.getName();
+    }
+
+    /**
+     * 取出数据库名
+     * @param entityClass
+     * @return
+     */
+    public static String getDataBaseName(Class<?> entityClass) {
+        Entity entityAnnotation = entityClass.getAnnotation(Entity.class);
+        return entityAnnotation.database();
     }
 }

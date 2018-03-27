@@ -91,7 +91,7 @@ public class MongoUtils {
         return fieldsObj;
     }
 
-    public static <T> T toBson(Object obj) {
+    public static <T> T toBson(Class<?> entityClass, Object obj) {
         if(null == obj) {
             throw new EmptyNullException("toBson is fail:  obj is null");
         }
@@ -116,7 +116,17 @@ public class MongoUtils {
 //        }
 
         try {
-            return (T)Document.parse(ToolsKit.toJsonString(obj));
+//            T entity = (T)ToolsKit.jsonParseObject(ToolsKit.toJsonString(obj), entityClass);
+            Document document = Document.parse(ToolsKit.toJsonString(obj));
+            Field[] fields = ClassUtils.getFields(entityClass);
+            for (int i = 0; i < fields.length; i++) {
+                if(DataType.isDate(fields[i].getType())) {
+                    String key = ToolsKit.getFieldName(fields[i]);
+                    document.put(key, document.getDate(key));
+                }
+            }
+//            ObjectKit.setField(obj, field.getName(), value);
+            return (T)document;
         } catch (Exception e) {
             throw new MongodbException("toBson is fail: " + e.getMessage(), e);
         }

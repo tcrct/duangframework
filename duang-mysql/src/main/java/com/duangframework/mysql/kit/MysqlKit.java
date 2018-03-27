@@ -1,6 +1,5 @@
 package com.duangframework.mysql.kit;
 
-import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ToolsKit;
@@ -40,7 +39,7 @@ public class MysqlKit {
     }
 
 
-    public MysqlKit entityClass(Class<? extends IdEntity> clazz) {
+    public MysqlKit entityClass(Class<?> clazz) {
         this._entityClass = clazz;
         return this;
     }

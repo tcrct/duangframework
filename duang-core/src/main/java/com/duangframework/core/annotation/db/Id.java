@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Id {
-	public IdType type() default IdType.OID;
-    public long start() default 1L;
+	IdType type() default IdType.OID;
+    long start() default 1L;
 }

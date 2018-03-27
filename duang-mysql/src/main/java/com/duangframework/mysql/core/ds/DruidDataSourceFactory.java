@@ -17,6 +17,9 @@ public class DruidDataSourceFactory extends AbstractDataSource<DruidDataSource> 
 	private final int maxActive = 20;
 	/** 最小空闲连接数 **/
 	private final int maxIdle = 5;
+	/**
+	 * 最大等待时间，毫秒
+	 */
 	private final int maxWaitMillis = 60000;
 	/** 超过时间限制是否回收 **/
 	private final boolean removeAbandoned = true;
@@ -40,6 +43,10 @@ public class DruidDataSourceFactory extends AbstractDataSource<DruidDataSource> 
      日志用的filter:log4j
     防御SQL注入的filter:wall */
 	private final String filters = "stat";
+	/**
+	 * 查询执行时间，默认10秒
+	 */
+	private final int queryTimeOut = 10;
 	
 	@Override
 	public DruidDataSource builderDataSource() {
@@ -81,6 +88,7 @@ public class DruidDataSourceFactory extends AbstractDataSource<DruidDataSource> 
 		ds.setTestWhileIdle(testWhileIdle);
 		ds.setTestOnReturn(testOnReturn);
 		ds.setPoolPreparedStatements(poolPreparedStatements);
+		ds.setQueryTimeout(queryTimeOut);
 		ds.setMaxPoolPreparedStatementPerConnectionSize(maxPoolPreparedStatementPerConnectionSize);
 		try {
 			ds.setFilters(filters);

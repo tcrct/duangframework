@@ -1,7 +1,7 @@
 package com.duangframework.core.common;
 
 
-import com.duangframework.core.annotation.ioc.Id;
+import com.duangframework.core.annotation.db.Id;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.Date;

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -50,7 +51,7 @@ public class DBSession {
 			public List<String> execute(DBRunner dbRunner) throws SQLException {
 				String sql = "select table_name from information_schema.tables where table_schema=?";
 				Object[] params = {dbRunner.getConnection().getCatalog()};
-				List<Map<String,Object>> queryList =  dbRunner.query(sql, params);
+				List<Map<String,Object>> queryList =  dbRunner.query(sql, null, params);
 				List<String> resultList = MysqlUtils.toList(queryList);
 				return resultList;
 			}
@@ -71,7 +72,8 @@ public class DBSession {
 			@Override
 			public List<String> execute(DBRunner dbRunner) throws SQLException {
 				String sql = "show index from "+ tableName;
-				String[] filterNames = {"Key_name"};
+				List filterNames = new ArrayList(1);
+				filterNames.add("Key_name");
 				List<Map<String,Object>> queryList = dbRunner.query(sql, filterNames, NULL_OBJECT);
 				List<String> resultList = MysqlUtils.toList(queryList);
 				return resultList;
@@ -95,7 +97,7 @@ public class DBSession {
 
 			@Override
 			public List<Map<String,Object>> execute(DBRunner dbRunner) throws SQLException {
-				return  dbRunner.query(querySql, params);
+				return  dbRunner.query(querySql, null, params);
 			}
 
 			@Override

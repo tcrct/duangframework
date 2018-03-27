@@ -1,8 +1,5 @@
 package com.duangframework.mongodb;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * mongoDB operation constant.
  * 
@@ -68,18 +65,6 @@ public final class Operator {
 
     public static final String HINT = "$hint";
 
-
-    //dbo查询关键字转为sql
-    public static final Map<String, String> SQL_OPERATOR_MAP = new HashMap<String,String>();
-    static {
-    	SQL_OPERATOR_MAP.put(Operator.GT, " > ");
-    	SQL_OPERATOR_MAP.put(Operator.GTE, " >= ");
-    	SQL_OPERATOR_MAP.put(Operator.LT, " < ");
-    	SQL_OPERATOR_MAP.put(Operator.LTE, " <= ");
-    	SQL_OPERATOR_MAP.put(Operator.NE, " != ");
-    	SQL_OPERATOR_MAP.put(Operator.OR, " or ");
-    	SQL_OPERATOR_MAP.put(Operator.AND, " and ");
-    }
     
     
 }

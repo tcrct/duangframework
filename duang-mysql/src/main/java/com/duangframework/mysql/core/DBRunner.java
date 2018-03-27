@@ -32,18 +32,6 @@ public final class DBRunner {
 	
 	/**
 	 * 执行查询SQL语句
-	 * @param sql			查询SQL语句			
-	 * @param params		查询参数
-	 * @return				结果集List<Map<String,Object>> 
-	 * 							每一个Map代表着一行数据，Map里的key<==>字段名，value<==>字段值
-	 * @throws SQLException
-	 */
-	public List<Map<String,Object>> query(String sql,  Object... params) throws SQLException {
-		return this.query(sql, null, params);
-	}
-	
-	/**
-	 * 执行查询SQL语句
 	 * @param sql				查询SQL语句
 	 * @param columnList			返回指定的字段
 	 * @param params			查询参数

@@ -1,6 +1,5 @@
 package com.duangframework.mysql.utils;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.duangframework.core.annotation.db.Index;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
@@ -8,6 +7,9 @@ import com.duangframework.core.exceptions.MysqlException;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
+import com.duangframework.mysql.MysqlDao;
+import com.duangframework.mysql.common.CurdEnum;
+import com.duangframework.mysql.common.CurdSqlModle;
 import com.duangframework.mysql.common.IConnect;
 import com.duangframework.mysql.common.MySqlConnect;
 import com.duangframework.mysql.core.DBSession;
@@ -20,6 +22,8 @@ import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Created by laotang on 2017/11/25 0025.
@@ -32,6 +36,7 @@ public class MysqlUtils {
     private static Map<String, Set<String>> ALL_TABLES = new HashMap<>();
     private static String defualDataBase;
     private static final Object[] NULL_OBJECT = new Object[0];
+    private static ConcurrentMap<String, MysqlDao<?>> MYSQLDAO_MAP = new ConcurrentHashMap<>();
 
 
     public static String getDefualDataBase() {
@@ -112,10 +117,20 @@ public class MysqlUtils {
      * @param entityClass         entity类
      * @return
      */
-    public static List<String> getIndexs(String dataBase, Class<? extends IdEntity> entityClass) {
+    public static List<String> getIndexs(String dataBase, Class<?> entityClass) {
         String tableName = ClassUtils.getEntityName(entityClass, true);
         List<String> indexList = DBSession.getIndexs(dataBase, tableName);
         return ToolsKit.isEmpty(indexList) ? null : indexList;
+    }
+
+    /**
+     * 取出数据库所有表,加载到Map
+     */
+    public static void getAllTable(String database) throws Exception {
+        List<String> list = DBSession.getMysqlTables(database);
+        if(ToolsKit.isNotEmpty(list)){
+            ALL_TABLES.get(database).addAll(list);
+        }
     }
 
     /**
@@ -141,7 +156,7 @@ public class MysqlUtils {
      * @param tableName
      * @param entityClass
      */
-    public static void createTables(String databaseName, String tableName, Class<? extends IdEntity> entityClass ) {
+    public static void createTables(String databaseName, String tableName, Class<?> entityClass ) {
 
     }
 
@@ -151,7 +166,7 @@ public class MysqlUtils {
      * @param tableName
      * @param entityClass
      */
-    public static void createIndexs(String databaseName, String tableName, Class<? extends IdEntity> entityClass ) {
+    public static void createIndexs(String databaseName, String tableName, Class<?> entityClass ) {
         // 先去查表里已经存在的索引
         List<String> indexs = MysqlUtils.getIndexs(databaseName, entityClass);
         Field[] fields = ClassUtils.getFields(entityClass);
@@ -161,9 +176,7 @@ public class MysqlUtils {
         StringBuilder indexSql = new StringBuilder();
         for (int i = 0; i < fields.length; i++) {
             Index index = fields[i].getAnnotation(Index.class);
-            JSONField jsonField = fields[i].getAnnotation(JSONField.class);
-            String columnName = (ToolsKit.isEmpty(jsonField)) ? fields[i].getName() :
-                    (ToolsKit.isEmpty(jsonField.format()) ? jsonField.name() : jsonField.format());
+            String columnName = ToolsKit.getFieldName(fields[i]);
             if (ToolsKit.isNotEmpty(index)) {
                 indexSql.delete(0,indexSql.length());
                 String indexName = ToolsKit.isEmpty(index.name()) ? "_" + columnName + "_" : index.name();
@@ -190,5 +203,53 @@ public class MysqlUtils {
                 }
             }
         }
+    }
+
+
+
+    /**
+     * 根据Entity类取出MongoDao
+     * @param cls           继承了IdEntity的类
+     * @param <T>
+     * @return
+     */
+    public static <T> MysqlDao<T> getMysqlDao(Class<T> cls){
+        String key = ClassUtils.getEntityName(cls);
+        MysqlDao<?> dao = MYSQLDAO_MAP.get(key);
+        if(null == dao){
+            dao = new MysqlDao<T>(cls);
+            MYSQLDAO_MAP.put(key, dao);
+        }
+        return (MysqlDao<T>)dao;
+    }
+
+    public static CurdSqlModle builderSqlModle(CurdEnum curdEnum, Class<?> entityClass, Map<String, Object> paramMap, String idFieldName) {
+        String databaseName = getDataBaseName(entityClass);
+        String tableName = ClassUtils.getEntityName(entityClass);
+        CurdSqlModle modle = null;
+        if(ToolsKit.isNotEmpty(databaseName) && ToolsKit.isNotEmpty(tableName) && ToolsKit.isNotEmpty(paramMap)) {
+            modle = new CurdSqlModle(curdEnum, databaseName, tableName, paramMap, idFieldName);
+        }
+        return modle;
+    }
+
+    /**
+     * 排序
+     */
+    public static List<String> orderParamKey(Map<String,?> paramMap) {
+        if (ToolsKit.isEmpty(paramMap)) {
+            return null;
+        }
+        ArrayList<String> keyList = new ArrayList<>(paramMap.keySet());
+        Collections.sort(keyList, String.CASE_INSENSITIVE_ORDER);
+        return keyList;
+    }
+
+    public static String getDataBaseName(Class<?> entityClass) {
+        String databaseName = ToolsKit.getDataBaseName(entityClass);
+        if (ToolsKit.isEmpty(databaseName)) {
+            databaseName = getDefualDataBase();
+        }
+        return databaseName;
     }
 }
