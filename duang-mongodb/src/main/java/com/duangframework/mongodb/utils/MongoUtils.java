@@ -5,9 +5,8 @@ import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
-import com.duangframework.core.utils.DataType;
 import com.duangframework.mongodb.MongoDao;
-import com.google.gson.stream.JsonWriter;
+import com.duangframework.mongodb.convert.EncodeConvetor;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import org.bson.Document;
@@ -96,64 +95,8 @@ public class MongoUtils {
         if(null == obj) {
             throw new EmptyNullException("toBson is fail:  obj is null");
         }
-
-        Class<? extends Object> type = obj.getClass();
-        if ( DataType.isBaseType(type) ) {
-            return (T)obj;
-        }
-
-/**
- *  Document document = Document.parse(jsonText);
- System.out.println(ToolsKit.toJsonString(document.keySet()));
- Field[] fields = ClassUtils.getFields(User.class);
- for (int i = 0; i < fields.length; i++) {
- String key = ToolsKit.getFieldName(fields[i]);
- Object valueObj = document.get(key);
- if(valueObj == null) continue;
- if(DataType.isListType(valueObj.getClass())) {
- List list = (List)valueObj;
- for(Object obj : list) {
- Document doc = (Document)obj;
- String value = doc.getString("createtime");
- doc.put("createtime", ToolsKit.parseDate(value, Const.DEFAULT_DATE_FORM));
- }
- }
- */
-
-
-//        Document document = Document.parse(ToolsKit.toJsonString(obj));
-//        String entityId = document.getString(IdEntity.ENTITY_ID_FIELD);
-//        // 如果没有ID字段属性，视为新增操作
-//        if(ToolsKit.isEmpty(entityId)) {
-//            return document;
-//        }
-//        // 有ID字段属性，
-//
-//        Field[] fields = ClassUtils.getFields(obj.getClass());
-//        for (Field field : fields) {
-//
-//        }
-
         try {
-//            T entity = (T)ToolsKit.jsonParseObject(ToolsKit.toJsonString(obj), entityClass);
-            String jsonText = ToolsKit.toJsonString(obj);
-            System.out.println(jsonText);
-            Document document = Document.parse(jsonText);
-            System.out.println(ToolsKit.toJsonString(document.keySet()));
-
-//            if(null != entityClass) {
-//                Field[] fields = ClassUtils.getFields(entityClass);
-//
-//                for (int i = 0; i < fields.length; i++) {
-//                    if (DataType.isDate(fields[i].getType())) {
-//                        String key = ToolsKit.getFieldName(fields[i]);
-//                        document.put(key, document.getDate(key));
-//                    }
-//                }
-//            }
-            System.out.println(document.toJson());
-//            ObjectKit.setField(obj, field.getName(), value);
-            return (T)document;
+            return (T)EncodeConvetor.convetor(obj);
         } catch (Exception e) {
             throw new MongodbException("toBson is fail: " + e.getMessage(), e);
         }

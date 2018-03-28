@@ -20,7 +20,7 @@ import java.util.*;
 public class ObjectKit {
 
     private static final Logger logger = LoggerFactory.getLogger(ObjectKit.class);
-
+    private static final Map<String, Map<String, Object>> FIELD_MAP = new HashMap<>();
     /**
      * 设置成员变量
      * @param obj       需要设置成员变量的对象
@@ -127,7 +127,7 @@ public class ObjectKit {
 
     /**
      * 获取成员变量
-     * @param  对象
+     * @param  obj 对象
      * @aram field  变量字段
      */
     public static Object getFieldValue(Object obj, Field field) {
@@ -228,7 +228,13 @@ public class ObjectKit {
      * 获取对象的字段映射（字段名 => 字段值），忽略 static 字段
      */
     public static Map<String, Object> getFieldMap(Object obj) {
-        return getFieldMap(obj, true);
+        String key = obj.getClass().getName();
+        Map<String, Object> fieldMap = FIELD_MAP.get(key);
+        if(ToolsKit.isEmpty(fieldMap)) {
+            fieldMap = getFieldMap(obj, true);
+            FIELD_MAP.put(key, fieldMap);
+        }
+        return fieldMap;
     }
 
     /**

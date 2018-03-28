@@ -118,10 +118,10 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		String id = entity.getId();
 		try {
 			if(ToolsKit.isEmpty(id)) {
-				document = MongoUtils.convert2ObjectId(document);
 				collection.insertOne(document);
-				entity.setId(document.get(IdEntity.ID_FIELD)+"");
+				entity.setId(document.get(IdEntity.ID_FIELD).toString());
 			} else {
+//                document = MongoUtils.convert2ObjectId(document);
                 update(id, document);
 //				Document filterDoc = new Document();
 //				filterDoc.put(IdEntity.ID_FIELD, new ObjectId(id));
