@@ -29,7 +29,6 @@ public class EncodeConvetor {
         if(ToolsKit.isNotEmpty(fields)) {
             for (int i = 0; i < fields.length; i++) {
                 Field field = fields[i];
-                String key = ToolsKit.getFieldName(field);
                 Encoder encoder = parser(object, field);
                 if(!encoder.isNull() && !encoder.isTran()) {        //不为null且没有Tran注解
                     document.put(encoder.getFieldName(), encoder.getValue());

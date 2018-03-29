@@ -76,11 +76,12 @@ public abstract class AbstractAsyncContext implements AsyncContext {
     protected IResponse buildExceptionResponse(String message) {
         HttpResponse httpResponse = new HttpResponse(asyncResponse.getHeaders(), asyncResponse.getCharacterEncoding(), asyncRequest.getContentType());
         ReturnDto<String> returnDto = new ReturnDto<>();
-        returnDto.setData(message);
+        returnDto.setData(null);
         HeadDto headDto = new HeadDto();
-        headDto.setMsg(message);
-        headDto.setUri(asyncRequest.getRequestURI());
+        int index = message.indexOf(":");
+        headDto.setMsg((index>-1) ? message.substring(index+1, message.length()) : message);
         headDto.setRet(1);
+        headDto.setUri(asyncRequest.getRequestURI());
         headDto.setTimestamp(System.currentTimeMillis());
         headDto.setRequestId(requestId);
         headDto.setClientId(IpUtils.getLocalHostIP());

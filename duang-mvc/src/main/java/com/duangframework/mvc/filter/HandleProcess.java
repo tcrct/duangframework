@@ -7,6 +7,7 @@ import com.duangframework.mvc.handles.Handles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
 
 /**
@@ -32,9 +33,10 @@ public class HandleProcess implements Callable<IResponse> {
         try {
             Handles.execute(target, request, response);
             return response;
-        } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
-            throw new DuangMvcException(e.getMessage(), e);
+        }
+        catch (Exception e) {
+            InvocationTargetException ite = (InvocationTargetException)e;
+            throw new DuangMvcException(ite.getCause().getMessage(), ite.getCause());
         }
     }
 }

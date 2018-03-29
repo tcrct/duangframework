@@ -88,8 +88,8 @@ public class MysqlKit {
         return count;
     }
 
-    public boolean add() throws Exception {
-        return delete();
+    public int add() throws Exception {
+        return DBSession.execute(_dataBase, _executeSql, _params);
     }
 
     public boolean update() throws Exception {

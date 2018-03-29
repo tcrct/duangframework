@@ -50,15 +50,17 @@ public class MysqlDao <T> implements IDao<T> {
     public boolean save(T entity) throws Exception {
         CurdSqlModle curdSqlModle = null;
         IdEntity idEntity = (IdEntity)entity;
-        boolean isInsert = ToolsKit.isEmpty(idEntity.getId());
+        boolean isInsert = ToolsKit.isEmpty(idEntity.getMysqlId()) || ToolsKit.isEmpty(idEntity.getId());
         try {
-            curdSqlModle = EncodeConvetor.encode(entity, isInsert ? CurdEnum.INSERT : CurdEnum.UPDATE);
+            curdSqlModle = EncodeConvetor.convetor(entity, isInsert ? CurdEnum.INSERT : CurdEnum.UPDATE);
         } catch (Exception e) {
             throw  new MysqlException("build CurdSqlModle is fail: " + e.getMessage(), e);
         }
         MysqlKit mysqlKit = MysqlKit.duang().entityClass(entityClass).params(curdSqlModle.getParamValueArray());
         if(isInsert) {
-            return mysqlKit.sql(curdSqlModle.builderInsertSql()).add();
+            int idNum =  mysqlKit.sql(curdSqlModle.builderInsertSql()).add();
+            idEntity.setId(idNum);
+            return idNum > 0 ? true : false;
         } else {
             return mysqlKit.sql(curdSqlModle.builderUpdateSql()).update();
         }

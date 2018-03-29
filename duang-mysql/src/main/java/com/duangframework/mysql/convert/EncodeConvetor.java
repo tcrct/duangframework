@@ -26,7 +26,7 @@ public class EncodeConvetor {
 
     private final static Logger logger = LoggerFactory.getLogger(EncodeConvetor.class);
 
-    public static CurdSqlModle encode(Object entity, CurdEnum curdEnum) {
+    public static CurdSqlModle convetor(Object entity, CurdEnum curdEnum) {
         Class<?> entityClass = entity.getClass();
         boolean isExtends = ClassUtils.isExtends(entityClass, IdEntity.class.getCanonicalName());
         if(!isExtends){
@@ -34,7 +34,7 @@ public class EncodeConvetor {
         }
         CurdSqlModle curdSqlModle = null;
         try {
-            String entityJson = ToolsKit.toJsonString(entity);
+            String entityJson = ToolsKit.toJsonString2(entity);
             if (ToolsKit.isNotEmpty(entityJson)) {
                 Map<String, Object> map = ToolsKit.jsonParseObject(entityJson, Map.class);
                 String idFieldName = ToolsKit.getIdFieldName(entityClass);

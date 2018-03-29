@@ -60,14 +60,14 @@ public class CORSHandle implements IHandle {
         }
         String host = "";
         boolean isAllowAccess = false;
-        String allowhost = request.getRequestURL().toString();
+        String allowhost = request.getHeader("Host");
         if(ToolsKit.isEmpty(allowhost)) {
             allowhost = request.getHeader("Origin");
             if (ToolsKit.isEmpty(allowhost)) {
                 allowhost = request.getHeader("Referer");
             }
             if (ToolsKit.isEmpty(allowhost)) {
-                allowhost = request.getHeader("Host");
+                allowhost = request.getRequestURL().toString();
             }
             if (ToolsKit.isEmpty(allowhost)) {
                 String key = request.getParameter("allowhost");

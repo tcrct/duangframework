@@ -5,6 +5,7 @@ import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serializable;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -98,7 +99,7 @@ public final class DBRunner {
 	}
 	
 	/**
-	 * 执行SQL语句，用于update, delete等
+	 * 执行SQL语句，用于insert, update, delete等
 	 * @param sql						sql语句
 	 * @param params				参数
 	 * @return								受影响的行数
@@ -114,9 +115,16 @@ public final class DBRunner {
 		PreparedStatement stmt = null;
 		try{
 			loggerSql(sql, params);
-			stmt = fillStatement(connection.prepareStatement(sql), params);
+			stmt = fillStatement(connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS), params);
 			rows = stmt.executeUpdate();
-		} catch(SQLException e){
+			if (sql.toLowerCase().startsWith("insert")) {
+                ResultSet rs = stmt.getGeneratedKeys();
+                if(rs.next() ) {
+                    Serializable ret = (Serializable) rs.getObject(1);
+                    rows = Integer.parseInt(ret.toString());
+                }
+            }
+        } catch(SQLException e){
 			logger.warn("execute "+sql+" error: " + e.getMessage(), e);
 		} finally{
 			DBSession.close(stmt);

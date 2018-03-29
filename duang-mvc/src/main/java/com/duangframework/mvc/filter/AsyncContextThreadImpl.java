@@ -51,7 +51,8 @@ public class AsyncContextThreadImpl extends AbstractAsyncContext {
             response = buildExceptionResponse("request time out");
             // 中止线程，参数为true时，会中止正在运行的线程，为false时，如果线程未开始，则停止运行
             futureTask.cancel(true);
-        } catch (Exception  e) {
+        }
+        catch (Exception  e) {
             logger.warn(e.getMessage(),e);
             response = buildExceptionResponse(e.getMessage());
         }

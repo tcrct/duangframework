@@ -1,10 +1,9 @@
 package com.duangframework.core.common;
 
 
-import com.alibaba.fastjson.annotation.JSONCreator;
 import com.alibaba.fastjson.annotation.JSONField;
-import com.alibaba.fastjson.annotation.JSONType;
 import com.duangframework.core.annotation.db.Id;
+import com.duangframework.core.kit.ToolsKit;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
 import java.util.Date;
@@ -59,9 +58,21 @@ public class IdEntity implements java.io.Serializable {
 		return id;
 	}
 
+    @JSONField(serialize = false, deserialize = false)
+    public int getMysqlId() {
+        if(ToolsKit.isNotEmpty(getId())) {
+            return Integer.parseInt(getId());
+        }
+        return -1;
+    }
+
 	public void setId(String id) {
 		this.id = id;
 	}
+
+    public void setId(int id) {
+        this.id = id+"";
+    }
 	
 	
 	@Override

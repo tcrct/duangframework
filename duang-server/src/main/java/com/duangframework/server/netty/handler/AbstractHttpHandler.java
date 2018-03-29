@@ -11,7 +11,6 @@ import io.netty.util.AsciiString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Iterator;
 import java.util.Map;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
@@ -60,12 +59,12 @@ public abstract class AbstractHttpHandler {
         httpHeaders.set(CONTENT_TYPE, JSON); //设置默认的返回结果格式
         httpHeaders.set(TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
         httpHeaders.set(HttpHeaderNames.DATE, ToolsKit.getCurrentDateString());
-        if(ToolsKit.isNotEmpty(headers)) {
-            for (Iterator<Map.Entry<String, String>> mapIterator = headers.entrySet().iterator(); mapIterator.hasNext(); ) {
-                Map.Entry<String, String> entry = mapIterator.next();
-                httpHeaders.set(entry.getKey(), entry.getValue());
-            }
-        }
+//        if(ToolsKit.isNotEmpty(headers)) {
+//            for (Iterator<Map.Entry<String, String>> mapIterator = headers.entrySet().iterator(); mapIterator.hasNext(); ) {
+//                Map.Entry<String, String> entry = mapIterator.next();
+//                httpHeaders.set(entry.getKey(), entry.getValue());
+//            }
+//        }
         httpHeaders.set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes()+"");
     }
 

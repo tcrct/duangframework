@@ -51,12 +51,20 @@ public class ToolsKit {
             SerializerFeature.QuoteFieldNames,
             SerializerFeature.WriteNonStringKeyAsString,
             SerializerFeature.DisableCircularReferenceDetect,
-//            SerializerFeature.WriteNullListAsEmpty,
-//            SerializerFeature.WriteNullStringAsEmpty,
-//            SerializerFeature.WriteNullNumberAsZero,
-//            SerializerFeature.WriteNullBooleanAsFalse
             SerializerFeature.NotWriteRootClassName
     };
+
+    private static SerializerFeature[] serializerFeatureArray2 = {
+            SerializerFeature.QuoteFieldNames,
+            SerializerFeature.WriteNonStringKeyAsString,
+            SerializerFeature.DisableCircularReferenceDetect,
+            SerializerFeature.WriteNullListAsEmpty,
+            SerializerFeature.WriteNullStringAsEmpty,
+            SerializerFeature.WriteNullNumberAsZero,
+            SerializerFeature.WriteNullBooleanAsFalse,
+            SerializerFeature.NotWriteRootClassName
+    };
+
     static {
         jsonConfig.put(Date.class, new SimpleDateFormatSerializer("yyyy-MM-dd HH:mm:ss.SSS"));
     }
@@ -143,6 +151,10 @@ public class ToolsKit {
 
     public static String toJsonString(Object obj) {
         return JSON.toJSONString(obj, jsonConfig, serializerFeatureArray);
+    }
+
+    public static String toJsonString2(Object obj) {
+        return JSON.toJSONString(obj, jsonConfig, serializerFeatureArray2);
     }
 
     public static byte[] toJsonBytes(Object obj) {
