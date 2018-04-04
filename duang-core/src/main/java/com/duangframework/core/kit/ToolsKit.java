@@ -22,6 +22,8 @@ import com.duangframework.core.utils.XmlHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileFilter;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -410,5 +412,19 @@ public class ToolsKit {
     public static String getDataBaseName(Class<?> entityClass) {
         Entity entityAnnotation = entityClass.getAnnotation(Entity.class);
         return entityAnnotation.database();
+    }
+
+    public static FileFilter fileFilter(final File dir, final String extName){
+        return new FileFilter() {
+            public boolean accept(File file) {
+                if(".class".equalsIgnoreCase(extName)) {
+                    return ( file.isFile() && file.getName().endsWith(extName) ) || file.isDirectory();
+                } else if(".jar".equalsIgnoreCase(extName)) {
+                    return ( file.isFile() && file.getName().endsWith(extName) ) || file.isFile();
+                } else {
+                    throw new IllegalArgumentException();
+                }
+            }
+        };
     }
 }

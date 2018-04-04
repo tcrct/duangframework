@@ -3,7 +3,7 @@ package com.duangframework.server.netty.server;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.interfaces.IProcess;
-import com.duangframework.core.utils.ClassUtils;
+import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.server.utils.NativeSupport;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
@@ -58,12 +60,43 @@ public class BootStrap implements Closeable {
     }
 
     private void init() {
+//        loadLibrary();
         try {
             bossGroup = EventLoopGroupFactory.builderBossLoopGroup();
             workerGroup = EventLoopGroupFactory.builderWorkerLoopGroup();
             allocator = new PooledByteBufAllocator(PlatformDependent.directBufferPreferred());
         } catch (Exception e) {
             throw new EmptyNullException(e.getMessage(), e);
+        }
+    }
+    private void loadLibrary() {
+        String libPath = System.getProperty("dunagframework.lib.path");
+        if(ToolsKit.isEmpty(libPath)) {
+            return;
+        }
+        File libDir = new File(libPath);
+        if(!libDir.isDirectory()) {
+            System.out.println("lib path["+libDir+"] is not exist");
+            return;
+        }
+        String[] files = libDir.list(new FilenameFilter(){
+            @Override
+            public boolean accept(File file, String name) {
+                String fileName = file.getName();
+                if(fileName.endsWith(".jar") && !fileName.endsWith("-sources.jar")) {
+                    return file.isFile();
+                } else {
+                    throw new IllegalArgumentException();
+                }
+            }
+        });
+        if(ToolsKit.isEmpty(files)) {
+            return;
+        }
+        for(String fileName : files) {
+            System.out.println(libPath+"/" + fileName);
+            String path = libDir + ((fileName.startsWith("/")) ? fileName.substring(1, fileName.length()) : fileName);
+            System.loadLibrary(path);
         }
     }
 

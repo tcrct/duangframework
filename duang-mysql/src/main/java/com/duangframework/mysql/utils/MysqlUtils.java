@@ -246,10 +246,6 @@ public class MysqlUtils {
     }
 
     public static String getDataBaseName(Class<?> entityClass) {
-        String databaseName = ToolsKit.getDataBaseName(entityClass);
-        if (ToolsKit.isEmpty(databaseName)) {
-            databaseName = getDefualDataBase();
-        }
-        return databaseName;
+        return ToolsKit.isEmpty(entityClass) ? getDefualDataBase() : ToolsKit.getDataBaseName(entityClass);
     }
 }

@@ -64,6 +64,9 @@ public class ClassUtils {
         if(null == clazz) {
             return null;
         }
+        if(Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
+            return null;
+        }
         try {
             logger.debug("\t>>{}", clazz.getCanonicalName());
             return (T)loadClass(clazz.getCanonicalName(), true).newInstance();
@@ -86,12 +89,15 @@ public class ClassUtils {
         }
         Class<?> cls;
         try {
-            if (isInitialized) {
+            cls = getClassLoader().loadClass(className);
+            // 要初始化且不是抽象类及接口
+            if(isInitialized && !Modifier.isAbstract(cls.getModifiers()) && !Modifier.isInterface(cls.getModifiers())) {
                 cls = Class.forName(className, isInitialized, getClassLoader());
-            } else {
-                cls = getClassLoader().loadClass(className);
             }
         } catch (ClassNotFoundException e) {
+            logger.error("Load class is error:" + className, e);
+            throw new RuntimeException(e);
+        } catch (Exception e) {
             logger.error("Load class is error:" + className, e);
             throw new RuntimeException(e);
         }

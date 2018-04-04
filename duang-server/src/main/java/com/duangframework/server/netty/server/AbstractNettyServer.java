@@ -47,6 +47,9 @@ public abstract class AbstractNettyServer implements IServer {
     }
 
     private void init() {
+        if(bootStrap.getPort()== 0){
+            throw new MvcStartUpException("Server Startup Fail: " + bootStrap.getPort() + " is not setting!");
+        }
         if(isUse()){
             throw new MvcStartUpException("Server Startup Fail: " + bootStrap.getPort() + " is use!");
         }

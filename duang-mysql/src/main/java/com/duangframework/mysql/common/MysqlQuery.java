@@ -3,6 +3,8 @@ package com.duangframework.mysql.common;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mysql.Operator;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,14 +166,9 @@ public class MysqlQuery<T> {
     }
 
     public Map<String, Object> getQueryObj() {
-        logger.info(" query: " + ToolsKit.toJsonString(queryObj));
-
-        for(Iterator<Map.Entry<String,Object>> iterator = queryObj.entrySet().iterator(); iterator.hasNext();) {
-            Map.Entry<String,Object> entry = iterator.next();
-            String fieldName = entry.getKey();
-        }
-
-
+        DBObject dbObject = new BasicDBObject(queryObj);
+        System.out.println(dbObject.toString());
+//        logger.info(" query: " + ToolsKit.toJsonString(queryObj));
         return queryObj;
     }
 

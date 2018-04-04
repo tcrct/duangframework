@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -83,6 +84,9 @@ public class BeanHelper {
 
     private static Object createBean(Map<Class<? extends Annotation>, IProxy> annotationMap, Class<?> cls) throws Exception {
         List<IProxy> proxyList = new ArrayList<>();
+        if(Modifier.isAbstract(cls.getModifiers()) || Modifier.isInterface(cls.getModifiers())) {
+            return null;
+        }
         Method[] methods = cls.getMethods();
         for (Method method : methods) {
             if(excludedMethodName.contains(method.getName())) {

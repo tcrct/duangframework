@@ -3,6 +3,7 @@ package com.duangframework.server.netty.kit;
 import com.duangframework.core.exceptions.ServerStartUpException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.interfaces.IProcess;
+import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.server.netty.server.HttpServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,7 @@ public class ServerKit {
     private static ServerKit _serverKit;
     private static Lock _serverKitLock = new ReentrantLock();
     private String host = "0.0.0.0";
-    private int port;
+    private int port = 0;
     private IContextLoaderListener contextLoaderList;
     private IProcess mainProcess;
 
@@ -63,6 +64,18 @@ public class ServerKit {
         if(null == mainProcess) {
             throw new ServerStartUpException("mainProcess is null");
         }
+        try {
+            String serverHost = System.getProperty("server.host");
+            if(ToolsKit.isNotEmpty(serverHost)) {
+                host = serverHost;
+            }
+        } catch (Exception e) {}
+        try {
+            String serverPort = System.getProperty("server.port");
+            if(ToolsKit.isNotEmpty(serverPort)) {
+                port = Integer.parseInt(serverPort);
+            }
+        } catch (Exception e) {}
         HttpServer httpServer = new HttpServer(host, port, contextLoaderList, mainProcess);
         httpServer.start();
     }

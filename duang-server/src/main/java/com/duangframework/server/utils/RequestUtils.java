@@ -2,6 +2,7 @@ package com.duangframework.server.utils;
 
 import com.duangframework.core.common.dto.http.request.HttpRequest;
 import com.duangframework.core.exceptions.DecoderException;
+import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.VerificationException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.server.common.enums.HttpMethod;
@@ -13,6 +14,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +68,7 @@ public class RequestUtils {
             headerMap = new HashMap<>(headers.size());
             for(Iterator<Map.Entry<String,String>> it = headers.iteratorAsString(); it.hasNext();) {
                 Map.Entry<String,String> entry = it.next();
-                headerMap.put(entry.getKey(), entry.getValue());
+                headerMap.put(entry.getKey().toLowerCase(), entry.getValue());
             }
             headerMap.put("method", request.method().toString());
         }
@@ -125,7 +127,7 @@ public class RequestUtils {
         String ipAddress = "";
         int paranPort = 80;     //PID
         try {
-            ipAddress = request.headers().get(ServerConfig.HEADER_X_FORWARDED_FOR)+"";
+            ipAddress = getRemoteAddr(request.headers());
             if (ToolsKit.isEmpty(ipAddress) || ServerConfig.UNKNOWN.equalsIgnoreCase(ipAddress)) {
                 InetSocketAddress inetSocketAddress = (InetSocketAddress) channel.remoteAddress();
                 paranPort = inetSocketAddress.getPort(); //PID
@@ -138,7 +140,7 @@ public class RequestUtils {
         if("0:0:0:0:0:0:0:1".equals(ipAddress) || ToolsKit.isEmpty(ipAddress)){
             ipAddress = "127.0.0.1";
         }
-
+        ipAddress = ipAddress.toLowerCase().replace("https://", "").replace("http://","");
         String protocolStr = request.protocolVersion().protocolName().toString().toLowerCase();
         String endPoint = protocolStr + "://" + ipAddress + request.uri();
         return new URI(endPoint);
@@ -154,5 +156,24 @@ public class RequestUtils {
         InetSocketAddress inetSocketAddress = BootStrap.getInstants().getSockerAddress();
         String endPoint = protocolStr+"://"+inetSocketAddress.getHostString() + ":" + inetSocketAddress.getPort();
         return new URI(endPoint);
+    }
+
+    private static String getRemoteAddr(HttpHeaders httpHeaders) throws Exception {
+        String ipAddress = httpHeaders.getAsString(HttpHeaderNames.HOST);
+        if (ToolsKit.isEmpty(ipAddress)) {
+            ipAddress = httpHeaders.getAsString(HttpHeaderNames.ORIGIN);
+        } else if (ToolsKit.isEmpty(ipAddress)) {
+            ipAddress = httpHeaders.getAsString(ServerConfig.X_REAL_IP);
+        } else if (ToolsKit.isEmpty(ipAddress)) {
+            ipAddress = httpHeaders.getAsString(ServerConfig.X_FORWARDED_FOR);
+            if(ToolsKit.isNotEmpty(ipAddress)) {
+                ipAddress = ipAddress.split(",")[0];
+            }
+        }
+        ipAddress = ipAddress.toLowerCase().replace("https://", "").replace("http://","");
+        if(ToolsKit.isEmpty(ipAddress)) {
+                throw new EmptyNullException("getRemoteAddr(): get remote host fail:  ipAddress is null");
+        }
+        return ipAddress;
     }
 }

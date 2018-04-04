@@ -1,6 +1,6 @@
 package com.duangframework.server.netty.server;
 
-import io.netty.handler.codec.http.HttpConstants;
+import io.netty.util.AsciiString;
 
 /**
  * Created by laotang on 2017/10/30.
@@ -22,8 +22,10 @@ public class ServerConfig {
 
     public static String DEFAULT_CHARSET = "UTF-8";
 
-    public static String HEADER_X_FORWARDED_FOR = "x-forwarded-for";
-
     public static String UNKNOWN= "unknown";
+
+    public static final AsciiString X_FORWARDED_FOR = new AsciiString("x-forwarded-for");
+
+    public static final AsciiString X_REAL_IP = new AsciiString("x-real-ip");
 
 }

@@ -38,8 +38,8 @@ public class MysqlDao <T> implements IDao<T> {
         String databaseName = MysqlUtils.getDataBaseName(entityClass);
         String tableName = ClassUtils.getEntityName(entityClass);
         try {
-            MysqlUtils.createTables(databaseName, tableName, entityClass);
-            MysqlUtils.createIndexs(databaseName, tableName, entityClass);
+//            MysqlUtils.createTables(databaseName, tableName, entityClass);
+//            MysqlUtils.createIndexs(databaseName, tableName, entityClass);
         } catch (Exception e) {
             logger.warn("init "+cls.getName()+" table fail: " + e.getMessage(), e);
         }
@@ -56,7 +56,11 @@ public class MysqlDao <T> implements IDao<T> {
         } catch (Exception e) {
             throw  new MysqlException("build CurdSqlModle is fail: " + e.getMessage(), e);
         }
-        MysqlKit mysqlKit = MysqlKit.duang().entityClass(entityClass).params(curdSqlModle.getParamValueArray());
+        ;
+        MysqlKit mysqlKit = MysqlKit.duang()
+                .use(MysqlUtils.getDataBaseName(entityClass))
+                .entityClass(entityClass)
+                .params(curdSqlModle.getParamValueArray());
         if(isInsert) {
             int idNum =  mysqlKit.sql(curdSqlModle.builderInsertSql()).add();
             idEntity.setId(idNum);

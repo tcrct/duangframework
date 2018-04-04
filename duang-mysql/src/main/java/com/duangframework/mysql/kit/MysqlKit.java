@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by laotang on 2017/11/25 0025.
@@ -22,8 +20,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class MysqlKit {
 
     private static final Logger logger = LoggerFactory.getLogger(MysqlKit.class);
-    private static MysqlKit _mysqlKit;
-    private static Lock _mysqlKitLock = new ReentrantLock();
     private String _executeSql = "";
     private String _dataBase = "";
     private Class<?> _entityClass;
@@ -35,15 +31,15 @@ public class MysqlKit {
     }
 
     private MysqlKit() {
-        _dataBase = MysqlUtils.getDefualDataBase();
     }
-
 
     public MysqlKit entityClass(Class<?> clazz) {
         this._entityClass = clazz;
+        if (ToolsKit.isEmpty(_dataBase)) {
+            _dataBase = MysqlUtils.getDataBaseName(_entityClass);
+        }
         return this;
     }
-
     public MysqlKit use(String dataBase) {
         this._dataBase = dataBase;
         return this;
@@ -60,11 +56,17 @@ public class MysqlKit {
     }
 
     public List<Map<String,Object>> query() throws Exception {
+        if (ToolsKit.isEmpty(_dataBase)) {
+            _dataBase = MysqlUtils.getDefualDataBase();
+        }
         resultList = DBSession.query(_dataBase, _executeSql, _params);
         return resultList;
     }
 
     private long count() throws Exception {
+        if(ToolsKit.isEmpty(_entityClass)) {
+            throw new EmptyNullException("entity class is null");
+        }
         String entityName = ClassUtils.getEntityName(_entityClass);
         String whereSql = "";
         if(_executeSql.toLowerCase().startsWith("select")) {
@@ -87,7 +89,6 @@ public class MysqlKit {
         }
         return count;
     }
-
     public int add() throws Exception {
         return DBSession.execute(_dataBase, _executeSql, _params);
     }
@@ -103,24 +104,24 @@ public class MysqlKit {
 
 
     public <T> T findOne() throws Exception {
+        if(ToolsKit.isEmpty(_entityClass)) {
+            throw new EmptyNullException("entity class is null");
+        }
         query();
         if(ToolsKit.isEmpty(resultList) || ToolsKit.isEmpty(resultList.get(0))) {
            return null;
-        }
-        if(ToolsKit.isEmpty(_entityClass)) {
-            throw new EmptyNullException("entity class is null");
         }
         return (T)ToolsKit.jsonParseObject(ToolsKit.toJsonString(resultList.get(0)), _entityClass);
     }
 
 
     public <T> List<T> findList() throws Exception {
+        if(ToolsKit.isEmpty(_entityClass)) {
+            throw new EmptyNullException("entity class is null");
+        }
         query();
         if(ToolsKit.isEmpty(resultList)) {
             return null;
-        }
-        if(ToolsKit.isEmpty(_entityClass)) {
-            throw new EmptyNullException("entity class is null");
         }
         return (List<T>)ToolsKit.jsonParseArray(ToolsKit.toJsonString(resultList), _entityClass);
     }
