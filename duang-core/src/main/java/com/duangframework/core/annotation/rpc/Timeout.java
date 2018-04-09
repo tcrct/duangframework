@@ -1,4 +1,4 @@
-package com.duangframework.core.annotation.mvc;
+package com.duangframework.core.annotation.rpc;
 
 /**
  * Created by laotang on 2017/11/5.

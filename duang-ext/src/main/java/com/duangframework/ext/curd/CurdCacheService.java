@@ -2,6 +2,7 @@ package com.duangframework.ext.curd;
 
 import com.duangframework.cache.kit.CacheKit;
 import com.duangframework.core.annotation.cache.EntityCache;
+import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.ServiceException;
 import com.duangframework.core.kit.ConfigKit;
@@ -17,6 +18,7 @@ import java.util.Map;
  * @author Created by laotang
  * @date createed in 2018/1/31.
  */
+@Service(autowired = false)
 public class CurdCacheService<T extends IdEntity>  {
 
     private static final Logger logger = LoggerFactory.getLogger(CurdCacheService.class);

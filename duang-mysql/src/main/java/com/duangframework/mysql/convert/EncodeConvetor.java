@@ -1,7 +1,5 @@
 package com.duangframework.mysql.convert;
 
-import com.duangframework.core.annotation.db.Vo;
-import com.duangframework.core.annotation.db.VoColl;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.MysqlException;
 import com.duangframework.core.kit.ToolsKit;
@@ -9,13 +7,10 @@ import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mysql.common.CurdEnum;
 import com.duangframework.mysql.common.CurdSqlModle;
 import com.duangframework.mysql.convert.encode.Encoder;
-import com.duangframework.mysql.convert.encode.PropertyEncoder;
-import com.duangframework.mysql.convert.encode.VoEncoder;
 import com.duangframework.mysql.utils.MysqlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.util.Map;
 
 /**
@@ -47,15 +42,15 @@ public class EncodeConvetor {
     }
 
 
-    public static Encoder parser(Object obj, Field field) {
+    public static Encoder parser(String fieldName, Map<String, Object> valueMap) {
         Encoder encoder = null;
-        if(null != field.getAnnotation(Vo.class)){
-            encoder = new VoEncoder(obj, field);
-        } else if (null != field.getAnnotation(VoColl.class)){
-//            encoder = new VoCollEncoder(obj, field);
-        } else {
-            encoder = new PropertyEncoder(obj, field);
-        }
+//        if(null != field.getAnnotation(Vo.class)){
+//            encoder = new VoEncoder(obj, field);
+//        } else if (null != field.getAnnotation(VoColl.class)){
+////            encoder = new VoCollEncoder(obj, field);
+//        } else {
+//            encoder = new PropertyEncoder(obj, field);
+//        }
         return encoder;
     }
 }

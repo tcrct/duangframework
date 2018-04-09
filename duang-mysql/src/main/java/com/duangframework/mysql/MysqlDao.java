@@ -76,7 +76,7 @@ public class MysqlDao <T> implements IDao<T> {
     }
 
     @Override
-    public <T1> T1 findOne(MysqlQuery mysqlQuery) throws Exception {
+    public <T> T findOne(MysqlQuery mysqlQuery) throws Exception {
         return null;
     }
 

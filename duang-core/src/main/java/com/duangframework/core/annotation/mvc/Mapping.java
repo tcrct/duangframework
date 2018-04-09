@@ -17,4 +17,5 @@ public @interface Mapping {
     String desc() default "";
     int level () default 0;
     String order() default "";
+    long timeout() default 3000L;
 }

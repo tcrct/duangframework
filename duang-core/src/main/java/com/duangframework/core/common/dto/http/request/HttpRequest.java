@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class HttpRequest implements IRequest {
 
-    private final static String CONTENT_ENCODING = "content-encoding";
+    private final static String CONTENT_ENCODING = "Content-Encoding";
 
     private URI remoteEndPoint;
     private URI localEndPoint;
@@ -69,7 +69,7 @@ public class HttpRequest implements IRequest {
     @Override
     public String getCharacterEncoding() {
         if(null == charset) {
-            String encodering = headers.get(CONTENT_ENCODING);
+            String encodering = headers.get(CONTENT_ENCODING.toLowerCase());
             if (ToolsKit.isEmpty(encodering)) {
                 charset = Charset.defaultCharset();
             } else {
@@ -91,7 +91,7 @@ public class HttpRequest implements IRequest {
 
     @Override
     public String getContentType() {
-        return headers.get(HttpHeaders.CONTENT_TYPE);
+        return headers.get(HttpHeaders.CONTENT_TYPE.toLowerCase());
     }
 
     @Override

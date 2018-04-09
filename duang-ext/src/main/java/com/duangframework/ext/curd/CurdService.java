@@ -1,11 +1,12 @@
 package com.duangframework.ext.curd;
 
+import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.ServiceException;
-import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mongodb.MongoDao;
@@ -23,6 +24,7 @@ import java.util.Date;
  * @author Created by laotang
  * @date createed in 2018/1/31.
  */
+@Service(autowired = false)
 public class CurdService<T extends IdEntity> extends CurdCacheService<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(CurdService.class);

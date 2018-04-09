@@ -1,6 +1,8 @@
 package com.duangframework.core.utils;
 
 import com.duangframework.core.annotation.db.Entity;
+import com.duangframework.core.annotation.mvc.Controller;
+import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
@@ -49,6 +51,24 @@ public class ClassUtils {
 //        }
     }
 
+    public static boolean supportInstance(Class<?> clazz) {
+        if(null == clazz) {
+            return false;
+        }
+        if(Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
+            return false;
+        }
+        Controller controller = clazz.getAnnotation(Controller.class);
+        if(null != controller && !controller.autowired()){
+            return false;
+        }
+        Service service = clazz.getAnnotation(Service.class);
+        if(null != service && !service.autowired()){
+            return false;
+        }
+        return true;
+    }
+
     /**
      * 通过反射构造函数创建实例
      * @param className             类名
@@ -61,10 +81,7 @@ public class ClassUtils {
     }
 
     public static <T> T newInstance(Class<?> clazz) {
-        if(null == clazz) {
-            return null;
-        }
-        if(Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
+        if(!supportInstance(clazz)){
             return null;
         }
         try {
@@ -90,8 +107,8 @@ public class ClassUtils {
         Class<?> cls;
         try {
             cls = getClassLoader().loadClass(className);
-            // 要初始化且不是抽象类及接口
-            if(isInitialized && !Modifier.isAbstract(cls.getModifiers()) && !Modifier.isInterface(cls.getModifiers())) {
+            // 要初始化且支持实例化
+            if(isInitialized && supportInstance(cls)) {
                 cls = Class.forName(className, isInitialized, getClassLoader());
             }
         } catch (ClassNotFoundException e) {

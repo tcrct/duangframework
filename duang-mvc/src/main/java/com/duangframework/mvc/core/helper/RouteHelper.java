@@ -2,6 +2,7 @@ package com.duangframework.mvc.core.helper;
 
 import com.duangframework.core.annotation.mvc.Controller;
 import com.duangframework.core.annotation.mvc.Mapping;
+import com.duangframework.core.common.Const;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
@@ -65,6 +66,9 @@ public class RouteHelper {
         List<String> keyList = getAllActionKeys();
         logger.warn("**************** Controller Mapper Key ****************");
         for (String key : keyList) {
+            if(key.contains(Const.REPORT_MAPPING_KEY)) {
+                continue;
+            }
             logger.warn(key);
         }
         if(!actionMapping.isEmpty()){
@@ -80,34 +84,36 @@ public class RouteHelper {
         String methodName = method.getName();
         String methodKey = buildMappingKey(mapping, methodName);
         String actionKey = methodKey;
+        long timeout = Const.REQUEST_TIMEOUT;
         if(!controllerKey.equalsIgnoreCase(methodKey)) {
             actionKey = controllerKey + (methodKey.startsWith("/") ? methodKey : "/"+ methodKey);
         }
         actionKey = actionKey.startsWith("/") ? actionKey : "/"+actionKey;
-        String descKey = methodName, levelKey = "", orderKey = "";
+        String desc = methodName, order = "";
+        int level = 0;
         if(ToolsKit.isNotEmpty(mapping)) {
-            descKey = ToolsKit.isEmpty(mapping.desc()) ? methodName : mapping.desc();
-            levelKey = mapping.level()+"";
-            orderKey = mapping.order();
+            desc = ToolsKit.isEmpty(mapping.desc()) ? methodName : mapping.desc();
+            level = mapping.level();
+            order = mapping.order();
+            timeout = mapping.timeout();
         }
-        return  new Action(actionKey, descKey, levelKey, orderKey, controllerClass, method);
+        return  new Action(controllerKey, actionKey, desc, level, order, controllerClass, method, timeout);
     }
 
     private static String buildMappingKey(Mapping mapping, String mappingKey) {
-        if(ToolsKit.isEmpty(mapping)) {
+
+        if(ToolsKit.isNotEmpty(mapping) && ToolsKit.isNotEmpty(mapping.value())) {
+            mappingKey = mapping.value();
+        } else {
             if(mappingKey.endsWith(CONTROLLER_ENDWITH_NAME)) {
                 mappingKey = mappingKey.replace(CONTROLLER_ENDWITH_NAME, "");
-            }
-        } else {
-            if(ToolsKit.isNotEmpty(mapping.value())) {
-                mappingKey = mapping.value();
             }
         }
         return mappingKey.endsWith("/") ? mappingKey.substring(0, mappingKey.length()-1).toLowerCase() : mappingKey.toLowerCase();
     }
 
     private static List<String> getAllActionKeys() {
-        List<String> allActionKeys = new ArrayList<String>(actionMapping.keySet());
+        List<String> allActionKeys = new ArrayList<>(actionMapping.keySet());
         Collections.sort(allActionKeys);
         return allActionKeys;
     }

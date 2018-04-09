@@ -17,4 +17,6 @@ import java.lang.annotation.Target;
 public @interface Controller {
     // 设置Controller是单例还是多例模式, singleton: 单例  prototype: 多例
     String scope() default "singleton";
+    // 是否自动注入
+    boolean autowired() default true;
 }

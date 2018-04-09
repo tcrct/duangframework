@@ -23,7 +23,7 @@ public abstract class AbstractAsyncContext implements AsyncContext {
     private IResponse asyncResponse;
     private String target;
     private String requestId;
-    private long timeout = 3000L;
+    private long timeout = Const.REQUEST_TIMEOUT;
 
     public AbstractAsyncContext(String target, IRequest request, IResponse response) {
         this(target, request, response, Const.REQUEST_TIMEOUT);

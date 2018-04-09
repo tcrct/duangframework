@@ -50,5 +50,6 @@ export JAVA_OPTS="-Xms${Xms}m -Xmx${Xmx}m -Xss256k -XX:NewSize=${NewSize}m -XX:M
 export JAVA_OPTS="$JAVA_OPTS -XX:+UseParNewGC -XX:ParallelGCThreads=4 -XX:MaxTenuringThreshold=9 -XX:+UseConcMarkSweepGC -XX:+DisableExplicitGC -XX:+UseCMSInitiatingOccupancyOnly -XX:+ScavengeBeforeFullGC -XX:+CMSParallelRemarkEnabled -XX:CMSInitiatingOccupancyFraction=60 -XX:+CMSClassUnloadingEnabled -XX:SoftRefLRUPolicyMSPerMB=0 -XX:+ExplicitGCInvokesConcurrent -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCApplicationConcurrentTime -XX:+PrintHeapAtGC -XX:+HeapDumpOnOutOfMemoryError -XX:-OmitStackTraceInFastThrow -Duser.timezone=Asia/Shanghai -Dclient.encoding.override=UTF-8 -Dfile.encoding=UTF-8"
 export JAVA_OPTS="$JAVA_OPTS -Dserver.host=$SERVER_HOST -Dserver.port=$SERVER_PORT -Dlogging.file=$LOG_DIR/$PRODUCT_CODE.log -Xloggc:$LOG_DIR/heap_trace.txt -XX:HeapDumpPath=$LOG_DIR/HeapDumpOnOutOfMemoryError/ -Dproduct.appid=$PRODUCT_APPID -Duse.env=$USE_ENV"
 
+MVC_CONFIG=${MVC_CONFIG//.//}
 # run the project
 java -server $JAVA_OPTS -classpath $CLASSPATH:$LIB_PATH:$PROJECT_PATH/WEB-INF/classes $MVC_CONFIG >> $LOG_DIR/$PRODUCT_CODE.log 2>&1 &

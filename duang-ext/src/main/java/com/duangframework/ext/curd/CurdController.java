@@ -1,5 +1,6 @@
 package com.duangframework.ext.curd;
 
+import com.duangframework.core.annotation.mvc.Controller;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.ServiceException;
@@ -11,6 +12,7 @@ import com.duangframework.mvc.core.BaseController;
  * @author Created by laotang
  * @date createed in 2018/2/6.
  */
+@Controller(autowired = false)
 public abstract  class CurdController<T extends IdEntity> extends BaseController {
 
     private CurdService CRUDService;

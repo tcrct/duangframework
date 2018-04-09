@@ -41,6 +41,9 @@ public class ClassScanKit {
             }
         }
         clear();
+        jarNameSet.add("duangframework");
+        packageSet.add("com.duangframework.mvc");
+        packageSet.add("com.duangframework.ext");
         return _classScanKit;
     }
 

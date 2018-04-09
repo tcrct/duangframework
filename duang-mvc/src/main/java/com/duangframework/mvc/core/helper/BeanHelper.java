@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 /**
@@ -36,7 +35,7 @@ public class BeanHelper {
                 .packages(ConfigKit.duang().key("base.package.path").asArray())
                 .jarname(ConfigKit.duang().key("jar.prefix").asArray())
                 // 增加MVC固定扫描的包路径
-                .packages("com.duangframework.mvc")
+//                .packages("com.duangframework.mvc")
                 .map();
 
         if(ToolsKit.isNotEmpty(classMap)) {
@@ -84,7 +83,7 @@ public class BeanHelper {
 
     private static Object createBean(Map<Class<? extends Annotation>, IProxy> annotationMap, Class<?> cls) throws Exception {
         List<IProxy> proxyList = new ArrayList<>();
-        if(Modifier.isAbstract(cls.getModifiers()) || Modifier.isInterface(cls.getModifiers())) {
+        if(!ClassUtils.supportInstance(cls)){
             return null;
         }
         Method[] methods = cls.getMethods();

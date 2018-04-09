@@ -110,4 +110,9 @@ public class Const {
      *系统用户ID
      */
     public static String DUANG_SYSTEM_USERID = "57bead16c6396d11707ee174";
+
+    /**
+     * 框架报告API关键字
+     */
+    public static final String REPORT_MAPPING_KEY = "/duangframework/report";
 }

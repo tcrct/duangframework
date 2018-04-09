@@ -1,5 +1,7 @@
 package com.duangframework.mvc.core;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.duangframework.core.common.Const;
 import com.duangframework.core.kit.ToolsKit;
 
 import java.lang.reflect.Method;
@@ -11,27 +13,36 @@ import java.lang.reflect.Method;
  */
 public class Action {
 
+    private String controllerKey;
 	private String actionKey;
-	private String descKey;
-	private String levelKey;
-	private String orderKey;
+	private String desc;
+	private int level;
+	private String order;
 	private Class<?> controllerClass;
+	@JSONField(serialize=false, deserialize = false)
 	private Method method;
 	private String restfulKey;  //restful风格URI
+	private long timeout = Const.REQUEST_TIMEOUT;  //请求过期时间
 
 	public Action() {
 
 	}
 
-	public Action(String actionKey, String descKey, String levelKey, String orderKey,
-                  Class<?> controllerClass, Method method) {
+	public Action(String controllerKey, String actionKey, String desc, int level, String order,
+                  Class<?> controllerClass, Method method, long timeout) {
+	    this.controllerKey = controllerKey;
 		this.actionKey = actionKey;
-		this.descKey = descKey;
-		this.levelKey = levelKey;
-		this.orderKey = orderKey;
+		this.desc = desc;
+		this.level = level;
+		this.order = order;
 		this.controllerClass = controllerClass;
 		this.method = method;
+		this.timeout = timeout;
 	}
+
+    public String getControllerKey() {
+        return controllerKey;
+    }
 
 	public Method getMethod() {
 		return method;
@@ -45,16 +56,20 @@ public class Action {
 		return controllerClass;
 	}
 
-	public String getDescKey() {
-		return descKey;
+	public String getDesc() {
+		return desc;
 	}
 
-	public String getLevelKey() {
-		return levelKey;
+	public int getLevel() {
+		return level;
 	}
 
-	public String getOrderKey() {
-		return orderKey;
+	public String getOrder() {
+		return order;
+	}
+
+	public long getTimeout() {
+		return timeout;
 	}
 
 	/**
@@ -80,10 +95,5 @@ public class Action {
 
 	public void setRestfulKey(String restfulKey) {
 		this.restfulKey = restfulKey;
-	}
-
-	public long getTimeout() {
-		com.duangframework.core.annotation.mvc.Timeout timeoutAnnotation = getMethod().getAnnotation(com.duangframework.core.annotation.mvc.Timeout.class);
-		return (ToolsKit.isNotEmpty(timeoutAnnotation)) ?  timeoutAnnotation.value() : 3000L;
 	}
 }
