@@ -89,8 +89,8 @@ public class RouteHelper {
             actionKey = controllerKey + (methodKey.startsWith("/") ? methodKey : "/"+ methodKey);
         }
         actionKey = actionKey.startsWith("/") ? actionKey : "/"+actionKey;
-        String desc = methodName, order = "";
-        int level = 0;
+        String desc = methodName;
+        int level = 0, order =0;
         if(ToolsKit.isNotEmpty(mapping)) {
             desc = ToolsKit.isEmpty(mapping.desc()) ? methodName : mapping.desc();
             level = mapping.level();

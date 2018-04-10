@@ -1,6 +1,8 @@
 package com.duangframework.mongodb.common;
 
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.mongodb.enums.OrderByEnum;
+import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -29,10 +31,10 @@ public class Order {
 	 * 添加排序
 	 * @param fieldName		排序的字段名
 	 * @param order			排序方向
-	 * @return
+ * @return
 	 */
-	public Order add(String fieldName, String order) {
-		orderLinkedMap.put(fieldName, order);
+	public Order add(String fieldName, OrderByEnum orderByEnum) {
+		orderLinkedMap.put(fieldName, orderByEnum.getKey());
 		return this;
 	}
 	
@@ -45,7 +47,7 @@ public class Order {
 		if(ToolsKit.isNotEmpty(orderLinkedMap)){
 			for(Iterator<Entry<String,String>> it = orderLinkedMap.entrySet().iterator(); it.hasNext();){
 				Entry<String,String> entry = it.next();
-//				orderObj.putAll( MongoKit.builderOrder(entry.getKey(), entry.getValue()) );
+				orderObj.putAll( MongoUtils.builderOrder(entry.getKey(), entry.getValue()) );
 			}
 		}
 		return orderObj;

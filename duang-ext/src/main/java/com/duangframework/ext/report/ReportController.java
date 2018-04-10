@@ -38,4 +38,12 @@ public class ReportController extends BaseController {
             returnFailJson(e);
         }
     }
+
+    public void info() {
+        try {
+            returnSuccessJson(reportService.info());
+        } catch (Exception e) {
+            returnFailJson(e);
+        }
+    }
 }

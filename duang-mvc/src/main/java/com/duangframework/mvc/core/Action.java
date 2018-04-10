@@ -1,6 +1,7 @@
 package com.duangframework.mvc.core;
 
 import com.alibaba.fastjson.annotation.JSONField;
+import com.duangframework.core.annotation.mvc.Controller;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.kit.ToolsKit;
 
@@ -17,7 +18,7 @@ public class Action {
 	private String actionKey;
 	private String desc;
 	private int level;
-	private String order;
+	private int order;
 	private Class<?> controllerClass;
 	@JSONField(serialize=false, deserialize = false)
 	private Method method;
@@ -28,7 +29,7 @@ public class Action {
 
 	}
 
-	public Action(String controllerKey, String actionKey, String desc, int level, String order,
+	public Action(String controllerKey, String actionKey, String desc, int level, int order,
                   Class<?> controllerClass, Method method, long timeout) {
 	    this.controllerKey = controllerKey;
 		this.actionKey = actionKey;
@@ -64,7 +65,7 @@ public class Action {
 		return level;
 	}
 
-	public String getOrder() {
+	public int getOrder() {
 		return order;
 	}
 
@@ -84,6 +85,20 @@ public class Action {
 		}
 		return true;
 	}
+
+	@JSONField(serialize = false, deserialize = false)
+    public Action getControllerAction() {
+        com.duangframework.core.annotation.mvc.Mapping controllerMapping = getControllerClass().getAnnotation(com.duangframework.core.annotation.mvc.Mapping.class);
+        if(ToolsKit.isNotEmpty(controllerMapping)) {
+            controllerKey = ToolsKit.isEmpty(controllerKey) ? "/"+controllerClass.getSimpleName().replace(Controller.class.getSimpleName(), "") : controllerKey;
+            String desc = controllerMapping.desc();
+            if(ToolsKit.isEmpty(desc)) {
+                desc = controllerKey;
+            }
+            return new Action(controllerKey, "", desc, controllerMapping.level(), controllerMapping.order(), controllerClass, null, 0);
+        }
+        return null;
+    }
 
 	public String getBeanKey() {
 		return getControllerClass().getCanonicalName();

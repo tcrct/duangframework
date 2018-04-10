@@ -7,6 +7,7 @@ import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.DataType;
 import com.duangframework.mongodb.Operator;
+import com.duangframework.mongodb.enums.OrderByEnum;
 import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
@@ -277,8 +278,8 @@ public class MongoQuery<T> {
 		return this;
 	}
 	
-	public MongoQuery<T> order(String fieldName, String order) {
-		this.order.add(fieldName, order);
+	public MongoQuery<T> order(String fieldName, OrderByEnum orderByEnum) {
+		this.order.add(fieldName, orderByEnum.getKey());
 		return this;
 	}
 	

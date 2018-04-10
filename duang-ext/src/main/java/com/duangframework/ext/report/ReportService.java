@@ -1,9 +1,12 @@
 package com.duangframework.ext.report;
 
+import com.duangframework.core.annotation.mvc.Mapping;
 import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.common.Const;
+import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mvc.core.Action;
 import com.duangframework.mvc.core.InstanceFactory;
+import com.duangframework.server.netty.server.BootStrap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,24 +50,45 @@ public class ReportService {
         return treeMap;
     }
 
-    public Map<String, List<Action>> treeActions() {
+    public Map<String, Map> treeActions() {
         List<String> keyList = getAllActionKeys();
-        Map<String, List<Action>> treeMap = new TreeMap<>();
+        Map<String, Action> treeMap = new TreeMap<>();
+        Map<String, List<Action>> treeItemMap = new TreeMap<>();
         for (String key : keyList) {
             if(key.contains(Const.REPORT_MAPPING_KEY)) {
                 continue;
             }
             Action action = getActionMapping().get(key);
             String controllerKey = action.getControllerKey();
-            if(treeMap.containsKey(controllerKey)) {
-                treeMap.get(controllerKey).add(action);
+            if(treeItemMap.containsKey(controllerKey)) {
+                treeItemMap.get(controllerKey).add(action);
             } else {
                 List<Action> itemList = new ArrayList<>();
                 itemList.add(action);
-                treeMap.put(controllerKey, itemList);
+                treeItemMap.put(controllerKey, itemList);
+                Mapping controllerMapping = action.getControllerClass().getAnnotation(Mapping.class);
+                if(null != controllerMapping) {
+                    if(controllerKey.equalsIgnoreCase(controllerMapping.value()) && !treeMap.containsKey(controllerKey)) {
+                        treeMap.put(controllerKey, action.getControllerAction());
+                    }
+                }
             }
         }
-        return treeMap;
+        Map<String, Map> mapList = new TreeMap();
+        mapList.put("controller", treeMap);
+        mapList.put("method", treeItemMap);
+        return mapList;
+    }
+
+    public Map<String, Object> info() {
+        Map<String, Object> infoMap = new HashMap<>();
+        infoMap.put("compute", ComputerInfo.getInstance());
+        BootStrap bootStrap = BootStrap.getInstants();
+        if(ToolsKit.isNotEmpty(bootStrap)) {
+            infoMap.put("host", bootStrap.getHost());
+            infoMap.put("prot", bootStrap.getPort());
+        }
+        return infoMap;
     }
 
 }

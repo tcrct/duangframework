@@ -8,6 +8,7 @@ import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.convert.EncodeConvetor;
 import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -178,5 +179,22 @@ public class MongoUtils {
             MONGODAO_MAP.put(key, dao);
         }
         return (MongoDao<T>)dao;
+    }
+
+    /**
+     * 构建排序对象
+     * @param fieldName 要排序的字段
+     * @param orderBy	排序字符串，asc(1)或desc(-1)
+     * @return
+     */
+    public static DBObject builderOrder(String fieldName, String orderBy){
+        if(ToolsKit.isEmpty(fieldName) || ToolsKit.isEmpty(orderBy)) {
+            return null;
+        }
+        if(ToolsKit.isEmpty(orderBy)){
+            return BasicDBObjectBuilder.start(IdEntity.ID_FIELD, -1).get();		//默认用OID时间倒序
+        }else{
+            return BasicDBObjectBuilder.start(fieldName, "desc".equalsIgnoreCase(orderBy) ? -1 : 1).get();
+        }
     }
 }
