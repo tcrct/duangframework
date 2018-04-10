@@ -279,7 +279,7 @@ public class MongoQuery<T> {
 	}
 	
 	public MongoQuery<T> order(String fieldName, OrderByEnum orderByEnum) {
-		this.order.add(fieldName, orderByEnum.getKey());
+		this.order.add(fieldName, orderByEnum);
 		return this;
 	}
 	

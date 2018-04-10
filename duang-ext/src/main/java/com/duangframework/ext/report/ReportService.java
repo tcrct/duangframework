@@ -1,6 +1,5 @@
 package com.duangframework.ext.report;
 
-import com.duangframework.core.annotation.mvc.Mapping;
 import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.kit.ToolsKit;
@@ -66,11 +65,9 @@ public class ReportService {
                 List<Action> itemList = new ArrayList<>();
                 itemList.add(action);
                 treeItemMap.put(controllerKey, itemList);
-                Mapping controllerMapping = action.getControllerClass().getAnnotation(Mapping.class);
-                if(null != controllerMapping) {
-                    if(controllerKey.equalsIgnoreCase(controllerMapping.value()) && !treeMap.containsKey(controllerKey)) {
-                        treeMap.put(controllerKey, action.getControllerAction());
-                    }
+                controllerKey = action.getControllerAction().getControllerKey();
+                if(!treeMap.containsKey(controllerKey)) {
+                    treeMap.put(controllerKey, action.getControllerAction());
                 }
             }
         }
