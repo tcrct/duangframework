@@ -109,6 +109,7 @@ public class RouteHelper {
                 mappingKey = mappingKey.replace(CONTROLLER_ENDWITH_NAME, "");
             }
         }
+        mappingKey = mappingKey.startsWith("/") ? mappingKey : "/"+ mappingKey;
         return mappingKey.endsWith("/") ? mappingKey.substring(0, mappingKey.length()-1).toLowerCase() : mappingKey.toLowerCase();
     }
 

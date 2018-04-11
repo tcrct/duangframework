@@ -78,13 +78,25 @@ public class ReportService {
     }
 
     public Map<String, Object> info() {
-        Map<String, Object> infoMap = new HashMap<>();
-        infoMap.put("compute", ComputerInfo.getInstance());
+        Map<String, Object> computerInfoMap = new HashMap<>();
+        computerInfoMap.put("compute", ComputerInfo.getInstance());
         BootStrap bootStrap = BootStrap.getInstants();
         if(ToolsKit.isNotEmpty(bootStrap)) {
-            infoMap.put("host", bootStrap.getHost());
-            infoMap.put("prot", bootStrap.getPort());
+            computerInfoMap.put("host", bootStrap.getHost());
+            computerInfoMap.put("prot", bootStrap.getPort());
+            computerInfoMap.put("ssl", bootStrap.isSslEnabled());
         }
+        Map<String, Map> treeActions = treeActions();
+        if(ToolsKit.isNotEmpty(treeActions)) {
+            computerInfoMap.put("controllerCount", ToolsKit.isEmpty(treeActions.get("controller")) ? 0 : treeActions.get("controller").size());
+            computerInfoMap.put("methodCount", ToolsKit.isEmpty(getActionMapping()) ? 0 : getActionMapping().size());
+        }
+        computerInfoMap.put("author", "duangframework");
+
+        Map<String, Object> infoMap = new HashMap<>();
+        infoMap.put("info", computerInfoMap);
+        infoMap.put("api", treeActions);
+
         return infoMap;
     }
 

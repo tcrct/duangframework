@@ -163,6 +163,8 @@ public class ClassUtils {
 
     public static String getEntityName(Class<?> cls, boolean isLowerCase) {
         Entity entity = cls.getAnnotation(Entity.class);
+        // TODO 兼容Duang2.0版的Entity
+
         String name= ( null == entity )? getClassSimpleName(cls, isLowerCase) : entity.name();
         return isLowerCase ? name.toLowerCase() : name;
     }

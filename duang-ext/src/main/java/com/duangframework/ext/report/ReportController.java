@@ -20,25 +20,28 @@ public class ReportController extends BaseController {
     /**
      * 返回所有原始action记录
      */
-    public void actions() {
-        try {
-            returnSuccessJson(reportService.actions());
-        } catch (Exception e) {
-            returnFailJson(e);
-        }
-    }
+//    public void actions() {
+//        try {
+//            returnSuccessJson(reportService.actions());
+//        } catch (Exception e) {
+//            returnFailJson(e);
+//        }
+//    }
 
     /**
      * 返回树型action记录， 以controller mapping value为key,
      */
-    public void treeActions() {
-        try {
-            returnSuccessJson(reportService.treeActions());
-        } catch (Exception e) {
-            returnFailJson(e);
-        }
-    }
+//    public void treeActions() {
+//        try {
+//            returnSuccessJson(reportService.treeActions());
+//        } catch (Exception e) {
+//            returnFailJson(e);
+//        }
+//    }
 
+    /**
+     * 返回系统信息
+     */
     public void info() {
         try {
             returnSuccessJson(reportService.info());
