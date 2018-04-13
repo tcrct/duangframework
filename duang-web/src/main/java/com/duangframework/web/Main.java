@@ -1,9 +1,6 @@
 package com.duangframework.web;
 
-import com.duangframework.core.utils.OS;
 import com.duangframework.server.netty.server.Server;
-
-import java.lang.management.ManagementFactory;
 
 /**
  * Created by laotang on 2017/11/5.

@@ -3,6 +3,7 @@ package com.duangframework.mvc.filter;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
+import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.kit.ThreadPoolKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,15 @@ public class AsyncContextThreadImpl extends AbstractAsyncContext {
             // 中止线程，参数为true时，会中止正在运行的线程，为false时，如果线程未开始，则停止运行
             futureTask.cancel(true);
         }
-        catch (Exception  e) {
+        catch (DuangMvcException e) {
+            logger.warn(e.getMessage(),e);
+            response = buildExceptionResponse(e.getMessage());
+        }
+        catch (RuntimeException  e) {
+            logger.warn(e.getMessage(),e);
+            response = buildExceptionResponse(e.getMessage());
+        }
+        catch (Throwable  e) {
             logger.warn(e.getMessage(),e);
             response = buildExceptionResponse(e.getMessage());
         }

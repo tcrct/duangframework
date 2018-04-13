@@ -88,17 +88,18 @@ public class Action {
 
 	@JSONField(serialize = false, deserialize = false)
     public Action getControllerAction() {
-        controllerKey = "/"+controllerClass.getSimpleName().replace(Controller.class.getSimpleName(), "");
+        controllerKey = "/"+controllerClass.getSimpleName().replace(Controller.class.getSimpleName(), "").toLowerCase();
+        String desc = controllerKey;
+        int level = 0;
+        int order = 0;
         com.duangframework.core.annotation.mvc.Mapping controllerMapping = getControllerClass().getAnnotation(com.duangframework.core.annotation.mvc.Mapping.class);
         if(ToolsKit.isNotEmpty(controllerMapping)) {
-            controllerKey = ToolsKit.isEmpty(controllerMapping.value()) ? controllerKey : controllerMapping.value();
+            controllerKey = ToolsKit.isEmpty(controllerMapping.value()) ? controllerKey : controllerMapping.value().toLowerCase();
+            desc = ToolsKit.isNotEmpty(controllerMapping.desc()) ? controllerMapping.desc() : controllerKey;
+            level = ToolsKit.isNotEmpty(controllerMapping.level()) ? controllerMapping.level() : level;
+            order = ToolsKit.isNotEmpty(controllerMapping.order()) ? controllerMapping.order() : order;
         }
-        controllerKey = controllerKey.toLowerCase();
-        String desc = controllerMapping.desc();
-        if(ToolsKit.isEmpty(desc)) {
-            desc = controllerKey;
-        }
-        return new Action(controllerKey, "", desc, controllerMapping.level(), controllerMapping.order(), controllerClass, null, 0);
+        return new Action(controllerKey, "", desc, level, order, controllerClass, null, 0);
     }
 
 	public String getBeanKey() {

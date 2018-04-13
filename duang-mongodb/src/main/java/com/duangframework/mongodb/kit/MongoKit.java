@@ -1,5 +1,8 @@
 package com.duangframework.mongodb.kit;
 
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.MongodbException;
@@ -13,7 +16,6 @@ import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
@@ -26,7 +28,13 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class MongoKit {
 
-    private static Logger logger = LoggerFactory.getLogger(MongoKit.class);
+    private static org.slf4j.Logger logger = LoggerFactory.getLogger(MongoKit.class);
+
+    static {
+//        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
+//        root.setLevel(Level.WARN);
+        ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.ERROR);
+    }
 
     private static MongoKit _mongoKit;
     private static Lock _mongoKitLock = new ReentrantLock();

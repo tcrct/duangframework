@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -30,6 +29,8 @@ public class MongoIndexUtils {
 
     private static ConcurrentMap<String, Index> INDEX_MAP = new ConcurrentHashMap<>();
 
+    private static Map<String, Set<String>> INDEX_NAME_MAP = new HashMap<String, Set<String>>();
+
     /**
      * 创建索引
      *
@@ -43,6 +44,14 @@ public class MongoIndexUtils {
         if (ToolsKit.isEmpty(fields)) {
             return;
         }
+
+        Set<String> indexNames = new HashSet<>();
+        List<DBObject> indexList = coll.getIndexInfo();
+        for(DBObject indexDbo : indexList) {
+            indexNames.add(indexDbo.get("name")+"");
+        }
+        INDEX_NAME_MAP.put(coll.getFullName(), indexNames);
+
         for (int i = 0; i < fields.length; i++) {
             String key = fields[i].getName();
             boolean isVoField = fields[i].isAnnotationPresent(Vo.class);
@@ -75,7 +84,14 @@ public class MongoIndexUtils {
 
     private static void createIndex(DBCollection coll, String key, Index index) throws Exception {
         String name = ToolsKit.isEmpty(index.name()) ? "_" + key + "_" : index.name();
-        if (name.length() < 3 && name.length()>120) return;
+        if (name.length() < 3 && name.length()>120) {
+            return;
+        }
+        Set<String> indexNameSet = INDEX_NAME_MAP.get(coll.getFullName());
+        // 如果包含有该索引名称则退出创建
+        if(ToolsKit.isNotEmpty(indexNameSet) && indexNameSet.contains(name)) {
+            return;
+        }
         String type = "text".equalsIgnoreCase(index.type()) ? "1" : "2d";
         String order = index.order().toLowerCase();
         DBObject keys = new BasicDBObject(key, "asc".equals(order) ? Integer.parseInt("1") : Integer.parseInt("-1"));

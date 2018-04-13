@@ -33,10 +33,13 @@ public class HandleProcess implements Callable<IResponse> {
         try {
             Handles.execute(target, request, response);
             return response;
-        }
-        catch (Exception e) {
-            InvocationTargetException ite = (InvocationTargetException)e;
+        } catch (DuangMvcException dme) {
+            throw dme;
+        } catch (InvocationTargetException ite) {
             throw new DuangMvcException(ite.getCause().getMessage(), ite.getCause());
+        } catch (Exception e) {
+//            InvocationTargetException ite = (InvocationTargetException)e;
+            throw new DuangMvcException(e.getMessage(), e);
         }
     }
 }

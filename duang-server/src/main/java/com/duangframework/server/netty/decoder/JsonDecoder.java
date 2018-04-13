@@ -25,6 +25,7 @@ public class JsonDecoder extends AbstractDecoder<Map<String, String[]>> {
     @Override
     public Map<String, String[]> decoder() throws Exception {
         String json = request.content().toString(HttpConstants.DEFAULT_CHARSET);
+        json = ToolsKit.isNotEmpty(json) ? json.trim() : "";
         if(ToolsKit.isMapJsonString(json)) {
             parseMap(JSON.parseObject(json, Map.class));
         } else if(ToolsKit.isArrayJsonString(json)) {

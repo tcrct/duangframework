@@ -75,7 +75,9 @@ public class ServerKit {
             if(ToolsKit.isNotEmpty(serverPort)) {
                 port = Integer.parseInt(serverPort);
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+        }
         HttpServer httpServer = new HttpServer(host, port, contextLoaderList, mainProcess);
         httpServer.start();
     }

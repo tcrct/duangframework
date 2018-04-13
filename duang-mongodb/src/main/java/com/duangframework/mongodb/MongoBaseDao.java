@@ -203,8 +203,8 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
         if(ToolsKit.isNotEmpty(orderDbo) && !orderDbo.isEmpty()) {
             documents.sort(orderDbo);
         }
-        if(pageNo>0 && pageSize>0){
-            documents.skip( (pageNo>0 ? (pageNo-1) : pageNo)*pageSize);
+        if(pageNo>0 && pageSize>1){
+            documents.skip( (pageNo-1) * pageSize );
             documents.limit(pageSize);
         }
         BasicDBObject hintDbo = (BasicDBObject)mongoQuery.getHintDBObject();

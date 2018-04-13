@@ -16,13 +16,20 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <core.version>1.0-SNAPSHOT</core.version>
+        <shiro.version>1.2.4</shiro.version>
     </properties>
 
     <dependencies>
         <dependency>
+            <groupId>com.duangframework.core</groupId>
+            <artifactId>duangframework-core</artifactId>
+            <version>${core.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.shiro</groupId>
             <artifactId>shiro-all</artifactId>
-            <version>1.2.4</version>
+            <version>${shiro.version}</version>
         </dependency>
     </dependencies>
 </project>
