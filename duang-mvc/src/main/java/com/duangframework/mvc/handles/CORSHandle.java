@@ -6,6 +6,7 @@ import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.interfaces.IHandle;
 import com.duangframework.core.kit.ConfigKit;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.core.utils.IpUtils;
 import com.duangframework.mvc.render.TextRender;
 import com.duangframework.server.common.enums.HttpMethod;
 
@@ -79,7 +80,9 @@ public class CORSHandle implements IHandle {
             host = allowhost.toLowerCase().replace(PROTOCOL,"").replace(PROTOCOLS,"").replace("*","");
             int endIndex = host.indexOf(":");
             host = host.substring(0, endIndex > -1 ? endIndex : host.length());
-            if(host.startsWith("127.0")
+            if(IpUtils.getLocalHostIP().equals(host)
+                    || IpUtils.getLocalHostIP(false).equals(host)
+                    || host.startsWith("127.0")
                     || host.startsWith("192.168")
                     || host.toLowerCase().startsWith("localhost")) {
                 isAllowAccess = true;

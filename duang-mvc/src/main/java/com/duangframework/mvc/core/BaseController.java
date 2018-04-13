@@ -185,7 +185,7 @@ public abstract class BaseController{
         try {
             values = request.getParameter(key);
             if (ToolsKit.isEmpty(values)) {
-                values = request.getAttribute(key)+"";
+                values = ToolsKit.isEmpty(request.getAttribute(key)) ? "" : request.getAttribute(key).toString();
             }
 //			if("GET".equalsIgnoreCase(request.getMethod().toString())){
 //				try{
