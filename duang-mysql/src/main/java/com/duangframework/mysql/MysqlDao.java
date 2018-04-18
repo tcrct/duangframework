@@ -10,7 +10,6 @@ import com.duangframework.mysql.common.MysqlQuery;
 import com.duangframework.mysql.common.MysqlUpdate;
 import com.duangframework.mysql.convert.EncodeConvetor;
 import com.duangframework.mysql.kit.MysqlKit;
-import com.duangframework.mysql.utils.MysqlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,18 +23,19 @@ public class MysqlDao <T> implements IDao<T> {
 
     private final static Logger logger = LoggerFactory.getLogger(MysqlDao.class);
     protected Class<T> entityClass;
+    protected String myClientCode = "";
 
-    public MysqlDao(final Class<T> cls){
-        init(cls);
+    public MysqlDao(final String clientCode, final Class<T> cls){
+        init(clientCode, cls);
     }
 
-    private void init(final Class<T> cls){
+    private void init(final String clientCode, final Class<T> cls){
         boolean isExtends = ClassUtils.isExtends(cls, IdEntity.class.getCanonicalName());
         if(!isExtends){
             throw new RuntimeException("the "+cls.getCanonicalName()+" is not extends "+ IdEntity.class.getCanonicalName() +", exit...");
         }
         this.entityClass = cls;
-        String databaseName = MysqlUtils.getDataBaseName(entityClass);
+        this.myClientCode = clientCode;
         String tableName = ClassUtils.getEntityName(entityClass);
         try {
 //            MysqlUtils.createTables(databaseName, tableName, entityClass);
@@ -56,9 +56,8 @@ public class MysqlDao <T> implements IDao<T> {
         } catch (Exception e) {
             throw  new MysqlException("build CurdSqlModle is fail: " + e.getMessage(), e);
         }
-        ;
         MysqlKit mysqlKit = MysqlKit.duang()
-                .use(MysqlUtils.getDataBaseName(entityClass))
+                .use(myClientCode)
                 .entityClass(entityClass)
                 .params(curdSqlModle.getParamValueArray());
         if(isInsert) {

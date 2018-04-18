@@ -13,4 +13,5 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Import {
     String value() default "";
+    String dbclient() default "";
 }

@@ -87,7 +87,7 @@ public class SimpleApolloConfig {
         }
       }
     }
-    logger.warn(String.format("Loading key : %s with value: %s", key, result));
+    logger.info(String.format("Loading key : %s with value: %s", key, result));
     return DEFAULT_VALUE.equals(result) ? "" : result;
   }
 

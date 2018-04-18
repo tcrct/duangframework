@@ -1,6 +1,6 @@
 package com.duangframework.mysql.core.ds;
 
-import com.duangframework.mysql.common.IConnect;
+import com.duangframework.core.interfaces.IConnect;
 
 import javax.sql.DataSource;
 

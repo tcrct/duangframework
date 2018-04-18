@@ -112,4 +112,8 @@ public class ConfigKit {
         }
     }
 
+    public Object asObject() {
+        return _iConfig.getObject(_key, _defaultValue);
+    }
+
 }

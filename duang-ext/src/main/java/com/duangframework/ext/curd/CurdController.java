@@ -15,14 +15,14 @@ import com.duangframework.mvc.core.BaseController;
 @Controller(autowired = false)
 public abstract  class CurdController<T extends IdEntity> extends BaseController {
 
-    private CurdService CRUDService;
+    private CurdService curdService;
     private Class<T> entityClass;
 
-    private CurdService getCRUDService() {
-        if(ToolsKit.isEmpty(CRUDService)) {
-            CRUDService = new CurdService(getEntityClass());
+    private CurdService getCurdService() {
+        if(ToolsKit.isEmpty(curdService)) {
+            curdService = new CurdService(getEntityClass());
         }
-        return CRUDService;
+        return curdService;
     }
 
     private Class<T> getEntityClass() {
@@ -42,7 +42,7 @@ public abstract  class CurdController<T extends IdEntity> extends BaseController
     public void add() throws ServiceException{
         try {
             T entityObj = getBean(getEntityClass());
-            returnSuccessJson(getCRUDService().add(entityObj) ? "新增记录成功" : "新增记录失败");
+            returnSuccessJson(getCurdService().add(entityObj) ? "新增记录成功" : "新增记录失败");
         } catch (Exception e) {
             returnFailJson(e);
         }
@@ -57,7 +57,7 @@ public abstract  class CurdController<T extends IdEntity> extends BaseController
             if(ToolsKit.isEmpty(id)) {
                 throw new EmptyNullException("ID不能为空");
             }
-            returnSuccessJson(getCRUDService().delete(id) ? "删除记录成功" : "删除记录失败");
+            returnSuccessJson(getCurdService().delete(id) ? "删除记录成功" : "删除记录失败");
         } catch (Exception  e) {
             returnFailJson(e);
         }
@@ -69,7 +69,7 @@ public abstract  class CurdController<T extends IdEntity> extends BaseController
     public void update() {
         try {
             T entityObj = getBean(getEntityClass());
-            returnSuccessJson( getCRUDService().update(entityObj) ? "更新记录成功" : "更新记录失败");
+            returnSuccessJson( getCurdService().update(entityObj) ? "更新记录成功" : "更新记录失败");
         } catch (Exception e) {
             returnFailJson(e);
         }
@@ -81,7 +81,7 @@ public abstract  class CurdController<T extends IdEntity> extends BaseController
     public void findById() {
         String id = getValue("id");
         try {
-            returnSuccessJson(getCRUDService().findById(id));
+            returnSuccessJson(getCurdService().findById(id));
         } catch (Exception e) {
             returnFailJson(e);
         }
@@ -93,7 +93,7 @@ public abstract  class CurdController<T extends IdEntity> extends BaseController
     public void save() {
         try {
             T entityObj = getBean(getEntityClass());
-            returnSuccessJson(getCRUDService().save(entityObj) ? "保存记录成功" : "保存记录失败");
+            returnSuccessJson(getCurdService().save(entityObj) ? "保存记录成功" : "保存记录失败");
         } catch (Exception e) {
             returnFailJson(e);
         }

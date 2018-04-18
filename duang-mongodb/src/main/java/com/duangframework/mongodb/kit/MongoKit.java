@@ -8,13 +8,12 @@ import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.mongodb.MongoDao;
-import com.duangframework.mongodb.common.MongoConnect;
+import com.duangframework.mongodb.common.MongoClientExt;
 import com.duangframework.mongodb.common.MongoQuery;
 import com.duangframework.mongodb.common.MongoUpdate;
 import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.DB;
 import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.slf4j.LoggerFactory;
 
@@ -38,15 +37,12 @@ public class MongoKit {
 
     private static MongoKit _mongoKit;
     private static Lock _mongoKitLock = new ReentrantLock();
-    private static MongoClient _mongoClient;
-    private static MongoClientKit _mongoClientKit;
     private static Class<?> _entityClass;
-    private static MongoDatabase _database;
-    private static MongoCollection _collection;
     private static MongoQuery mongoQuery;
     private static MongoUpdate mongoUpdate;
     private static MongoClient mongoClient;
     private static IdEntity _entityObj;
+    private static String _dbClientCode;
 
     public static MongoKit duang() {
         if(null == _mongoKit) {
@@ -66,18 +62,19 @@ public class MongoKit {
     private static void clear() {
         mongoQuery = new MongoQuery();
         mongoUpdate = new MongoUpdate();
+        _dbClientCode = "";
     }
 
     private MongoKit() {
     }
 
     /**
-     * 根据connect对象取得MongoClient
-     * @param connect       @MongoConnect对象
+     * 指定要操作的实体类
+     * @param clazz     继承IdEntity的实体类
      * @return
      */
-    public MongoKit client(MongoConnect connect) {
-        mongoClient = MongoClientKit.duang().connect(connect).getClient();
+    public <T> MongoKit use(Class<T> clazz) {
+        _entityClass = clazz;
         return this;
     }
 
@@ -86,22 +83,19 @@ public class MongoKit {
      * @param clazz     继承IdEntity的实体类
      * @return
      */
-//    public MongoKit use(Class<?> clazz) {
-//        _entityClass = clazz;
-//        return this;
-//    }
-
-    public <T> MongoKit use(Class<T> clazz) {
+    public <T> MongoKit use(String clientcode, Class<T> clazz) {
+        _dbClientCode = clientcode;
         _entityClass = clazz;
         return this;
     }
 
-    public MongoKit querybson(MongoQuery query){
+
+    public MongoKit query(MongoQuery query){
         mongoQuery = query;
         return this;
     }
 
-    public MongoKit updatebson(MongoUpdate update){
+    public MongoKit update(MongoUpdate update){
         mongoUpdate = update;
         return this;
     }
@@ -122,7 +116,7 @@ public class MongoKit {
      * @return  保存成功返回true
      */
     public boolean save() {
-        getClient();
+//        getClient();
         try {
             MongoDao dao = getMongoDao();
             return dao.save(_entityObj);
@@ -133,11 +127,10 @@ public class MongoKit {
 
     /**
      * 查找多条记录，以Page对象返回
-     * @param <T>       对象泛类
      * @return                泛型对象集合
      */
     public long update() {
-        getClient();
+//        getClient();
         try {
             MongoDao dao = getMongoDao();
             return dao.update(mongoQuery, mongoUpdate);
@@ -151,7 +144,7 @@ public class MongoKit {
      * @return                泛型对象集合
      */
     public boolean insert() {
-        getClient();
+//        getClient();
         try {
             MongoDao dao = getMongoDao();
             return dao.insert(_entityObj);
@@ -166,7 +159,7 @@ public class MongoKit {
      * @return                泛型对象
      */
     public <T> T first() {
-        getClient();
+//        getClient();
         try {
             MongoDao<T> dao = getMongoDao();
             return dao.findOne(mongoQuery);
@@ -181,7 +174,7 @@ public class MongoKit {
      * @return                泛型对象集合
      */
     public <T> List<T> findList() {
-        getClient();
+//        getClient();
         try {
             MongoDao<T> dao = getMongoDao();
             return dao.findList(mongoQuery);
@@ -196,7 +189,7 @@ public class MongoKit {
      * @return                泛型对象集合
      */
     public <T> PageDto<T> findPage() {
-        getClient();
+//        getClient();
         try {
             MongoDao<T> dao = getMongoDao();
             return dao.findPage(mongoQuery);
@@ -213,7 +206,7 @@ public class MongoKit {
      * @return
      */
     private <T> MongoDao<T> getMongoDao() {
-        return (MongoDao<T>)MongoUtils.getMongoDao(_entityClass);
+        return (MongoDao<T>)MongoUtils.getMongoDao(_dbClientCode, _entityClass);
     }
 
 
@@ -222,14 +215,17 @@ public class MongoKit {
      * @return
      */
     private MongoClient getClient() {
-        if(ToolsKit.isEmpty(mongoClient)) {
-            //框架启动后会有值
-            mongoClient = MongoClientKit.duang().getClient();
-            if(ToolsKit.isEmpty(mongoClient)) {
-                // 取duang.properties指定的值
-                mongoClient = MongoClientKit.duang().connect(new MongoConnect()).getClient();
-            }
+        //框架启动后会有值
+        MongoClientExt clientExt = null;
+        if(ToolsKit.isNotEmpty(_dbClientCode)) {
+            clientExt = MongoUtils.getMongoClientExtMap().get(_dbClientCode);
+        } else {
+            clientExt = MongoUtils.getDefaultClientExt();
         }
+        if(ToolsKit.isEmpty(clientExt)) {
+            throw new MongodbException("clientExt is null");
+        }
+        mongoClient = clientExt.getClient();
         return mongoClient;
     }
 

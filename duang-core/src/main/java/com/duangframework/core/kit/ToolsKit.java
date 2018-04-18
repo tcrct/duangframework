@@ -6,7 +6,6 @@ import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializeConfig;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
-import com.duangframework.core.annotation.db.Entity;
 import com.duangframework.core.annotation.db.Id;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.common.DuangId;
@@ -402,16 +401,6 @@ public class ToolsKit {
             }
         }
         return null == idField ? IdEntity.ENTITY_ID_FIELD : idField.getName();
-    }
-
-    /**
-     * 取出数据库名
-     * @param entityClass
-     * @return
-     */
-    public static String getDataBaseName(Class<?> entityClass) {
-        Entity entityAnnotation = entityClass.getAnnotation(Entity.class);
-        return entityAnnotation.database();
     }
 
     public static FileFilter fileFilter(final File dir, final String extName){

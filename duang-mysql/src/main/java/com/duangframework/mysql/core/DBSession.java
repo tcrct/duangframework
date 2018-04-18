@@ -45,7 +45,7 @@ public class DBSession {
      * 取出指定库里所有的表
      * @return		表名集合
      */
-    public static  List<String> getMysqlTables(final String dataBase){
+    public static  List<String> getMysqlTables(final String exampleCode){
         return call(new DBAction<List<String>>(){
             @Override
             public List<String> execute(DBRunner dbRunner) throws SQLException {
@@ -57,7 +57,7 @@ public class DBSession {
             }
             @Override
             public String dataSourceKey() {
-                return dataBase;
+                return exampleCode;
             }
         });
     }
@@ -67,7 +67,7 @@ public class DBSession {
      * @param tableName		表名
      * @return		索引数组集合
      */
-    public static List<String> getIndexs(final String dataBase, final String tableName) {
+    public static List<String> getIndexs(final String exampleCode, final String tableName) {
         return call(new DBAction<List<String> >(){
             @Override
             public List<String> execute(DBRunner dbRunner) throws SQLException {
@@ -80,19 +80,19 @@ public class DBSession {
             }
             @Override
             public String dataSourceKey() {
-                return dataBase;
+                return exampleCode;
             }
         });
     }
 
     /**
      * 执行查询SQL语句
-     * @param dataBase	 			数据库名称
+     * @param exampleCode	 			数据库名称
      * @param querySql		查询SQL语句
      * @param params			参数数组
      * @return
      */
-    public static List<Map<String,Object>> query(final String dataBase, final String querySql, final Object... params) throws Exception{
+    public static List<Map<String,Object>> query(final String exampleCode, final String querySql, final Object... params) throws Exception{
         return call(new DBAction<List<Map<String,Object>>>(){
 
             @Override
@@ -102,7 +102,7 @@ public class DBSession {
 
             @Override
             public String dataSourceKey() {
-                return dataBase;
+                return exampleCode;
             }
         });
     }
@@ -113,7 +113,7 @@ public class DBSession {
      * @param params
      * @return
      */
-    public static int execute(final String dataBase, final String sql, final Object... params)  throws Exception {
+    public static int execute(final String exampleCode, final String sql, final Object... params)  throws Exception {
         return call(new DBAction<Integer>(){
             @Override
             public Integer execute(DBRunner dbRunner) throws SQLException {
@@ -122,7 +122,7 @@ public class DBSession {
 
             @Override
             public String dataSourceKey() {
-                return dataBase;
+                return exampleCode;
             }
         });
     }
@@ -147,8 +147,8 @@ public class DBSession {
     /**
      * 开启事务
      */
-    public static void startTransaction(String dataBase) {
-        Connection connection = getConnection(dataBase);
+    public static void startTransaction(String exampleCode) {
+        Connection connection = getConnection(exampleCode);
         try {
             if(null != connection){
                 connection.setAutoCommit(false);
@@ -161,8 +161,8 @@ public class DBSession {
     /**
      * 提交事务
      */
-    public static void commintTransaction(String dataBase) {
-        Connection connection = getConnection(dataBase);
+    public static void commintTransaction(String exampleCode) {
+        Connection connection = getConnection(exampleCode);
         try {
             if(null != connection){
                 connection.commit();
@@ -177,8 +177,8 @@ public class DBSession {
     /**
      * 回滚事务
      */
-    public static void rollbakcTransaction(String dataBase) {
-        Connection connection = getConnection(dataBase);
+    public static void rollbakcTransaction(String exampleCode) {
+        Connection connection = getConnection(exampleCode);
         try {
             if(null != connection){
                 connection.rollback();

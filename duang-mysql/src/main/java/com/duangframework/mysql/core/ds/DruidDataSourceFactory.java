@@ -1,7 +1,9 @@
 package com.duangframework.mysql.core.ds;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.duangframework.core.interfaces.IConnect;
 
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 /**
@@ -96,5 +98,4 @@ public class DruidDataSourceFactory extends AbstractDataSource<DruidDataSource> 
 			e.printStackTrace();
 		}			
 	}
-
 }

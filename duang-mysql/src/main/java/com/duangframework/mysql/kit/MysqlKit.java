@@ -21,7 +21,7 @@ public class MysqlKit {
 
     private static final Logger logger = LoggerFactory.getLogger(MysqlKit.class);
     private String _executeSql = "";
-    private String _dataBase = "";
+    private String _clientCode = "";
     private Class<?> _entityClass;
     private Object[] _params = null;
     private List<Map<String,Object>> resultList = new ArrayList<>();
@@ -35,13 +35,13 @@ public class MysqlKit {
 
     public MysqlKit entityClass(Class<?> clazz) {
         this._entityClass = clazz;
-        if (ToolsKit.isEmpty(_dataBase)) {
-            _dataBase = MysqlUtils.getDataBaseName(_entityClass);
+        if (ToolsKit.isEmpty(_clientCode)) {
+            _clientCode = MysqlUtils.getDefaultClientExt().getConnect().getClientCode();
         }
         return this;
     }
-    public MysqlKit use(String dataBase) {
-        this._dataBase = dataBase;
+    public MysqlKit use(String clientCode) {
+        this._clientCode = clientCode;
         return this;
     }
 
@@ -56,10 +56,10 @@ public class MysqlKit {
     }
 
     public List<Map<String,Object>> query() throws Exception {
-        if (ToolsKit.isEmpty(_dataBase)) {
-            _dataBase = MysqlUtils.getDefualDataBase();
+        if (ToolsKit.isEmpty(_clientCode)) {
+            _clientCode = MysqlUtils.getDefaultClientExt().getConnect().getClientCode();
         }
-        resultList = DBSession.query(_dataBase, _executeSql, _params);
+        resultList = DBSession.query(_clientCode, _executeSql, _params);
         return resultList;
     }
 
@@ -76,7 +76,7 @@ public class MysqlKit {
         String countSql = "select count(id) from " + entityName +" " + whereSql;
         long count = 0L;
         try {
-            List<Map<String,Object>> results = DBSession.query(_dataBase, countSql, _params);
+            List<Map<String,Object>> results = DBSession.query(_clientCode, countSql, _params);
             if(ToolsKit.isNotEmpty(results)){
                 Map<String, Object> result = results.get(0);
                 for(Iterator<Map.Entry<String,Object>> it = result.entrySet().iterator(); it.hasNext();){
@@ -90,7 +90,7 @@ public class MysqlKit {
         return count;
     }
     public int add() throws Exception {
-        return DBSession.execute(_dataBase, _executeSql, _params);
+        return DBSession.execute(_clientCode, _executeSql, _params);
     }
 
     public boolean update() throws Exception {
@@ -98,7 +98,7 @@ public class MysqlKit {
     }
 
     public boolean delete() throws Exception {
-        int executeResultCount =  DBSession.execute(_dataBase, _executeSql, _params);
+        int executeResultCount =  DBSession.execute(_clientCode, _executeSql, _params);
         return (executeResultCount > 0) ? true : false;
     }
 

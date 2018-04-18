@@ -1,8 +1,10 @@
 package com.duangframework.mongodb.kit;
 
 import com.duangframework.core.exceptions.EmptyNullException;
+import com.duangframework.core.exceptions.MongodbException;
+import com.duangframework.core.interfaces.IConnect;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.mongodb.common.MongoConnect;
+import com.duangframework.mongodb.common.MongoDbConnect;
 import com.mongodb.*;
 import com.mongodb.client.MongoDatabase;
 import org.slf4j.Logger;
@@ -10,8 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Created by laotang
@@ -21,40 +21,26 @@ public class MongoClientKit {
 
     private static Logger logger = LoggerFactory.getLogger(MongoClientKit.class);
 
-    private static MongoClientKit _mongoClientKit;
-    private static Lock _mongoClientKitLock = new ReentrantLock();
-    private static MongoConnect _mongoConnect;
-    private static MongoClient _mongoClient;
-    private static List<ServerAddress> _hostList = new ArrayList<>();
-    private static List<MongoCredential> _authList = new ArrayList<>();
-    private static MongoClientOptions.Builder _options;				// mongodb参数设置
+    private MongoDbConnect _mongoDbConnect;
+    private MongoClient _mongoClient;
+    private List<ServerAddress> _hostList = new ArrayList<>();
+    private List<MongoCredential> _authList = new ArrayList<>();
+    private MongoClientOptions.Builder _options;				// mongodb参数设置
 
     public static MongoClientKit duang() {
-        if(null == _mongoClientKit) {
-            try {
-                _mongoClientKitLock.lock();
-                _mongoClientKit = new MongoClientKit();
-            } catch (Exception e) {
-                logger.warn(e.getMessage(), e);
-            } finally {
-                _mongoClientKitLock.unlock();
-            }
-        }
-        clear();
-        return _mongoClientKit;
-    }
-
-    private static void clear() {
-        _hostList.clear();
-        _authList.clear();
+        return new MongoClientKit();
     }
 
     private MongoClientKit() {
     }
 
-    public MongoClientKit connect(MongoConnect connect) {
-        _mongoConnect = connect;
-       _options = MongoClientOptions.builder()
+    public MongoClientKit connect(IConnect connect) {
+        _mongoDbConnect = (MongoDbConnect) connect;
+        return this;
+    }
+
+    private void options() {
+        _options = MongoClientOptions.builder()
                 .connectionsPerHost(100)									// 最大连接数
                 .minConnectionsPerHost(10)
                 .heartbeatFrequency(10000)
@@ -67,34 +53,33 @@ public class MongoClientKit {
                 .maxWaitTime(20000)
                 .socketTimeout(10000) //10S
                 .threadsAllowedToBlockForConnectionMultiplier(5);			// 与connectionsPerHost相乘，变成一个线程变为可用的最大阻塞数
-        return this;
     }
 
 
     // 数据库授权
     private void auth() {
-        if(ToolsKit.isNotEmpty(_mongoConnect.getUserName()) && ToolsKit.isNotEmpty(_mongoConnect.getPassWord()) ) {
+        if(ToolsKit.isNotEmpty(_mongoDbConnect.getUserName()) && ToolsKit.isNotEmpty(_mongoDbConnect.getPassWord()) ) {
             _authList.add(MongoCredential.createScramSha1Credential(
-                    _mongoConnect.getUserName(),
-                    _mongoConnect.getDataBase(),
-                    _mongoConnect.getPassWord().toCharArray()));
+                    _mongoDbConnect.getUserName(),
+                    _mongoDbConnect.getDataBase(),
+                    _mongoDbConnect.getPassWord().toCharArray()));
         }
     }
 
     private void hosts() {
-        if( ToolsKit.isNotEmpty(_mongoConnect.getRepliCaset()) ) {
-            for(String replicasetString : _mongoConnect.getRepliCaset()) {
+        if( ToolsKit.isNotEmpty(_mongoDbConnect.getRepliCaset()) ) {
+            for(String replicasetString : _mongoDbConnect.getRepliCaset()) {
                 String[] replicasetItemArray = replicasetString.split(":");
                 if(ToolsKit.isEmpty(replicasetItemArray) || replicasetItemArray.length != 2){
                     throw new RuntimeException("replicasetItemArray is null or length != 2 ");
                 }
                 _hostList.add(new ServerAddress(replicasetItemArray[0], Integer.parseInt(replicasetItemArray[1])));
-                logger.info("connect replicaset mongodb host: " + replicasetItemArray[0]+"           port: "+ replicasetItemArray[1]);
+                logger.warn("connect replicaset mongodb host: " + replicasetItemArray[0]+"           port: "+ replicasetItemArray[1]);
             }
         } else {
-            if(ToolsKit.isNotEmpty(_mongoConnect.getHost()) && _mongoConnect.getPort()>-1) {
-                _hostList.add(new ServerAddress(_mongoConnect.getHost(), _mongoConnect.getPort()));
-                logger.info("connect single mongodb host: " + _mongoConnect.getHost()+"           port: "+ _mongoConnect.getPort());
+            if(ToolsKit.isNotEmpty(_mongoDbConnect.getHost()) && _mongoDbConnect.getPort()>-1) {
+                _hostList.add(new ServerAddress(_mongoDbConnect.getHost(), _mongoDbConnect.getPort()));
+                logger.warn("connect single mongodb host: " + _mongoDbConnect.getHost()+"           port: "+ _mongoDbConnect.getPort());
             }
         }
 
@@ -103,17 +88,41 @@ public class MongoClientKit {
         }
     }
 
-    public MongoClient getClient() {
+    public MongoClient createMongoDBClientWithOutURI() throws Exception {
         if(ToolsKit.isEmpty(_mongoClient)) {
             try {
+                options();
                 hosts();
                 auth();
                 _mongoClient = new MongoClient(_hostList, _authList, _options.build());
-             } catch (Exception e) {
-                throw new RuntimeException("Can't connect mongodb!");
+            } catch (Exception e) {
+                throw new RuntimeException("Can't connect mongodb: " + e.getMessage() , e);
             }
         }
         return _mongoClient;
+    }
+
+    public MongoClient createMongoDBClientWithURI() throws Exception {
+        MongoClientURI connectionString = new MongoClientURI(_mongoDbConnect.getUrl());
+        logger.warn("mongodb connection url: " + connectionString);
+        _mongoClient = new MongoClient(connectionString);
+        if(null != _mongoClient){
+            logger.warn("Connection ReplicaSet Mongodb Success...");
+        }else{
+            throw new NullPointerException("can't connect mongodb database! crate client fail");
+        }
+        return _mongoClient;
+    }
+
+    public MongoClient getClient() {
+        try {
+            if (ToolsKit.isEmpty(_mongoDbConnect.getUrl())) {
+                return createMongoDBClientWithOutURI();
+            }
+            return createMongoDBClientWithURI();
+        } catch (Exception e) {
+            throw new MongodbException(e.getMessage(), e);
+        }
     }
 
     public DB getDB(String dbName) {
@@ -121,7 +130,7 @@ public class MongoClientKit {
     }
 
     public DB getDefaultDB() {
-        return getClient().getDB(_mongoConnect.getDataBase());
+        return getClient().getDB(_mongoDbConnect.getDataBase());
     }
 
     public MongoDatabase getMongoDatabase(String dbName) {
@@ -129,7 +138,7 @@ public class MongoClientKit {
     }
 
     public MongoDatabase getDefaultMongoDatabase() {
-        return getClient().getDatabase(_mongoConnect.getDataBase());
+        return getClient().getDatabase(_mongoDbConnect.getDataBase());
     }
 
 }

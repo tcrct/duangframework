@@ -78,7 +78,7 @@ public class JsonDecoder extends AbstractDecoder<Map<String, String[]>> {
                             }
                         }
                         */
-                    params.put(key, valueList.toArray(EMPTY_ARRAYS));
+                    params.put(key, (String[])valueList.toArray());
                 } else {
                     String[] valueArray = {value+""};
                     params.put(key, valueArray);

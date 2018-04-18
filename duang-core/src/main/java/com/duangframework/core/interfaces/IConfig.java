@@ -66,4 +66,12 @@ public interface IConfig {
      * @return
      */
     <T> T getList(String key, List<T> defaultValue);
+
+    /**
+     * 取Object
+     * @param key
+     * @param defaultValue
+     * @return
+     */
+    Object getObject(String key, Object defaultValue);
 }

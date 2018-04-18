@@ -2,19 +2,19 @@ package com.duangframework.mysql.plugin;
 
 
 import com.duangframework.core.annotation.ioc.Import;
-import com.duangframework.core.exceptions.MvcStartUpException;
 import com.duangframework.core.exceptions.MysqlException;
 import com.duangframework.core.interfaces.IPlugin;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.BeanUtils;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mysql.MysqlDao;
-import com.duangframework.mysql.common.IMySql;
-import com.duangframework.mysql.common.MySqlConnect;
+import com.duangframework.mysql.common.MysqlClientExt;
+import com.duangframework.mysql.common.MysqlDbConnect;
 import com.duangframework.mysql.utils.MysqlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -31,7 +31,19 @@ import java.util.Map;
 public class MysqlPlugin implements IPlugin {
 
     private final static Logger logger = LoggerFactory.getLogger(MysqlPlugin.class);
-    private List<MySqlConnect> connectList = new ArrayList<>();
+    private List<MysqlDbConnect> connectList = new ArrayList<>();
+
+    public MysqlPlugin(MysqlDbConnect dbConnect) {
+        this(dbConnect.getHost(), dbConnect.getPort(), dbConnect.getUserName(), dbConnect.getPassWord(), dbConnect.getDataBase(), dbConnect.getUrl(), dbConnect.getClientCode());
+    }
+
+    public MysqlPlugin(String  url) {
+        this("", 0, "", "", "", url, "");
+    }
+
+    public MysqlPlugin(String  url, String exampleCode) {
+        this("", 0, "", "", "", url, exampleCode);
+    }
 
     /**
      * 单数据库时使用
@@ -40,9 +52,10 @@ public class MysqlPlugin implements IPlugin {
      * @param userName
      * @param passWord
      * @param dataBase
+     * @param exampleCode       实例代号
      */
-    public MysqlPlugin(String host, int port, String userName, String passWord,String dataBase) {
-        MySqlConnect connect = new MySqlConnect(host, port, userName, passWord, dataBase);
+    public MysqlPlugin(String host, int port, String dataBase, String userName, String passWord, String url, String exampleCode) {
+        MysqlDbConnect connect = new MysqlDbConnect(host, port, userName, passWord, dataBase, url, exampleCode);
         connectList.add(connect);
     }
 
@@ -50,21 +63,21 @@ public class MysqlPlugin implements IPlugin {
      * 多数据库时使用
      * @param connectList
      */
-    public MysqlPlugin(List<MySqlConnect> connectList) {
+    public MysqlPlugin(List<MysqlDbConnect> connectList) {
         this.connectList.addAll(connectList);
     }
 
-    /**
-     * 多数据库时使用
-     * @param model
-     */
-    public MysqlPlugin(IMySql model) {
-        try {
-            this.connectList.addAll(model.builderConnects());
-        } catch (Exception e) {
-            throw new MvcStartUpException("start MysqlPlugin is fail: " + e.getMessage(), e);
-        }
-    }
+//    /**
+//     * 多数据库时使用
+//     * @param model
+//     */
+//    public MysqlPlugin(IMySql model) {
+//        try {
+//            this.connectList.addAll(model.builderConnects());
+//        } catch (Exception e) {
+//            throw new MvcStartUpException("start MysqlPlugin is fail: " + e.getMessage(), e);
+//        }
+//    }
 
     @Override
     public void init() throws Exception {
@@ -74,7 +87,23 @@ public class MysqlPlugin implements IPlugin {
     @Override
     public void start() throws Exception {
         try {
-            MysqlUtils.initDataSource(connectList);
+            boolean isFirstClient = true;
+            for(MysqlDbConnect connect : connectList) {
+                DataSource client = MysqlUtils.getDataSource(connect);
+                String key = connect.getClientCode();
+                if(ToolsKit.isNotEmpty(client) && ToolsKit.isNotEmpty(key)) {
+                    MysqlClientExt clientExt = new MysqlClientExt(key, client, connect);
+                    if(isFirstClient) {
+                        MysqlUtils.setDefaultClientExt(clientExt);
+                        isFirstClient = false;
+                    }
+                    if(connect.isDefaultClient()) {
+                        MysqlUtils.setDefaultClientExt(clientExt);
+                    }
+                    MysqlUtils.setMysqlClient(key, clientExt);
+                    connect.printDbInfo(key);
+                }
+            }
             importDao();
         } catch (Exception e) {
             throw new MysqlException("connection is fail: " + e.getMessage(), e);
@@ -93,7 +122,7 @@ public class MysqlPlugin implements IPlugin {
 //                try {
 //                    for (Iterator<Class<?>> iterator = entityMap.keySet().iterator(); iterator.hasNext(); ) {
 //                        Class<? extends IdEntity> entityClass = (Class<? extends IdEntity>) iterator.next();
-//                        String databaseName = MysqlUtils.getDataBaseName(entityClass);
+//                        String databaseName = MysqlUtils.getDefualDbClientCode(entityClass);
 //                        String tableName = ClassUtils.getEntityName(entityClass);
 //                        // 表
 //                        MysqlUtils.createTables(databaseName, tableName, entityClass);
@@ -126,13 +155,14 @@ public class MysqlPlugin implements IPlugin {
             Field[] fields = beanClass.getDeclaredFields();
             Object beanObj = entry.getValue();
             for(Field field : fields) {
-                if (field.isAnnotationPresent(Import.class) && MysqlDao.class.equals(field.getType())) {
+                Import importAnnon = field.getAnnotation(Import.class);
+                if ( ToolsKit.isNotEmpty(importAnnon) && MysqlDao.class.equals(field.getType())) {
                     ParameterizedType paramType = (ParameterizedType) field.getGenericType();
                     Type[] types = paramType.getActualTypeArguments();
                     if(ToolsKit.isNotEmpty(types)) {
                         String paramTypeClassName = types[0].toString().substring(6).trim();
                         Class<?> paramTypeClass  = ClassUtils.loadClass(paramTypeClassName, false);
-                        Object daoObj = MysqlUtils.getMysqlDao(paramTypeClass);
+                        Object daoObj = MysqlUtils.getMysqlDao(importAnnon.dbclient(), paramTypeClass);
                         field.setAccessible(true);
                         field.set(beanObj, daoObj);
                     }

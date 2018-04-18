@@ -118,4 +118,12 @@ public class PropertiesKit {
         }
     }
 
+    public Object asObject() {
+        try {
+            Object itemObj =  _configuration.getProperty(_key);
+            return null == itemObj ? _defaultValue : itemObj;
+        } catch (Exception e) {
+            return -1d;
+        }
+    }
 }

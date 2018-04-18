@@ -21,6 +21,8 @@ import java.util.Date;
 
 
 /**
+ * 共用的CURD方法服务类
+ * 如果有多数据源时，目前仅支持默认的数据源操作
  * @author Created by laotang
  * @date createed in 2018/1/31.
  */
@@ -42,7 +44,7 @@ public class CurdService<T extends IdEntity> extends CurdCacheService<T> {
             if(ToolsKit.isEmpty(entityClass)) {
                 this.entityClass = ClassUtils.getSuperClassGenricType(getClass());
             }
-            mongoDao = MongoUtils.getMongoDao(entityClass);
+            mongoDao = MongoUtils.getMongoDao("", entityClass);
         }
         return mongoDao;
     }

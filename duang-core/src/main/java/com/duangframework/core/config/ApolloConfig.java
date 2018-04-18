@@ -51,4 +51,9 @@ public class ApolloConfig implements IConfig{
         return null;
     }
 
+    @Override
+    public Object getObject(String key, Object defaultValue) {
+        return ApolloConfigKit.duang().key(key).defaultValue(defaultValue).asString();
+    }
+
 }

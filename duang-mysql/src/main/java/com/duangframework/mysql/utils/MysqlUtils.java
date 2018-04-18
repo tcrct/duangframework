@@ -10,8 +10,8 @@ import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mysql.MysqlDao;
 import com.duangframework.mysql.common.CurdEnum;
 import com.duangframework.mysql.common.CurdSqlModle;
-import com.duangframework.mysql.common.IConnect;
-import com.duangframework.mysql.common.MySqlConnect;
+import com.duangframework.mysql.common.MysqlClientExt;
+import com.duangframework.mysql.common.MysqlDbConnect;
 import com.duangframework.mysql.core.DBSession;
 import com.duangframework.mysql.core.ds.DruidDataSourceFactory;
 import com.duangframework.mysql.core.ds.IDataSourceFactory;
@@ -32,15 +32,28 @@ public class MysqlUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(MysqlUtils.class);
 
-    private static Map<String, DataSource> dataSourceMap = new HashMap<>();
+    private static Map<String, MysqlClientExt> dataSourceMap = new HashMap<>();
     private static Map<String, Set<String>> ALL_TABLES = new HashMap<>();
-    private static String defualDataBase;
+    private static String defualExampleCode;
     private static final Object[] NULL_OBJECT = new Object[0];
     private static ConcurrentMap<String, MysqlDao<?>> MYSQLDAO_MAP = new ConcurrentHashMap<>();
+    private static MysqlClientExt mysqlClientExt;
 
+    public static String getDefualExampleCode() {
+        return defualExampleCode;
+    }
 
-    public static String getDefualDataBase() {
-        return defualDataBase;
+    public static MysqlClientExt getDefaultClientExt() {
+        return mysqlClientExt;
+    }
+    public static void setDefaultClientExt(MysqlClientExt defaultClient) {
+        MysqlUtils.mysqlClientExt = defaultClient;
+    }
+    public static void setMysqlClient(String key, MysqlClientExt client) {
+        dataSourceMap.put(key, client);
+    }
+    public static MysqlClientExt getMysqlClientMap(String key) {
+        return dataSourceMap.get(key);
     }
     /**
      *
@@ -70,30 +83,14 @@ public class MysqlUtils {
         return (T)resultList;
     }
 
-    public static void initDataSource(List<MySqlConnect> connectList) throws Exception {
-        for(MySqlConnect connect : connectList) {
-            if(ToolsKit.isEmpty(connect.getDataBase())) {
-                throw new NullPointerException("database name is null");
-            }
-            DataSource dataSource = getDataSource(connect);
-            if(null != dataSource) {
-                dataSourceMap.put(connect.getDataBase(), dataSource);
-//                dataSource.getConnection();
-            }
-        }
-        if(ToolsKit.isNotEmpty(connectList)) {
-            defualDataBase = connectList.get(0).getDataBase();
-        }
-    }
-
     public static Connection getConnection(String key) throws Exception {
         if(dataSourceMap.isEmpty()) {
           throw new EmptyNullException("请先启动MysqlPlugin插件");
         }
-        return dataSourceMap.get(key).getConnection();
+        return dataSourceMap.get(key).getClient().getConnection();
     }
 
-    public static DataSource getDataSource(IConnect connect) {
+    public static DataSource getDataSource(MysqlDbConnect connect) {
         DataSource dataSource = null;
         IDataSourceFactory dsFactory = null;
         String dataSourceFactoryClassName = connect.getDataSourceFactoryClassName();
@@ -213,22 +210,32 @@ public class MysqlUtils {
      * @param <T>
      * @return
      */
-    public static <T> MysqlDao<T> getMysqlDao(Class<T> cls){
+    public static <T> MysqlDao<T> getMysqlDao(String dbClientCode, Class<T> cls){
         String key = ClassUtils.getEntityName(cls);
+        key = ToolsKit.isNotEmpty(dbClientCode) ? dbClientCode+"_" + key : key;
         MysqlDao<?> dao = MYSQLDAO_MAP.get(key);
         if(null == dao){
-            dao = new MysqlDao<T>(cls);
+            MysqlClientExt clientExt = null;
+            if(ToolsKit.isNotEmpty(dbClientCode)) {
+                clientExt = MysqlUtils.getMysqlClientMap(dbClientCode);
+            } else {
+                clientExt = MysqlUtils.getDefaultClientExt();
+            }
+            if(ToolsKit.isEmpty(clientExt)) {
+                throw new MysqlException("mysql client  is null");
+            }
+            dao = new MysqlDao<T>(clientExt.getConnect().getClientCode(), cls);
             MYSQLDAO_MAP.put(key, dao);
         }
         return (MysqlDao<T>)dao;
     }
 
     public static CurdSqlModle builderSqlModle(CurdEnum curdEnum, Class<?> entityClass, Map<String, Object> paramMap, String idFieldName) {
-        String databaseName = getDataBaseName(entityClass);
+
         String tableName = ClassUtils.getEntityName(entityClass);
         CurdSqlModle modle = null;
-        if(ToolsKit.isNotEmpty(databaseName) && ToolsKit.isNotEmpty(tableName) && ToolsKit.isNotEmpty(paramMap)) {
-            modle = new CurdSqlModle(curdEnum, databaseName, tableName, paramMap, idFieldName);
+        if(ToolsKit.isNotEmpty(tableName) && ToolsKit.isNotEmpty(paramMap)) {
+            modle = new CurdSqlModle(curdEnum, tableName, paramMap, idFieldName);
         }
         return modle;
     }
@@ -243,9 +250,5 @@ public class MysqlUtils {
         ArrayList<String> keyList = new ArrayList<>(paramMap.keySet());
         Collections.sort(keyList, String.CASE_INSENSITIVE_ORDER);
         return keyList;
-    }
-
-    public static String getDataBaseName(Class<?> entityClass) {
-        return ToolsKit.isEmpty(entityClass) ? getDefualDataBase() : ToolsKit.getDataBaseName(entityClass);
     }
 }

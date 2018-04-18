@@ -1,7 +1,7 @@
 package com.duangframework.core.config;
 
 import com.duangframework.core.interfaces.IConfig;
-import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.PropertiesKit;
 
 import java.util.List;
 
@@ -18,37 +18,41 @@ public class PropertiesConfig implements IConfig {
 
     @Override
     public String getString(String key, String defaultValue) {
-        return ConfigKit.duang().key(key).defaultValue(defaultValue).asString();
+        return PropertiesKit.duang().key(key).defaultValue(defaultValue).asString();
     }
 
     @Override
     public int getInt(String key, int defaultValue) {
-        return ConfigKit.duang().key(key).defaultValue(defaultValue).asInt();
+        return PropertiesKit.duang().key(key).defaultValue(defaultValue).asInt();
     }
 
     @Override
     public long getLong(String key, long defaultValue) {
-        return ConfigKit.duang().key(key).defaultValue(defaultValue).asLong();
+        return PropertiesKit.duang().key(key).defaultValue(defaultValue).asLong();
     }
 
     @Override
     public boolean getBoolean(String key, boolean defaultValue) {
-        return ConfigKit.duang().key(key).defaultValue(defaultValue).asBoolean();
+        return PropertiesKit.duang().key(key).defaultValue(defaultValue).asBoolean();
     }
 
     @Override
     public double getDouble(String key, double defaultValue) {
-        return ConfigKit.duang().key(key).defaultValue(defaultValue).asDouble();
+        return PropertiesKit.duang().key(key).defaultValue(defaultValue).asDouble();
     }
 
     @Override
     public String[] getStringArray(String key) {
-        return ConfigKit.duang().key(key).asArray();
+        return PropertiesKit.duang().key(key).asArray();
     }
 
     @Override
     public <T> T getList(String key, List<T> defaultValue) {
-        return (T) ConfigKit.duang().key(key).asList();
+        return (T) PropertiesKit.duang().key(key).asList();
     }
 
+    @Override
+      public Object getObject(String key, Object defaultValue) {
+        return PropertiesKit.duang().key(key).defaultValue(defaultValue).asObject();
+    }
 }

@@ -13,7 +13,6 @@ import java.util.Map;
  */
 public class CurdSqlModle implements java.io.Serializable {
 
-    private String database;
     private String table;
     private Map<String,Object> paramMap;
     private List<String> paramKeyList;
@@ -23,20 +22,11 @@ public class CurdSqlModle implements java.io.Serializable {
     public CurdSqlModle() {
     }
 
-    public CurdSqlModle(CurdEnum curdEnum, String database, String table, Map<String, Object> paramMap, String idFieldName) {
+    public CurdSqlModle(CurdEnum curdEnum, String table, Map<String, Object> paramMap, String idFieldName) {
         this.curdEnum = curdEnum;
-        this.database = database;
         this.table = table;
         this.idFieldName = idFieldName;
         setParamMap(paramMap);
-    }
-
-    public String getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(String database) {
-        this.database = database;
     }
 
     public String getTable() {

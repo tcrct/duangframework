@@ -3,7 +3,7 @@
  */
 package com.duangframework.mysql.core.ds;
 
-import com.duangframework.mysql.common.IConnect;
+import com.duangframework.core.interfaces.IConnect;
 
 import javax.sql.DataSource;
 
@@ -18,7 +18,7 @@ public abstract class AbstractDataSource<T extends DataSource> implements IDataS
 		T ds = builderDataSource();
 		setUsername(ds, connect.getUserName());
 		setPassword(ds, connect.getPassWord());
-		setUrl(ds, connect.getJdbcUrl());
+		setUrl(ds, connect.getUrl());
 		setInitParam(ds);
 		return ds;
 	}

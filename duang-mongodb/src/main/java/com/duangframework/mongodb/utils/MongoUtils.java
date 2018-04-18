@@ -6,10 +6,11 @@ import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mongodb.MongoDao;
+import com.duangframework.mongodb.common.MongoClientExt;
+import com.duangframework.mongodb.common.MongoDbConnect;
 import com.duangframework.mongodb.convert.EncodeConvetor;
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBObject;
+import com.mongodb.*;
+import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -31,8 +32,19 @@ public class MongoUtils {
 
     private static ConcurrentMap<String, MongoDao<?>> MONGODAO_MAP = new ConcurrentHashMap<>();
 
+    private static ConcurrentMap<String, MongoClientExt> MONGO_CLIENT_EXT_MAP = new ConcurrentHashMap<>();
+
     private static Logger logger = LoggerFactory.getLogger(MongoUtils.class);
 
+    private static MongoClientExt mongoClientExt;
+
+    public static MongoClientExt getDefaultClientExt() {
+        return mongoClientExt;
+    }
+
+    public static void setDefaultClientExt(MongoClientExt defaultClient) {
+        MongoUtils.mongoClientExt = defaultClient;
+    }
 
     public static Object toObjectIds(Object values) {
         if(values instanceof Object[]){
@@ -167,16 +179,32 @@ public class MongoUtils {
 
     /**
      * 根据Entity类取出MongoDao
+     *@param dbClientCode           多数据源时，指定的数据源客户端代号标识字符串
      * @param cls           继承了IdEntity的类
      * @param <T>
      * @return
      */
-    public static <T> MongoDao<T> getMongoDao(Class<T> cls){
+    public static <T> MongoDao<T> getMongoDao(String dbClientCode, Class<T> cls){
         String key = ClassUtils.getEntityName(cls);
+        key = ToolsKit.isNotEmpty(dbClientCode) ? dbClientCode+"_" + key : key;
         MongoDao<?> dao = MONGODAO_MAP.get(key);
         if(null == dao){
-            dao = new MongoDao<T>(cls);
-            MONGODAO_MAP.put(key, dao);
+            try {
+                MongoClientExt clientExt = null;
+                if(ToolsKit.isNotEmpty(dbClientCode)) {
+                    clientExt = MongoUtils.getMongoClientExtMap().get(dbClientCode);
+                } else {
+                    clientExt = MongoUtils.getDefaultClientExt();
+                }
+                MongoDbConnect dbConnect = clientExt.getConnect();
+                MongoClient mongoClient = clientExt.getClient();
+                DB db = mongoClient.getDB(dbConnect.getDataBase());
+                MongoDatabase database = mongoClient.getDatabase(dbConnect.getDataBase());
+                dao = new MongoDao<T>(db, database, cls);
+                MONGODAO_MAP.put(key, dao);
+            } catch (Exception e) {
+                logger.warn("getMongoDao is fail: " + e.getMessage(), e);
+            }
         }
         return (MongoDao<T>)dao;
     }
@@ -196,5 +224,13 @@ public class MongoUtils {
         }else{
             return BasicDBObjectBuilder.start(fieldName, "desc".equalsIgnoreCase(orderBy) ? -1 : 1).get();
         }
+    }
+
+    public static ConcurrentMap<String, MongoClientExt> getMongoClientExtMap() {
+        return MONGO_CLIENT_EXT_MAP;
+    }
+
+    public static void setMongoClient(String key, MongoClientExt client) {
+        MONGO_CLIENT_EXT_MAP.put(key, client);
     }
 }
