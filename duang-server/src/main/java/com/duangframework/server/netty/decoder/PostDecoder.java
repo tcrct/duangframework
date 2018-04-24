@@ -1,5 +1,6 @@
 package com.duangframework.server.netty.decoder;
 
+import com.duangframework.core.kit.ToolsKit;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.multipart.Attribute;
 import io.netty.handler.codec.http.multipart.HttpPostRequestDecoder;
@@ -28,6 +29,9 @@ public class PostDecoder extends AbstractDecoder<Map<String,String[]>> {
                 Attribute attribute = (Attribute) httpData;
                 String key = attribute.getName();
                 String value = attribute.getValue();
+                if(ToolsKit.isEmpty(value)) {
+                    continue;
+                }
                 parseValue2List(params, key, value);
                 paramsMap.put(key, params.get(key).toArray(EMPTY_ARRAYS));
             }

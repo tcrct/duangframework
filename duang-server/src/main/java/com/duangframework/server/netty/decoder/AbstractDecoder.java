@@ -25,10 +25,12 @@ public abstract class AbstractDecoder<T> {
 
     protected FullHttpRequest request;
     protected  Map<String,String[]> paramsMap;
+    protected  Map<String,Object> attributeMap;
 
     public AbstractDecoder(FullHttpRequest request) {
         this.request = request;
         paramsMap = new ConcurrentHashMap<>();
+        attributeMap = new ConcurrentHashMap<>();
     }
 
     protected void parseValue2List(Map<String,List<String>> params, String key, String value) {

@@ -30,6 +30,7 @@ public class DefaultClassTemplate extends AbstractClassTemplate {
     @Override
     public void doLoadClass(List<Class<?>> filelist, String packageName, String fileName, String suffix) {
         Class<?> clazz = ClassUtils.loadClass(packageName+"."+fileName, false);
+//        System.out.println(packageName+"       "+fileName+"           "+clazz.getName());
         for (Iterator<String> it = suffixSet.iterator(); it.hasNext();) {
             String suffixStr = it.next();
             if(fileName.endsWith(suffixStr)) {

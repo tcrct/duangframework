@@ -1,5 +1,6 @@
 package com.duangframework.mongodb.utils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.MongodbException;
@@ -9,6 +10,7 @@ import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.common.MongoClientExt;
 import com.duangframework.mongodb.common.MongoDbConnect;
 import com.duangframework.mongodb.convert.EncodeConvetor;
+import com.duangframework.mongodb.convert.decode.MongodbDecodeValueFilter;
 import com.mongodb.*;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -109,7 +111,13 @@ public class MongoUtils {
             throw new EmptyNullException("toBson is fail:  obj is null");
         }
         try {
-            return (T)EncodeConvetor.convetor(obj);
+//            MongodbEncodeValueFilter mongodbEncodeValueFilter =  new MongodbEncodeValueFilter();
+//            String json = JSON.toJSONString(obj, mongodbEncodeValueFilter);
+//            System.out.println(json);
+//            Document document = Document.parse(json);
+//            return (T)document;
+//            return (T)Document.parse(json);
+            return (T) EncodeConvetor.convetor(obj);
         } catch (Exception e) {
             throw new MongodbException("toBson is fail: " + e.getMessage(), e);
         }
@@ -132,8 +140,10 @@ public class MongoUtils {
 
     public static <T> T toEntity(Document document, Class<?> clazz) {
         try {
-            document = convert2EntityId(document);
-            return (T) ToolsKit.jsonParseObject(document.toJson(), clazz);
+            String json = JSONObject.toJSONString(document, new MongodbDecodeValueFilter());
+            if(ToolsKit.isNotEmpty(json)) {
+                return (T) ToolsKit.jsonParseObject(json, clazz);
+            } return null;
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
             return null;
@@ -155,6 +165,9 @@ public class MongoUtils {
         } catch (ClassCastException e) {
                 /*如果转换出错直接返回原本的值,不做任何处理*/
         }
+        document.remove(IdEntity.ID_FIELD);
+        document.remove(IdEntity.CREATETIME_FIELD);
+        document.remove(IdEntity.UPDATETIME_FIELD);
         return document;
     }
 
@@ -232,5 +245,10 @@ public class MongoUtils {
 
     public static void setMongoClient(String key, MongoClientExt client) {
         MONGO_CLIENT_EXT_MAP.put(key, client);
+    }
+
+    public static MongoClient getMongoClient(String key) {
+        MongoClientExt clientExt = MONGO_CLIENT_EXT_MAP.get(key);
+        return ToolsKit.isEmpty(clientExt) ? null : clientExt.getClient();
     }
 }

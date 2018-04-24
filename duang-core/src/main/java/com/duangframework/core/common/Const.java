@@ -12,6 +12,11 @@ import java.util.List;
 public class Const {
 
     /**
+     * 是否debug模式，默认为false;
+     */
+    public static boolean IS_DEBUG;
+
+    /**
      * 默认的编码格式字符串
      */
     public static final String ENCODING_FIELD = "UTF-8";

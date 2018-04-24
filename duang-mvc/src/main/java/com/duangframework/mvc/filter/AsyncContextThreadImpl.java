@@ -5,6 +5,7 @@ import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.kit.ThreadPoolKit;
+import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,8 +46,13 @@ public class AsyncContextThreadImpl extends AbstractAsyncContext {
             handleProcess = new HandleProcess(getTarget(), getAsyncRequest(), getAsyncResponse());
             // 线程池方式执行请求处理器链
             futureTask = ThreadPoolKit.execute(handleProcess);
-            // 等待结果返回，如果超出指定时间，则抛出TimeoutException, 默认时间为3秒
-            response = futureTask.get(getTimeout(), TimeUnit.MILLISECONDS);
+            // 是否开发模式，如果是则不指定超时
+            if(ToolsKit.isDebug()) {
+                response = futureTask.get();
+            } else {
+                // 等待结果返回，如果超出指定时间，则抛出TimeoutException, 默认时间为3秒
+                response = futureTask.get(getTimeout(), TimeUnit.MILLISECONDS);
+            }
         } catch (TimeoutException e) {
             // 超时时，会执行该异常
             response = buildExceptionResponse("request time out");

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -28,6 +29,7 @@ public class ClassScanKit {
     private static Set<String> jarNameSet = new HashSet<>();
     private static Set<String> suffixSet  = new HashSet<>();
     private static IClassTemplate template;
+    private static boolean _isFilter;
 
     public static ClassScanKit duang() {
         if(null == _classScanKit) {
@@ -53,6 +55,7 @@ public class ClassScanKit {
         jarNameSet.clear();
         suffixSet.clear();
         template = null;
+        _isFilter = false;
     }
 
     /**
@@ -119,6 +122,11 @@ public class ClassScanKit {
         template = classTemplate;
         return _classScanKit;
     }
+    public ClassScanKit filter(boolean isFilter) {
+        _isFilter = isFilter;
+        return _classScanKit;
+    }
+
 
     private void checkClassTemplate() {
         // 兼容Duang2.0版前的规则
@@ -144,7 +152,19 @@ public class ClassScanKit {
     public List<Class<?>> list() {
         try {
             checkClassTemplate();
-            return template.getList();
+            List<Class<?>> tempList = template.getList();
+            if(_isFilter) {
+                List<Class<?>> classList = new ArrayList<>();
+                for(Class<?> clazz : tempList) {
+                    if (null == clazz || Modifier.isAbstract(clazz.getModifiers()) || Modifier.isInterface(clazz.getModifiers())) {
+                        continue;
+                    }
+                    classList.add(clazz);
+                }
+                return classList;
+            } else {
+                return tempList;
+            }
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
             return null;

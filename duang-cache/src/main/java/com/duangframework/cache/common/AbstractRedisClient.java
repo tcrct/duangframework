@@ -1,8 +1,5 @@
 package com.duangframework.cache.common;
 
-import com.duangframework.cache.sdk.redis.RedisEnums;
-import com.duangframework.cache.utils.JedisClusterPoolUtils;
-import com.duangframework.cache.utils.JedisPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -15,71 +12,34 @@ import redis.clients.jedis.JedisCluster;
 public abstract class AbstractRedisClient {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractRedisClient.class);
-
-    protected RedisEnums redisEnums;
-    protected String host;
-    protected String password;
-    protected int port;
-    protected int database = 0;
     private static boolean isCluster;
+    private static CacheClientExt _clientExt;
 
-    public static boolean isCluster() {
+    protected static void setCacheClientExt(CacheClientExt clientExt) {
+        _clientExt = clientExt;
+        isCluster = clientExt.getConnect().getHost().contains(",");
+    }
+
+    /**
+     * 是否集群对象
+     * @return   是集群返回true
+     */
+    protected static boolean isCluster() {
         return isCluster;
     }
 
-    public void setCluster(boolean cluster) {
-        isCluster = cluster;
+    protected static Jedis getJedis() {
+        return _clientExt.getJedis();
     }
 
-    public int getDatabase() {
-        return database;
-    }
-
-    public void setDatabase(int database) {
-        this.database = database;
-    }
-
-    public AbstractRedisClient() {
-    }
-
-    public RedisEnums getRedisEnums() {
-        return redisEnums;
-    }
-
-    public void setRedisEnums(RedisEnums redisEnums) {
-        this.redisEnums = redisEnums;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-        // 如果host字段里包含有,号的话，则代表有一个以上的地址，认为是一个集群环境
-        setCluster(host.contains(","));
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
+    protected static JedisCluster getJedisCluster() {
+        return _clientExt .getJedisCluster();
     }
 
     public <T> T call(JedisAction cacheAction) {
         T result = null;
-        if(!isCluster()) {
-            Jedis jedis = JedisPoolUtils.getJedis();
+        if(!isCluster) {
+            Jedis jedis = getJedis();
             try {
                 result = (T) cacheAction.execute(jedis);
             } catch (Exception e) {
@@ -90,7 +50,7 @@ public abstract class AbstractRedisClient {
 //                JedisPoolUtils.returnResource(jedis);
 //            }
         } else {
-            JedisCluster jedisCluster = JedisClusterPoolUtils.getJedisCluster();
+            JedisCluster jedisCluster = getJedisCluster();
             result = (T) cacheAction.execute(jedisCluster);
         }
         return result;

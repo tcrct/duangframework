@@ -87,7 +87,12 @@ public class MysqlUtils {
         if(dataSourceMap.isEmpty()) {
           throw new EmptyNullException("请先启动MysqlPlugin插件");
         }
-        return dataSourceMap.get(key).getClient().getConnection();
+        MysqlClientExt clientExt = getMysqlClientMap(key);
+        if(null != clientExt && ToolsKit.isNotEmpty(clientExt.getClient())) {
+            return clientExt.getClient().getConnection();
+        } else {
+            return getDataSource(clientExt.getConnect()).getConnection();
+        }
     }
 
     public static DataSource getDataSource(MysqlDbConnect connect) {

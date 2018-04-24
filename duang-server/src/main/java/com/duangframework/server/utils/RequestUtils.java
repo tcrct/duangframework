@@ -5,6 +5,7 @@ import com.duangframework.core.exceptions.DecoderException;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.VerificationException;
 import com.duangframework.core.kit.ToolsKit;
+import com.duangframework.server.common.enums.ContentType;
 import com.duangframework.server.common.enums.HttpMethod;
 import com.duangframework.server.netty.decoder.AbstractDecoder;
 import com.duangframework.server.netty.decoder.DecoderFactory;
@@ -25,6 +26,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 
@@ -46,11 +48,22 @@ public class RequestUtils {
      */
     public static HttpRequest buildDuangRequest(ChannelHandlerContext ctx, FullHttpRequest request) {
         try {
+            String contentType = request.headers().get(CONTENT_TYPE)+"";
+            String method = request.method().toString();
+            Map<String, String[]> paramsMap = new ConcurrentHashMap<>();
+            Map<String, Object> attributeMap = new ConcurrentHashMap<>();
+            if(HttpMethod.POST.name().equalsIgnoreCase(method) &&
+                    (contentType.contains(ContentType.JSON.getValue()) || contentType.contains(ContentType.XML.getValue())) ) {
+                attributeMap.putAll(decoderAttribute(request, method, contentType));
+            } else {
+                paramsMap.putAll(decoderParams(request, method, contentType));
+            }
             HttpRequest httpRequest = new HttpRequest(
                     getRemoteAddr(ctx.channel(), request),
                     getLocalAddr(request),
                     getHeaders(request),
-                    decoder(request),
+                    paramsMap,
+                    attributeMap,
                     //Unpooled.wrappedBuffer(request.content()).array(),
                 Unpooled.copiedBuffer(request.content()).array()
             );
@@ -75,12 +88,28 @@ public class RequestUtils {
         return headerMap;
     }
 
-    private static Map<String,String[]> decoder(FullHttpRequest request) {
+    private static Map<String,String[]> decoderParams(FullHttpRequest request, String method, String contentType) {
         try {
-            AbstractDecoder<Map<String, String[]>> decoder = DecoderFactory.create(request.method().toString(), request.headers().get(CONTENT_TYPE)+"", request);
+            Map<String,Object> attributeMap = decoderAttribute(request, method, contentType);
+            Map<String, String[]> paramMap = new HashMap<>();
+            if(ToolsKit.isNotEmpty(attributeMap)) {
+                for (Iterator<Map.Entry<String, Object>> iterator = attributeMap.entrySet().iterator(); iterator.hasNext(); ) {
+                    Map.Entry<String, Object> entry = iterator.next();
+                    paramMap.put(entry.getKey(), (String[]) entry.getValue());
+                }
+            }
+            return paramMap;
+        } catch (Exception e) {
+            throw new DecoderException("decoderParams request is fail: " + e.getMessage(), e);
+        }
+    }
+
+    private static Map<String,Object> decoderAttribute(FullHttpRequest request, String method, String contentType) {
+        try {
+            AbstractDecoder<Map<String, Object>> decoder = DecoderFactory.create(method, contentType, request);
             return decoder.decoder();
         } catch (Exception e) {
-            throw new DecoderException("decoder request is fail: " + e.getMessage(), e);
+            throw new DecoderException("decoderAttribute request is fail: " + e.getMessage(), e);
         }
     }
     /**
@@ -91,7 +120,7 @@ public class RequestUtils {
 
         // 保证解析结果正确,否则直接退出
         if (!request.decoderResult().isSuccess()) {
-            throw new VerificationException("request decoder is not success, so exit...");
+            throw new VerificationException("request decoderParams is not success, so exit...");
         }
 
         // 支持的的请求方式

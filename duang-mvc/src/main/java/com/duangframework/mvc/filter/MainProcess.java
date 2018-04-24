@@ -57,7 +57,7 @@ public class MainProcess implements IProcess {
         if(ToolsKit.isEmpty(request)) {  throw new EmptyNullException("request is null");}
         if(ToolsKit.isEmpty(response)) {throw new EmptyNullException("response is null");}
         String target = request.getRequestURI().toString();
-
+        boolean isDebug = ToolsKit.isDebug();
         AsyncContext asyncContext = new AsyncContextThreadImpl(target, request, response);
         return asyncContext.complete();
 

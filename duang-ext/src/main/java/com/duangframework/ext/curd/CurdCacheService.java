@@ -1,6 +1,6 @@
 package com.duangframework.ext.curd;
 
-import com.duangframework.cache.kit.CacheKit;
+import com.duangframework.cache.kit.CacheClientKit;
 import com.duangframework.core.annotation.cache.EntityCache;
 import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.common.IdEntity;
@@ -67,10 +67,10 @@ public class CurdCacheService<T extends IdEntity>  {
         EntityCacheModle modle = getEntityCacheModle(entity.getClass());
         try {
             // 保存到缓存中
-            long count = CacheKit.duang().hset(modle.getKey(), entity.getId(), ToolsKit.toJsonString(entity));
+            long count = CacheClientKit.duang().hset(modle.getKey(), entity.getId(), ToolsKit.toJsonString(entity));
             if(count > 0 ) {
                 //设置过期时间,
-                CacheKit.duang().expire(modle.getKey(), modle.getTtl());
+                CacheClientKit.duang().expire(modle.getKey(), modle.getTtl());
                 return true;
             }
             return false;
@@ -90,7 +90,7 @@ public class CurdCacheService<T extends IdEntity>  {
      */
     public <T> T findById(String id, Class<T> clazz) throws ServiceException {
         EntityCacheModle modle = getEntityCacheModle(clazz);
-        String jsonString = CacheKit.duang().hget(modle.getKey(), id);
+        String jsonString = CacheClientKit.duang().hget(modle.getKey(), id);
         if(ToolsKit.isNotEmpty(jsonString)) {
             return ToolsKit.jsonParseObject(jsonString, clazz);
         }
@@ -106,7 +106,7 @@ public class CurdCacheService<T extends IdEntity>  {
      */
     public boolean delete(Class clazz, String id) throws ServiceException {
         EntityCacheModle modle = getEntityCacheModle(clazz);
-        long count = CacheKit.duang().hdel(modle.getKey(), id);
+        long count = CacheClientKit.duang().hdel(modle.getKey(), id);
         return count > 0;
     }
 }

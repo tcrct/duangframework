@@ -1,8 +1,6 @@
 package com.duangframework.mongodb.kit;
 
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.MongodbException;
@@ -32,7 +30,7 @@ public class MongoKit {
     static {
 //        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(ch.qos.logback.classic.Logger.ROOT_LOGGER_NAME);
 //        root.setLevel(Level.WARN);
-        ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.ERROR);
+//        ((LoggerContext) LoggerFactory.getILoggerFactory()).getLogger("org.mongodb.driver").setLevel(Level.ERROR);
     }
 
     private static MongoKit _mongoKit;

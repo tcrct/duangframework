@@ -1,5 +1,6 @@
 package com.duangframework.server.netty.kit;
 
+import com.duangframework.core.common.Const;
 import com.duangframework.core.exceptions.ServerStartUpException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.interfaces.IProcess;
@@ -20,6 +21,7 @@ public class ServerKit {
     private static Lock _serverKitLock = new ReentrantLock();
     private String host = "0.0.0.0";
     private int port = 0;
+    private boolean isDebug;
     private IContextLoaderListener contextLoaderList;
     private IProcess mainProcess;
 
@@ -47,6 +49,11 @@ public class ServerKit {
         return this;
     }
 
+    public ServerKit debug(boolean isDebug) {
+        this.isDebug = isDebug;
+        return this;
+    }
+
     public ServerKit listener(IContextLoaderListener listener) {
         this.contextLoaderList = listener;
         return this;
@@ -61,15 +68,20 @@ public class ServerKit {
         if(null == contextLoaderList) {
             throw new ServerStartUpException("contextLoaderList is null");
         }
+
         if(null == mainProcess) {
             throw new ServerStartUpException("mainProcess is null");
         }
+
         try {
             String serverHost = System.getProperty("server.host");
             if(ToolsKit.isNotEmpty(serverHost)) {
                 host = serverHost;
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+        }
+
         try {
             String serverPort = System.getProperty("server.port");
             if(ToolsKit.isNotEmpty(serverPort)) {
@@ -78,7 +90,18 @@ public class ServerKit {
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
         }
-        HttpServer httpServer = new HttpServer(host, port, contextLoaderList, mainProcess);
+
+        try {
+            String serverDebug = System.getProperty("server.debug");
+            if(ToolsKit.isNotEmpty(serverDebug)) {
+                isDebug = Boolean.parseBoolean(serverDebug);
+            }
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+        }
+        // 设置到常量类用于传递值
+        Const.IS_DEBUG = isDebug;
+        HttpServer httpServer = new HttpServer(host, port, isDebug, contextLoaderList, mainProcess);
         httpServer.start();
     }
 }

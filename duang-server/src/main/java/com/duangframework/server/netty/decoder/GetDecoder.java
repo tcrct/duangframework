@@ -8,7 +8,7 @@ import io.netty.util.CharsetUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -31,9 +31,11 @@ public class GetDecoder extends AbstractDecoder<Map<String, String[]>> {
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(url);
         Map<String,List<String>> map =  queryStringDecoder.parameters();
         if(ToolsKit.isNotEmpty(map)) {
-            for(String key : map.keySet()) {
-//                System.out.println(key+"               "+map.get(key).toArray(EMPTY_ARRAYS).getClass());
-                paramsMap.put(key, map.get(key).toArray(EMPTY_ARRAYS));
+            for(Iterator<Map.Entry<String,List<String>>> iterator = map.entrySet().iterator(); iterator.hasNext();) {
+                Map.Entry<String,List<String>> entry = iterator.next();
+                if(ToolsKit.isNotEmpty(entry.getValue())) {
+                    paramsMap.put(entry.getKey(), entry.getValue().toArray(EMPTY_ARRAYS));
+                }
             }
         }
         return paramsMap;

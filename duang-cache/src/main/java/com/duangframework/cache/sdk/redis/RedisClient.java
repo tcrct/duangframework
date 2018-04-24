@@ -3,8 +3,7 @@ package com.duangframework.cache.sdk.redis;
 import com.alibaba.fastjson.TypeReference;
 import com.duangframework.cache.common.AbstractRedisClient;
 import com.duangframework.cache.common.JedisAction;
-import com.duangframework.cache.utils.JedisClusterPoolUtils;
-import com.duangframework.cache.utils.JedisPoolUtils;
+import com.duangframework.cache.utils.CacheUtils;
 import com.duangframework.cache.utils.SerializableUtils;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.kit.ThreadPoolKit;
@@ -28,7 +27,7 @@ public class RedisClient extends AbstractRedisClient {
     private final static Logger logger = LoggerFactory.getLogger(RedisClient.class);
     private static RedisClient ourInstance;
 
-    public static RedisClient getInstance() {
+    public static RedisClient duang() {
         try {
             if (null == ourInstance) {
                 ourInstance = new RedisClient();
@@ -36,6 +35,7 @@ public class RedisClient extends AbstractRedisClient {
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
         }
+        use(CacheUtils.getDefaultClientExt().getKey());
         return ourInstance;
     }
 
@@ -43,12 +43,18 @@ public class RedisClient extends AbstractRedisClient {
 
     }
 
+    public static RedisClient use(String key) {
+       setCacheClientExt(CacheUtils.getCacheClientExt(key));
+        return ourInstance;
+    }
+
+
     /**
      * 是否集群对象
      * @param jedisObj  jedis对象
      * @return   是集群返回true
      */
-    private boolean isCluster(Object jedisObj) {
+    private static boolean isCluster(Object jedisObj) {
         return (jedisObj instanceof JedisCluster)  ? true : false;
     }
     private Jedis c2j(Object jedisObj) {
@@ -331,7 +337,7 @@ public class RedisClient extends AbstractRedisClient {
             @Override
             public Map<String, String> execute(Object jedisObj) {
                 List<String> byteList = isCluster(jedisObj) ? c2jc(jedisObj).hmget(key, fields) : c2j(jedisObj).hmget(key, fields);
-                Map<String,String> map = new HashMap<String, String>();
+                Map<String,String> map = new HashMap<>();
                 int size  = byteList.size();
                 for (int i = 0; i < size; i ++) {
                     if(ToolsKit.isNotEmpty(byteList.get(i))){
@@ -1257,10 +1263,10 @@ public void subscribe3(final RedisListener listener, final List<String> channels
                 @Override
                 public void run() {
                     if(!RedisClient.isCluster()) {
-                        Jedis jedis = JedisPoolUtils.getJedis();
+                        Jedis jedis = getJedis();
                         jedis.subscribe(listener, channelsArray);
                     } else {
-                        JedisCluster jedisCluster = JedisClusterPoolUtils.getJedisCluster();
+                        JedisCluster jedisCluster = getJedisCluster();
                         jedisCluster.subscribe(listener, channelsArray);
                     }
                 }
@@ -1288,10 +1294,10 @@ public void subscribe3(final RedisListener listener, final List<String> channels
                 @Override
                 public void run() {
                     if(!RedisClient.isCluster()) {
-                        Jedis jedis = JedisPoolUtils.getJedis();
+                        Jedis jedis = getJedis();
                         jedis.psubscribe(listener, channelsArray);
                     } else {
-                        JedisCluster jedisCluster = JedisClusterPoolUtils.getJedisCluster();
+                        JedisCluster jedisCluster = getJedisCluster();
                         jedisCluster.psubscribe(listener, channelsArray);
                     }
                 }

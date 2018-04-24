@@ -1,9 +1,16 @@
 package com.duangframework.cache.plugin;
 
-import com.duangframework.cache.sdk.redis.RedisClient;
-import com.duangframework.cache.utils.JedisClusterPoolUtils;
-import com.duangframework.cache.utils.JedisPoolUtils;
+import com.duangframework.cache.common.CacheClientExt;
+import com.duangframework.cache.common.CacheDbConnect;
+import com.duangframework.cache.kit.CacheClientKit;
+import com.duangframework.cache.utils.CacheUtils;
 import com.duangframework.core.interfaces.IPlugin;
+import com.duangframework.core.kit.ToolsKit;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Created by laotang
@@ -12,27 +19,19 @@ import com.duangframework.core.interfaces.IPlugin;
 public class CachePlugin implements IPlugin {
 
     private boolean isClusterRedis = false;
+    private List<CacheDbConnect> connectList = new ArrayList<>();
 
-    public CachePlugin(String endpoint, String pwd, int database) {
-        String [] arrayItem = endpoint.split(",");
-        if(arrayItem.length > 1) {
-            RedisClient.getInstance().setHost(endpoint);
-            RedisClient.getInstance().setPort(0);
-            isClusterRedis = true;
-        } else {
-            String [] endpointArray = endpoint.split(":");
-            RedisClient.getInstance().setHost(endpointArray[0]);
-            RedisClient.getInstance().setPort(Integer.parseInt(endpointArray[1]));
-        }
-        RedisClient.getInstance().setDatabase(database);
-        RedisClient.getInstance().setPassword(pwd);
+    public CachePlugin(CacheDbConnect cacheDbConnect) {
+        connectList.add(cacheDbConnect);
     }
 
-    public CachePlugin(String host, int port, String pwd, int database) {
-        RedisClient.getInstance().setHost(host);
-        RedisClient.getInstance().setPort(port);
-        RedisClient.getInstance().setDatabase(database);
-        RedisClient.getInstance().setPassword(pwd);
+    public CachePlugin(List<CacheDbConnect> cacheDbConnects) {
+        connectList.addAll(cacheDbConnects);
+    }
+
+    public CachePlugin(String host, int port, String userName, String pwd, int database, String clientcode) {
+        CacheDbConnect cacheDbConnect = new CacheDbConnect(host, port, database+"", userName, pwd, clientcode);
+        connectList.add(cacheDbConnect);
     }
 
     @Override
@@ -41,19 +40,38 @@ public class CachePlugin implements IPlugin {
 
     @Override
     public void start() throws Exception {
-        if(!isClusterRedis) {
-            JedisPoolUtils.getJedis();
-        } else {
-            JedisClusterPoolUtils.getJedisCluster();
+
+        boolean isFirstClient = true;
+        for(CacheDbConnect connect : connectList) {
+            String key = connect.getClientCode();
+            CacheClientExt clientExt = null;
+            if(connect.getHost().contains(",")) {
+                Jedis jedis  = CacheClientKit.duang().connect(connect).getJedis();
+                if(null != jedis) {
+                    clientExt = new CacheClientExt(key, jedis, connect);
+                }
+            } else {
+                JedisCluster clusterJedis  = CacheClientKit.duang().connect(connect).getClusterJedis();
+                if(null != clusterJedis) {
+                    clientExt = new CacheClientExt(key, clusterJedis, connect);
+                }
+            }
+            if(ToolsKit.isNotEmpty(clientExt) && ToolsKit.isNotEmpty(key)) {
+                if(isFirstClient) {
+                    CacheUtils.setDefaultClientExt(clientExt);
+                    isFirstClient = false;
+                }
+                if(connect.isDefaultClient()) {
+                    CacheUtils.setDefaultClientExt(clientExt);
+                }
+                CacheUtils.setCacheClientExt(key, clientExt);
+                connect.printDbInfo(key);
+            }
         }
     }
 
     @Override
     public void stop() throws Exception {
-        if(!isClusterRedis) {
-            JedisPoolUtils.close();
-        } else {
-            JedisClusterPoolUtils.close();
-        }
+        CacheUtils.close();
     }
 }

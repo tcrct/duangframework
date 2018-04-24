@@ -22,20 +22,21 @@ public class IdEntity implements java.io.Serializable {
 	public static final String SOURCE_FIELD = "source";
 	public static final String STATUS_FIELD_SUCCESS = "审核通过";
 	public static final String STATUS_FIELD_DELETE = "已删除";
-	
+
 	@Id
+	@JSONField(name=ID_FIELD)
 	private String id;
 
 	private Date createtime;			//创建时间
-	
+
 	private String createuserid;		//创建人ID
-	
+
 	private Date updatetime;			//更新时间
-	
+
 	private String updateuserid;		//更新人ID
-	
+
 	private String status;			//数据状态(查数据字典)
-	
+
 	private String source;			//数据来源
 
 	public IdEntity(String id, Date createtime, String createuserid,
@@ -73,8 +74,8 @@ public class IdEntity implements java.io.Serializable {
     public void setId(int id) {
         this.id = id+"";
     }
-	
-	
+
+
 	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this);

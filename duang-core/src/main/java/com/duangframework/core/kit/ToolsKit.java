@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.serializer.SerializeConfig;
+import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.SimpleDateFormatSerializer;
 import com.duangframework.core.annotation.db.Id;
@@ -48,7 +49,7 @@ public class ToolsKit {
             return new HeadDto();
         }
     };
-    private static SerializerFeature[] serializerFeatureArray = {
+    public static SerializerFeature[] serializerFeatureArray = {
             SerializerFeature.QuoteFieldNames,
             SerializerFeature.WriteNonStringKeyAsString,
             SerializerFeature.DisableCircularReferenceDetect,
@@ -152,6 +153,10 @@ public class ToolsKit {
 
     public static String toJsonString(Object obj) {
         return JSON.toJSONString(obj, jsonConfig, serializerFeatureArray);
+    }
+
+    public static String toJsonString(Object obj, SerializeFilter filter) {
+        return JSON.toJSONString(obj, jsonConfig, filter, serializerFeatureArray);
     }
 
     public static String toJsonString2(Object obj) {
@@ -415,5 +420,9 @@ public class ToolsKit {
                 }
             }
         };
+    }
+
+    public static boolean isDebug() {
+        return Const.IS_DEBUG;
     }
 }

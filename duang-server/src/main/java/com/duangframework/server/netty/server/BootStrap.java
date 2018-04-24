@@ -36,6 +36,7 @@ public class BootStrap implements Closeable {
 
     private String host;
     private int port;
+    private boolean isDebug;
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
     protected ByteBufAllocator allocator;
@@ -206,5 +207,13 @@ public class BootStrap implements Closeable {
 
     public void setMainProcess(IProcess mainProcess) {
         this.mainProcess = mainProcess;
+    }
+
+    public boolean isDebug() {
+        return isDebug;
+    }
+
+    public void setDebug(boolean debug) {
+        isDebug = debug;
     }
 }

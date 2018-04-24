@@ -1,6 +1,6 @@
 package com.duangframework.cache.utils;
 
-import com.duangframework.cache.sdk.redis.RedisClient;
+import com.duangframework.cache.common.CacheDbConnect;
 import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,22 +16,15 @@ import redis.clients.jedis.exceptions.JedisException;
 public class JedisPoolUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(JedisPoolUtils.class);
-
-    private static JedisPool pool = null;
-    
-    private static String host;
-	private static int port;
 	private static int timeout = 2000;
-	private static String password;
-	private static int database = 0;
-	private static JedisPoolUtils _JedisPoolKit;
-    
+
     /**
      * 建立连接池 真实环境，一般把配置参数缺抽取出来。
      * 
      */
-    private static void createJedisPool() {
+    private JedisPool createJedisPool(CacheDbConnect cacheDbConnect) {
 
+		JedisPool pool = null;
         // 建立连接池配置参数
         JedisPoolConfig config = new JedisPoolConfig();
 
@@ -50,45 +43,31 @@ public class JedisPoolUtils {
 
      // 创建连接池       
         try{
-			database = RedisClient.getInstance().getDatabase();
-			host = RedisClient.getInstance().getHost();
-			password = RedisClient.getInstance().getPassword();
-			port = RedisClient.getInstance().getPort();
+			int database = Integer.parseInt(cacheDbConnect.getDataBase());
+			String host = cacheDbConnect.getHost();
+			String password = cacheDbConnect.getPassWord();
+			int port = cacheDbConnect.getPort();
 			if(ToolsKit.isEmpty(password)) {
 				pool = new JedisPool(config, host, port, timeout);
 			} else {
 				pool = new JedisPool(config, host, port, timeout, password, database);
 			}
 			System.out.println("Connent  " + host + ":"+port +" Redis is Success...");
+			return pool;
         }catch(Exception e){
         	e.printStackTrace();
         	throw new JedisException(e.getMessage(), e);
         }
     }
     
-    public static boolean isSuccess() {
-		return ToolsKit.isNotEmpty(pool);
-	}
-
-    /**
-     * 在多线程环境同步初始化
-     */
-    private static synchronized void poolInit() throws JedisException {
-        if (pool == null) {
-			createJedisPool();
-		}
-    }
-
     /**
      * 获取一个jedis 对象
      * 
      * @return
      */
-    public static Jedis getJedis() {
-    	if (pool == null){
-            poolInit();
-    	}
-        return pool.getResource();
+    public synchronized Jedis getJedis(CacheDbConnect cacheDbConnect) {
+		JedisPool pool = createJedisPool(cacheDbConnect);
+		return (null != pool) ? pool.getResource() : null;
     }
 
     /**
@@ -96,7 +75,7 @@ public class JedisPoolUtils {
      * 
      * @param jedis
      */
-    public static void returnResource(Jedis jedis) {
+    public void returnResource(JedisPool pool, Jedis jedis) {
     	try {
     		pool.returnResource(jedis);	
 		} catch (Exception e) {
@@ -108,7 +87,7 @@ public class JedisPoolUtils {
      * 归还一个损坏的连接
      * @param jedis
      */
-    public static void returnBrokenResource(Jedis jedis) {
+    public void returnBrokenResource(JedisPool pool, Jedis jedis) {
     	try {
     		pool.returnBrokenResource(jedis);	
 		} catch (Exception e) {
@@ -116,7 +95,7 @@ public class JedisPoolUtils {
 		}
     }
 
-	public static void close() {
+	public void close(JedisPool pool) {
 		if (pool != null){
 			pool.close();
 		}

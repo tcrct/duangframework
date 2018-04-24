@@ -19,10 +19,7 @@ import com.duangframework.mongodb.kit.MongoClientKit;
 import com.duangframework.mongodb.utils.MongoIndexUtils;
 import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.*;
-import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.*;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
@@ -115,6 +112,10 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
      */
 	private boolean doSaveOrUpdate(IdEntity entity) throws Exception {
 		Document document = MongoUtils.toBson(entity);
+        System.out.println("document.toJson(): " + document.toJson());
+        if(ToolsKit.isEmpty(document)) {
+			throw new EmptyNullException("entity to document is null");
+		}
 		String id = entity.getId();
 		try {
 			if(ToolsKit.isEmpty(id)) {
@@ -189,12 +190,11 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		if(null == mongoQuery) {
 			throw new EmptyNullException("Mongodb findList is Fail: mongoQuery is null");
 		}
-		Bson queryDoc = mongoQuery.getQueryBson();
+        Bson queryDoc = mongoQuery.getQueryBson();
         PageDto<T> page = mongoQuery.getPage();
         int pageNo = page.getPageNo();
         int pageSize = page.getPageSize();
-		FindIterable<Document> documents = collection.find(queryDoc);
-
+        FindIterable<Document> documents = collection.find(queryDoc);
         BasicDBObject fieldDbo = (BasicDBObject)mongoQuery.getDBFields();
         if(ToolsKit.isNotEmpty(fieldDbo) && !fieldDbo.isEmpty()) {
             documents.projection(fieldDbo);
@@ -214,11 +214,11 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		if(ToolsKit.isEmpty(documents)) {
 			return null;
 		}
-		final List<T> resultList = new ArrayList();
-		documents.forEach(new Block<Document>() {
+        final List<T> resultList = new ArrayList();
+   		documents.forEach(new Block<Document>() {
 			@Override
 			public void apply(Document document) {
-				resultList.add((T)MongoUtils.toEntity(document, cls));
+                resultList.add((T)MongoUtils.toEntity(document, cls));
 			}
 		});
 		return resultList;

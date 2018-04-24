@@ -1,11 +1,11 @@
 package com.duangframework.server.netty.decoder;
 
+import com.duangframework.core.kit.ToolsKit;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.multipart.HttpPostMultipartRequestDecoder;
 import io.netty.handler.codec.http.multipart.InterfaceHttpData;
 import io.netty.handler.codec.http.multipart.MemoryAttribute;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +29,12 @@ public class MultiPartPostDecoder extends AbstractDecoder<Map<String,String[]>> 
                 MemoryAttribute attribute = (MemoryAttribute) httpData;
                 String key = attribute.getName();
                 String value = attribute.getValue();
+                List<String> list = params.get(key);
+                if(ToolsKit.isEmpty(value)) {
+                    continue;
+                }
                 parseValue2List(params, key, value);
-                paramsMap.put(key, params.get(key).toArray(EMPTY_ARRAYS));
+                paramsMap.put(key, list.toArray(EMPTY_ARRAYS));
             }
         }
         return paramsMap;

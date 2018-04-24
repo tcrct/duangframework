@@ -39,10 +39,11 @@ public abstract class AbstractNettyServer implements IServer {
         init();//初始化
     }
 
-    public AbstractNettyServer(String host, int port, IContextLoaderListener listener, IProcess mainProcess) {
+    public AbstractNettyServer(String host, int port, boolean isDebug, IContextLoaderListener listener, IProcess mainProcess) {
         bootStrap = new BootStrap(host, port);
         bootStrap.setStartContextListener(listener);
         bootStrap.setMainProcess(mainProcess);
+        bootStrap.setDebug(isDebug);
         init();//初始化
     }
 

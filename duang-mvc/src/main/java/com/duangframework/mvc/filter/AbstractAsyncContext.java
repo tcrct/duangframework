@@ -24,6 +24,7 @@ public abstract class AbstractAsyncContext implements AsyncContext {
     private String target;
     private String requestId;
     private long timeout = Const.REQUEST_TIMEOUT;
+    private boolean isDebug;
 
     public AbstractAsyncContext(String target, IRequest request, IResponse response) {
         this(target, request, response, Const.REQUEST_TIMEOUT);

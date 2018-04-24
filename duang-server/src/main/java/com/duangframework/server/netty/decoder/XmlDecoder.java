@@ -60,8 +60,11 @@ public class XmlDecoder extends AbstractDecoder<Map<String, String[]>> {
             while (i < allNodes.getLength()) {
                 Node node = allNodes.item(i);
                 if (node instanceof Element) {
-                    String[] nodeValueArray = {node.getTextContent()};
-                    map.put(node.getNodeName(), nodeValueArray);
+                    String content = node.getTextContent();
+                    if(ToolsKit.isNotEmpty(content)) {
+                        String[] nodeValueArray = {content};
+                        map.put(node.getNodeName(), nodeValueArray);
+                    }
                 }
                 i++;
             }

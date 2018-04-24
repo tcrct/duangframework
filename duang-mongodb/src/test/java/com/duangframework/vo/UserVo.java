@@ -12,9 +12,9 @@ import java.util.Map;
  * @date on 2017/11/22.
  */
 @Vo
-public class UserVo extends IdEntity {
+public class UserVo  extends IdEntity {
 
-    private Map<String, String> addressMap ;
+    private Map<String, String> addressMap;
     private List<UserVo> typeList;
     @JSONField(name = "user_age")
     private int age;

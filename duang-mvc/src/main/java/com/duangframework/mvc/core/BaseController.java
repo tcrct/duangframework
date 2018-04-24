@@ -113,6 +113,16 @@ public abstract class BaseController{
                 params.put(name, valueStr);
             }
         }
+
+        Enumeration<String> attributeNames = request.getAttributeNames();
+        while (attributeNames.hasMoreElements()) {
+            String name = attributeNames.nextElement();
+            if(Const.DUANG_INPUTSTREAM_STR_NAME.equalsIgnoreCase(name) ||
+                    name.contains(".")) {
+                continue;
+            }
+            params.put(name, request.getAttribute(name));
+        }
         return params;
     }
 
@@ -219,7 +229,11 @@ public abstract class BaseController{
         }
         String jsonText = ToolsKit.toJsonString(values);
         if(ToolsKit.isEmpty(jsonText)) {
-            return ObjectKit.newInstance(cls);
+            try {
+                return ObjectKit.newInstance(cls);
+            } catch (Exception e) {
+                return null;
+            }
         }
         return (T) ToolsKit.jsonParseObject(jsonText, cls);
     }

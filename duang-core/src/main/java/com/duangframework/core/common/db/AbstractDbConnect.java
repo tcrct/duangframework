@@ -179,7 +179,7 @@ public abstract class AbstractDbConnect implements IConnect {
             return MD5.MD5Encode(url);
         }
         else if(ToolsKit.isNotEmpty(host)) {
-            return MD5.MD5Encode("tcrct:" + host + ":" + port);
+            return MD5.MD5Encode("tcrct:" + host + ":" + port+"/" + dataBase);
         }
         return "";
     }

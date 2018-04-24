@@ -39,11 +39,12 @@ public class HttpRequest implements IRequest {
     private byte[] content;
     private Map<String,Object> attributes = new ConcurrentHashMap<>();
 
-    public HttpRequest(URI remoteEndPoint, URI localEndPoint, Map<String,String> headers, Map<String,String[]> params, byte[] content) {
+    public HttpRequest(URI remoteEndPoint, URI localEndPoint, Map<String,String> headers, Map<String,String[]> paramMap, Map<String,Object> attributeMap, byte[] content) {
         this.remoteEndPoint = remoteEndPoint;
         this.localEndPoint = localEndPoint;
         this.headers = headers;
-        this.params = params;
+        this.params = paramMap;
+        this.attributes.putAll(attributeMap);
         this.content = content;
     }
 

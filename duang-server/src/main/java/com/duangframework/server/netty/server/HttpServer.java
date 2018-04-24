@@ -18,8 +18,8 @@ public class HttpServer extends AbstractNettyServer {
         super(host, port);
     }
 
-    public HttpServer(String host, int port, IContextLoaderListener listenerCls, IProcess mainProcessCls) {
-        super(host, port, listenerCls, mainProcessCls);
+    public HttpServer(String host, int port, boolean isDebug, IContextLoaderListener listenerCls, IProcess mainProcessCls) {
+        super(host, port, isDebug, listenerCls, mainProcessCls);
     }
 
     @Override
