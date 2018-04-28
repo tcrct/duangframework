@@ -112,7 +112,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
      */
 	private boolean doSaveOrUpdate(IdEntity entity) throws Exception {
 		Document document = MongoUtils.toBson(entity);
-        System.out.println("document.toJson(): " + document.toJson());
+//        System.out.println("document.toJson(): " + document.toJson());
         if(ToolsKit.isEmpty(document)) {
 			throw new EmptyNullException("entity to document is null");
 		}

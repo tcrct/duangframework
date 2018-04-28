@@ -61,9 +61,10 @@ public class CORSHandle implements IHandle {
         }
         String host = "";
         boolean isAllowAccess = false;
-        String allowhost = request.getHeader("Host");
+        String originString = request.getHeader("Origin");
+        String allowhost = originString;
         if(ToolsKit.isEmpty(allowhost)) {
-            allowhost = request.getHeader("Origin");
+            allowhost = request.getHeader("Host");
             if (ToolsKit.isEmpty(allowhost)) {
                 allowhost = request.getHeader("Referer");
             }
@@ -99,6 +100,8 @@ public class CORSHandle implements IHandle {
         }
 
         if(isAllowAccess) {
+            host = (ToolsKit.isEmpty(originString))? getScheme(request) + "://" + host : originString;
+//            System.out.println("###########CORS: " + host);
             response.setHeader("Access-Control-Allow-Origin", host);
             response.setHeader("Access-Control-Allow-Credentials", "true");
             String allowString = "Accept,Content-Type,Access-Control-Allow-Headers,Authorization,X-Requested-With,Authoriza,duang-token-id";

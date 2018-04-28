@@ -12,6 +12,9 @@ import io.netty.util.AsciiString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
@@ -30,7 +33,7 @@ public abstract class AbstractHttpHandler {
         // 构建请求返回对象，并设置返回主体内容结果
         HttpResponseStatus status = response.getStatus() == 200 ? HttpResponseStatus.OK : HttpResponseStatus.INTERNAL_SERVER_ERROR;
         FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer(response.toString(), HttpConstants.DEFAULT_CHARSET));
-        builderResponseHeader(fullHttpResponse, reuqest);
+        builderResponseHeader(fullHttpResponse, reuqest, response);
         HttpHeaders.setKeepAlive(fullHttpResponse, keepAlive);
         ChannelFuture channelFutureListener = ctx.channel().writeAndFlush(fullHttpResponse);
         //如果不支持keep-Alive，服务器端主动关闭请求
@@ -52,13 +55,26 @@ public abstract class AbstractHttpHandler {
      * @param response
      * @param request
      */
-    private void builderResponseHeader(FullHttpResponse response, IRequest request) {
-        HttpHeaders responseHeaders = response.headers();
+    private void builderResponseHeader(FullHttpResponse fullHttpResponse, IRequest request, IResponse response) {
+        HttpHeaders responseHeaders = fullHttpResponse.headers();
         String conentType = request.getHeader(HttpHeaderNames.CONTENT_TYPE.toString());
         if(ToolsKit.isEmpty(conentType)) {
             conentType = JSON;
         }
         responseHeaders.set(HttpHeaderNames.CONTENT_TYPE.toString(), conentType); //设置返回结果格式
+
+        Map<String,String> headersMap = response.getHeaders();
+        if(ToolsKit.isNotEmpty(headersMap)) {
+            for(Iterator<Map.Entry<String,String>> iterator = headersMap.entrySet().iterator(); iterator.hasNext();) {
+                Map.Entry<String,String> entry = iterator.next();
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                if(ToolsKit.isNotEmpty(key) && ToolsKit.isNotEmpty(value)) {
+                    responseHeaders.set(key, value);
+                }
+            }
+        }
+
 
         // 数据分块返回客户端，不能与CONTENT_LENGTH同时使用，一般用于图片或文件之类的stream
         // 功能待实现，暂不开启，如开启则返回数据会不显示
@@ -72,7 +88,7 @@ public abstract class AbstractHttpHandler {
         responseHeaders.set(HttpHeaderNames.DATE.toString(), ToolsKit.getCurrentDateString());
         int readableBytesLength = 0;
         try {
-            readableBytesLength = response.content().readableBytes();
+            readableBytesLength = fullHttpResponse.content().readableBytes();
         } catch (Exception e) {}
         responseHeaders.set(HttpHeaderNames.CONTENT_LENGTH.toString(), readableBytesLength);
     }

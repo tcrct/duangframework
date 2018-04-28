@@ -12,6 +12,7 @@ import com.duangframework.mvc.core.Action;
 import com.duangframework.mvc.core.BaseController;
 import com.duangframework.mvc.core.InstanceFactory;
 import com.duangframework.mvc.core.helper.IocHelper;
+import com.duangframework.server.common.enums.HttpMethod;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -28,6 +29,10 @@ public class ActionHandle implements IHandle {
 
     @Override
     public void execute(String target, IRequest request, IResponse response) throws Exception {
+
+        if(HttpMethod.OPTIONS.name().equalsIgnoreCase(request.getMethod())) {
+            return;
+        }
 
         // 请求的URL中如果包含有.  则全部当作是静态文件的请求处理，直接返回
         if (target.contains(".")) { return; }
