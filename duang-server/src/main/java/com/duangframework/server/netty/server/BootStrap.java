@@ -3,6 +3,7 @@ package com.duangframework.server.netty.server;
 import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.interfaces.IProcess;
+import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.server.utils.NativeSupport;
 import io.netty.buffer.ByteBufAllocator;
@@ -183,13 +184,23 @@ public class BootStrap implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
-        if(null != workerGroup) {
-            workerGroup.shutdownGracefully();
-        }
+    public void close() {
+        try {
+            if (null != workerGroup) {
+                workerGroup.shutdownGracefully();
+            }
 
-        if(null != bossGroup) {
-            bossGroup.shutdownGracefully();
+            if (null != bossGroup) {
+                bossGroup.shutdownGracefully();
+            }
+
+            if (null != allocator) {
+                allocator = null;
+            }
+
+            ThreadPoolKit.shutdown();
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
         }
     }
 

@@ -47,6 +47,7 @@ public class Server implements IServer {
             public void run() {
                 try {
                     httpServer = new HttpServer(host, httpPort);
+                    httpServer.shutdownHook();
                     httpServer.start();
                 } catch (Exception e) {
                     logger.warn(e.getMessage(), e);

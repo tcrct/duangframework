@@ -80,6 +80,14 @@ public abstract class AbstractNettyServer implements IServer {
         }
     }
 
+    public void shutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                shutdown();
+            }
+        });
+    }
+
     /**
      * 检测本机指定端口是否可用<br/>
      * 如果端口可用，则返回false
