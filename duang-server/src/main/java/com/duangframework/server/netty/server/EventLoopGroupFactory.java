@@ -1,7 +1,7 @@
 package com.duangframework.server.netty.server;
 
 import com.duangframework.server.utils.NamedThreadFactory;
-import com.duangframework.server.utils.NativeSupport;
+import com.duangframework.server.utils.EpollSupport;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -24,7 +24,7 @@ public class EventLoopGroupFactory {
                 new NamedThreadFactory(ServerConfig.BOSSGROUP_POOLTHREAD_NAME));
 
 
-        if(NativeSupport.isSupportNative()) {
+        if(EpollSupport.isSupportEpoll()) {
             EpollEventLoopGroup bossLoopGroup = new EpollEventLoopGroup(ServerConfig.MAX_BOSS_EXECUTORS_NUMBER, executor);
             bossLoopGroup.setIoRatio(ServerConfig.IO_RATIO_NUMBER);
             return bossLoopGroup;
@@ -47,7 +47,7 @@ public class EventLoopGroupFactory {
                 new ArrayBlockingQueue<Runnable>(workerNum),
                 new NamedThreadFactory(ServerConfig.WORKERGROUP_POOLTHREAD_NAME));
 
-        if(NativeSupport.isSupportNative()) {
+        if(EpollSupport.isSupportEpoll()) {
             EpollEventLoopGroup workerLoopGroup = new EpollEventLoopGroup(workerNum, executor);
             workerLoopGroup.setIoRatio(ServerConfig.IO_RATIO_NUMBER);
             return workerLoopGroup;

@@ -57,7 +57,9 @@ public class ThreadPoolKit {
 	}
 
 	public static void shutdown() {
-		es.shutdown();
+		if(null != es && !es.isShutdown()) {
+			es.shutdown();
+		}
 	}
 
 	/**

@@ -5,7 +5,7 @@ import com.duangframework.core.interfaces.IContextLoaderListener;
 import com.duangframework.core.interfaces.IProcess;
 import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.server.utils.NativeSupport;
+import com.duangframework.server.utils.EpollSupport;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelHandler;
@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 
 /**
@@ -168,7 +167,7 @@ public class BootStrap implements Closeable {
     }
 
     public Class<? extends ServerChannel> getDefaultChannel() {
-        if (NativeSupport.isSupportNative()) {
+        if (EpollSupport.isSupportEpoll()) {
             return EpollServerSocketChannel.class;
         } else {
             return NioServerSocketChannel.class;
