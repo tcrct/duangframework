@@ -73,11 +73,11 @@ public class Server implements IServer {
 
     }
 
-    @Override
+//    @Override
     public void shutdown() {
-        if(null != httpServer) {
-            httpServer.shutdown();
-        }
+//        if(null != httpServer) {
+//            httpServer.shutdown();
+//        }
 //        if(null != rpcServer) {
 //            rpcServer.shutdown();
 //        }

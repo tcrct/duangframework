@@ -199,6 +199,7 @@ public class BootStrap implements Closeable {
             }
 
             ThreadPoolKit.shutdown();
+            logger.warn("server shutdown is done!");
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
         }

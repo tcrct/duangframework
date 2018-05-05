@@ -30,7 +30,8 @@ public class HttpServer extends AbstractNettyServer {
         try {
             ChannelFuture future = nettyBootstrap.bind().sync();
             future.addListener(new HttpContextListener(bootStrap));
-            writePidFile();
+            writePidFile(); // 写PID到文件
+            shutdownHook();//添加关闭hook
             // 等待或监听数据全部完成
             future.channel().closeFuture().awaitUninterruptibly();
             //成功绑定到端口之后,给channel增加一个 管道关闭的监听器并同步阻塞,直到channel关闭,线程才会往下执行,结束进程。
