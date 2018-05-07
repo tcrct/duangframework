@@ -1,7 +1,7 @@
 package com.duangframework.cache.common;
 
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPool;
 
 /**
  * @author Created by laotang
@@ -10,13 +10,13 @@ import redis.clients.jedis.JedisCluster;
 public class CacheClientExt {
 
     private String key;
-    private Jedis jedis;
+    private JedisPool jedisPool;
     private JedisCluster jedisCluster;
     private CacheDbConnect connect;
 
-    public CacheClientExt(String key, Jedis jedis, CacheDbConnect connect) {
+    public CacheClientExt(String key, JedisPool jedisPool, CacheDbConnect connect) {
         this.key = key;
-        this.jedis = jedis;
+        this.jedisPool = jedisPool;
         this.connect = connect;
     }
 
@@ -34,12 +34,12 @@ public class CacheClientExt {
         this.key = key;
     }
 
-    public Jedis getJedis() {
-        return jedis;
+    public JedisPool getJedisPool() {
+        return jedisPool;
     }
 
-    public void setJedis(Jedis jedis) {
-        this.jedis = jedis;
+    public void setJedisPool(JedisPool jedisPool) {
+        this.jedisPool = jedisPool;
     }
 
     public JedisCluster getJedisCluster() {

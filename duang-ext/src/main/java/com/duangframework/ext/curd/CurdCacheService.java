@@ -10,6 +10,7 @@ import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class CurdCacheService<T extends IdEntity>  {
     private static final Logger logger = LoggerFactory.getLogger(CurdCacheService.class);
     private static final CurdCacheService CRUD_CACHE_SERVICE = new CurdCacheService();
     private static final Map<String, EntityCache> ENTITY_CACHE_MAP = new HashMap<>();
+    private static Jedis jedis = null;
     private static String keyPrefix = "";
     public CurdCacheService getCacheDao() {
         init();
@@ -33,6 +35,9 @@ public class CurdCacheService<T extends IdEntity>  {
     private void init() {
         if(ToolsKit.isEmpty(keyPrefix)) {
             keyPrefix = ConfigKit.duang().key("product.code").asString();
+        }
+        if(ToolsKit.isEmpty(jedis)) {
+            jedis = CacheClientKit.duang().getJedis();
         }
     }
 
@@ -67,10 +72,10 @@ public class CurdCacheService<T extends IdEntity>  {
         EntityCacheModle modle = getEntityCacheModle(entity.getClass());
         try {
             // 保存到缓存中
-            long count = CacheClientKit.duang().hset(modle.getKey(), entity.getId(), ToolsKit.toJsonString(entity));
+            long count = jedis.hset(modle.getKey(), entity.getId(), ToolsKit.toJsonString(entity));
             if(count > 0 ) {
                 //设置过期时间,
-                CacheClientKit.duang().expire(modle.getKey(), modle.getTtl());
+                jedis.expire(modle.getKey(), modle.getTtl());
                 return true;
             }
             return false;
@@ -90,7 +95,7 @@ public class CurdCacheService<T extends IdEntity>  {
      */
     public <T> T findById(String id, Class<T> clazz) throws ServiceException {
         EntityCacheModle modle = getEntityCacheModle(clazz);
-        String jsonString = CacheClientKit.duang().hget(modle.getKey(), id);
+        String jsonString = jedis.hget(modle.getKey(), id);
         if(ToolsKit.isNotEmpty(jsonString)) {
             return ToolsKit.jsonParseObject(jsonString, clazz);
         }
@@ -106,7 +111,7 @@ public class CurdCacheService<T extends IdEntity>  {
      */
     public boolean delete(Class clazz, String id) throws ServiceException {
         EntityCacheModle modle = getEntityCacheModle(clazz);
-        long count = CacheClientKit.duang().hdel(modle.getKey(), id);
+        long count = jedis.hdel(modle.getKey(), id);
         return count > 0;
     }
 }

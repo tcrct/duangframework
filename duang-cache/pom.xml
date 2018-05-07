@@ -26,7 +26,7 @@
             <artifactId>duangframework-core</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+        <!-- https://mvnrepository.com/artifact/redis.clients/jedisPool -->
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>

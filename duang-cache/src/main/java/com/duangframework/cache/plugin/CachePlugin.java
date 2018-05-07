@@ -6,8 +6,8 @@ import com.duangframework.cache.kit.CacheClientKit;
 import com.duangframework.cache.utils.CacheUtils;
 import com.duangframework.core.interfaces.IPlugin;
 import com.duangframework.core.kit.ToolsKit;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +45,10 @@ public class CachePlugin implements IPlugin {
         for(CacheDbConnect connect : connectList) {
             String key = connect.getClientCode();
             CacheClientExt clientExt = null;
-            if(connect.getHost().contains(",")) {
-                Jedis jedis  = CacheClientKit.duang().connect(connect).getJedis();
-                if(null != jedis) {
-                    clientExt = new CacheClientExt(key, jedis, connect);
+            if(!connect.getHost().contains(",")) {
+                JedisPool jedisPool  = CacheClientKit.duang().connect(connect).getJedisPool();
+                if(null != jedisPool) {
+                    clientExt = new CacheClientExt(key, jedisPool, connect);
                 }
             } else {
                 JedisCluster clusterJedis  = CacheClientKit.duang().connect(connect).getClusterJedis();

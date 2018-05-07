@@ -6,8 +6,8 @@ import com.duangframework.cache.utils.JedisPoolUtils;
 import com.duangframework.core.interfaces.IConnect;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPool;
 
 /**
  * @author Created by laotang
@@ -29,8 +29,8 @@ public class CacheClientKit {
         return this;
     }
 
-    public Jedis getJedis() {
-        return new JedisPoolUtils().getJedis(_cacheDbConnect);
+    public JedisPool getJedisPool() {
+        return new JedisPoolUtils().getJedisPool(_cacheDbConnect);
     }
 
     public JedisCluster getClusterJedis() {

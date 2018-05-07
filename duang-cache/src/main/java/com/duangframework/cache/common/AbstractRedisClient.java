@@ -1,5 +1,6 @@
 package com.duangframework.cache.common;
 
+import com.duangframework.cache.utils.JedisPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -29,7 +30,7 @@ public abstract class AbstractRedisClient {
     }
 
     protected static Jedis getJedis() {
-        return _clientExt.getJedis();
+        return _clientExt.getJedisPool().getResource();
     }
 
     protected static JedisCluster getJedisCluster() {
@@ -43,12 +44,12 @@ public abstract class AbstractRedisClient {
             try {
                 result = (T) cacheAction.execute(jedis);
             } catch (Exception e) {
-//                JedisPoolUtils.returnBrokenResource(jedis);
+                JedisPoolUtils.returnBrokenResource(_clientExt.getJedisPool(), jedis);
                 logger.warn(e.getMessage(), e);
             }
-//            finally {
-//                JedisPoolUtils.returnResource(jedis);
-//            }
+            finally {
+                JedisPoolUtils.returnResource(_clientExt.getJedisPool(), jedis);
+            }
         } else {
             JedisCluster jedisCluster = getJedisCluster();
             result = (T) cacheAction.execute(jedisCluster);

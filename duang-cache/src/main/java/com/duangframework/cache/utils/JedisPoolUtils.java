@@ -23,7 +23,6 @@ public class JedisPoolUtils {
      * 
      */
     private JedisPool createJedisPool(CacheDbConnect cacheDbConnect) {
-
 		JedisPool pool = null;
         // 建立连接池配置参数
         JedisPoolConfig config = new JedisPoolConfig();
@@ -59,15 +58,15 @@ public class JedisPoolUtils {
         	throw new JedisException(e.getMessage(), e);
         }
     }
-    
+
     /**
      * 获取一个jedis 对象
      * 
      * @return
      */
-    public synchronized Jedis getJedis(CacheDbConnect cacheDbConnect) {
+    public synchronized JedisPool getJedisPool(CacheDbConnect cacheDbConnect) {
 		JedisPool pool = createJedisPool(cacheDbConnect);
-		return (null != pool) ? pool.getResource() : null;
+		return (null != pool) ? pool : null;
     }
 
     /**
@@ -75,7 +74,7 @@ public class JedisPoolUtils {
      * 
      * @param jedis
      */
-    public void returnResource(JedisPool pool, Jedis jedis) {
+    public static void returnResource(JedisPool pool, Jedis jedis) {
     	try {
     		pool.returnResource(jedis);	
 		} catch (Exception e) {
@@ -87,7 +86,7 @@ public class JedisPoolUtils {
      * 归还一个损坏的连接
      * @param jedis
      */
-    public void returnBrokenResource(JedisPool pool, Jedis jedis) {
+    public static void returnBrokenResource(JedisPool pool, Jedis jedis) {
     	try {
     		pool.returnBrokenResource(jedis);	
 		} catch (Exception e) {

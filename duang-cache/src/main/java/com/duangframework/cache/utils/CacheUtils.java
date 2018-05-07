@@ -1,8 +1,8 @@
 package com.duangframework.cache.utils;
 
 import com.duangframework.cache.common.CacheClientExt;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisCluster;
+import redis.clients.jedis.JedisPool;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -36,9 +36,9 @@ public class CacheUtils {
     public static void close() throws Exception {
         for(Iterator<Map.Entry<String, CacheClientExt>>  iterator = CACHE_CLIENT_EXT_MAP.entrySet ().iterator(); iterator.hasNext();) {
             Map.Entry<String, CacheClientExt> entry = iterator.next();
-            Jedis jedis = entry.getValue().getJedis();
-            if(null != jedis) {
-                jedis.close();
+            JedisPool jedisPool = entry.getValue().getJedisPool();
+            if(null != jedisPool) {
+                jedisPool.close();
             }
             JedisCluster jedisCluster = entry.getValue().getJedisCluster();
             if(null != jedisCluster) {
