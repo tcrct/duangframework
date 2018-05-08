@@ -24,7 +24,9 @@ public final class Operator {
     public static final String EXISTS = "$exists";
     public static final String WHERE = "$where";
     public static final String ELEMMATCH = "$elemMatch";
-    
+
+    public static final String REGEX = "$regex";
+
     //like
     public static final String LIKE = "like";
     //between 

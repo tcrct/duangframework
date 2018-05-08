@@ -35,8 +35,6 @@ public class RedisClient extends AbstractRedisClient {
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
         }
-//        ourInstance = new RedisClient();
-//        System.out.println(CacheUtils.getDefaultClientExt().getKey());
         use(CacheUtils.getDefaultClientExt().getKey());
         return ourInstance;
     }

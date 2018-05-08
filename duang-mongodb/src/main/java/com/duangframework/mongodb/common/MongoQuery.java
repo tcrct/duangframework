@@ -210,7 +210,7 @@ public class MongoQuery<T> {
 	 * @return
 	 */
 	public MongoQuery<T> regex(String key, String value) {
-		append2DBObject(key, null, Pattern.compile(value));
+		append2DBObject(key, Operator.REGEX, Pattern.compile(value).pattern());
 		return this;
 	}
 	
