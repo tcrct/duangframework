@@ -24,6 +24,7 @@ public class HttpResponse implements IResponse {
         this.headers = headers;
         this.charset = charset;
         this.contentType = contentType;
+        this.returnObj = null;
     }
 
     private HttpResponse() {
@@ -90,7 +91,10 @@ public class HttpResponse implements IResponse {
 
     @Override
     public String toString() {
-        return ToolsKit.toJsonString(returnObj);
+        if(null != returnObj) {
+            return ToolsKit.toJsonString(returnObj);
+        }
+        return "{\"hello\" : \"duangframework\"}";
     }
 
 
