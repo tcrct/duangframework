@@ -19,7 +19,6 @@ public class CacheModelOptions {
         private int ttl;
         private String keyDesc;
 
-
         public Builder(ICacheKeyEnums enums) {
             this.keyPrefix = enums.getKeyPrefix();
             this.ttl = enums.getKeyTTL();

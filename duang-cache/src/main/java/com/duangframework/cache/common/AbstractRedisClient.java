@@ -58,5 +58,20 @@ public abstract class AbstractRedisClient {
     }
 
 
+    public <T> T call(AliyunJedisAction cacheAction) {
+        T result = null;
+        Jedis jedis = getJedis();
+        try {
+            result = (T) cacheAction.execute(jedis);
+        } catch (Exception e) {
+            logger.warn(e.getMessage(), e);
+        }
+        finally {
+            jedis.close();
+        }
+        return result;
+    }
+
+
 
 }

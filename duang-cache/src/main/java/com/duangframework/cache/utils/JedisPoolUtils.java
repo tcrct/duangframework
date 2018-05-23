@@ -27,9 +27,9 @@ public class JedisPoolUtils {
         // 建立连接池配置参数
         JedisPoolConfig config = new JedisPoolConfig();
 
-		config.setMaxIdle(4000);
-		config.setMinIdle(1000);
-		config.setMaxTotal(4000);
+		config.setMaxIdle(100);
+		config.setMinIdle(10);
+		config.setMaxTotal(100);
 		config.setMaxWaitMillis(5000);
 		config.setTestWhileIdle(false);
 		config.setTestOnBorrow(true);
@@ -47,6 +47,17 @@ public class JedisPoolUtils {
 			String password = cacheDbConnect.getPassWord();
 			int port = cacheDbConnect.getPort();
 			if(ToolsKit.isEmpty(password)) {
+				if(host.contains(":")) {
+					String[] hostArray = host.split(":");
+					if(ToolsKit.isNotEmpty(hostArray)) {
+						try{
+							host = hostArray[0];
+							port = Integer.parseInt(hostArray[1]);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}
 				pool = new JedisPool(config, host, port, timeout);
 			} else {
 				pool = new JedisPool(config, host, port, timeout, password, database);
@@ -76,7 +87,8 @@ public class JedisPoolUtils {
      */
     public static void returnResource(JedisPool pool, Jedis jedis) {
     	try {
-    		pool.returnResource(jedis);	
+//    		pool.returnResource(jedis);
+            jedis.close();
 		} catch (Exception e) {
 			throw new JedisException(e.getMessage());
 		}
@@ -88,7 +100,8 @@ public class JedisPoolUtils {
      */
     public static void returnBrokenResource(JedisPool pool, Jedis jedis) {
     	try {
-    		pool.returnBrokenResource(jedis);	
+//    		pool.returnBrokenResource(jedis);
+            jedis.close();
 		} catch (Exception e) {
 			throw new JedisException(e.getMessage());
 		}

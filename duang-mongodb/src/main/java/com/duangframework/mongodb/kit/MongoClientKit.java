@@ -40,7 +40,7 @@ public class MongoClientKit {
     }
 
     private void options() {
-        _options = MongoClientOptions.builder();
+        _options = MongoClientOptions.builder().readPreference(ReadPreference.secondaryPreferred());
 //                .connectionsPerHost(100)									// 最大连接数
 //                .minConnectionsPerHost(10)
 //                .heartbeatFrequency(10000)
@@ -104,7 +104,7 @@ public class MongoClientKit {
 
     public MongoClient createMongoDBClientWithURI() throws Exception {
         MongoClientURI connectionString = new MongoClientURI(_mongoDbConnect.getUrl());
-        logger.warn("mongodb connection url: " + connectionString);
+//        logger.warn("mongodb connection url: " + connectionString);
         _mongoClient = new MongoClient(connectionString);
         if(null != _mongoClient){
             logger.warn("Connection ReplicaSet Mongodb Success...");

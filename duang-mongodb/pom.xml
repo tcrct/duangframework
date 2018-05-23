@@ -17,7 +17,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <core.version>1.0-SNAPSHOT</core.version>
-        <mongodb.version>3.5.0</mongodb.version>
+        <mongodb.version>3.7.0</mongodb.version>
     </properties>
 
     <dependencies>
