@@ -9,6 +9,7 @@ import com.duangframework.server.IServer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.DefaultMessageSizeEstimator;
+import io.netty.util.ResourceLeakDetector;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +55,7 @@ public abstract class AbstractNettyServer implements IServer {
         if(isUse()){
             throw new MvcStartUpException("Server Startup Fail: " + bootStrap.getPort() + " is use!");
         }
+        ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
         nettyBootstrap = new ServerBootstrap();
         nettyBootstrap.group(bootStrap.getBossGroup(), bootStrap.getWorkerGroup());
         nettyBootstrap.option(ChannelOption.SO_BACKLOG, bootStrap.getBockLog())  //连接数
