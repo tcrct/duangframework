@@ -14,8 +14,8 @@ public abstract class Render implements Serializable {
 	private static final long serialVersionUID = -8406693915721288408L;
 	protected static final String _DUANG_BACKDOOR_PWD_  = "laotang";
 	protected  static final String ENCODING = ConfigKit.duang().key("encoding").defaultValue("UTF-8").asString();
-	protected transient IRequest request;
-	protected transient IResponse response;
+	protected IRequest request;
+	protected IResponse response;
 	protected Object obj;
 	protected String view;
 

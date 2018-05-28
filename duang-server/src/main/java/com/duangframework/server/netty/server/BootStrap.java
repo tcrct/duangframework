@@ -179,7 +179,7 @@ public class BootStrap implements Closeable {
     }
 
     public ChannelHandler getLoggingHandler() {
-        return new LoggingHandler(LogLevel.WARN);
+        return new LoggingHandler(LogLevel.ERROR);
     }
 
     @Override
