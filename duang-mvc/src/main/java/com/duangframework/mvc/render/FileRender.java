@@ -5,6 +5,9 @@ import com.duangframework.core.common.dto.upload.DownLoadStream;
 import com.duangframework.core.common.dto.upload.UploadFile;
 import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.exceptions.ServiceException;
+import com.duangframework.core.utils.UploadFileUtils;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 
@@ -31,6 +34,20 @@ public class FileRender extends Render {
 
     public FileRender(DownLoadStream stream) {
         this.stream = stream;
+        byte[] bytes = new byte[8192];
+        try {
+            IOUtils.write(bytes, stream.getOutputStream());
+            String serverFileDir = UploadFileUtils.builderServerFileDir("");
+            String serverFileName = UploadFileUtils.builderServerFileName(stream.getFileName(), false);
+            File dir = new File(serverFileDir);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            file = new File(serverFileDir, serverFileName);
+            FileUtils.writeByteArrayToFile(file, bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 	@Override

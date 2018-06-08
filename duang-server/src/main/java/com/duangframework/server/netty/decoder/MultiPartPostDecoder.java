@@ -52,8 +52,7 @@ public class MultiPartPostDecoder extends AbstractDecoder<Map<String,Object>> {
                         } else {
                             bytes = Files.readAllBytes(fileUpload.getFile().toPath());
                         }
-                        fileItem = new FileItem(fileUpload.getName(), fileUpload.getContentTransferEncoding(), fileUpload.getContentType(),
-                                fileUpload.getFilename(), fileUpload.getFile().length(), bytes);
+                        fileItem = new FileItem(fileUpload.getName(), fileUpload.getContentTransferEncoding(), fileUpload.getFilename(), fileUpload.getContentType(), fileUpload.getFile().length(), bytes);
                         attributeMap.put(fileItem.getName(), fileItem);
                     }
                 }

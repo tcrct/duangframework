@@ -53,7 +53,10 @@ public class RequestUtils {
             Map<String, String[]> paramsMap = new ConcurrentHashMap<>();
             Map<String, Object> attributeMap = new ConcurrentHashMap<>();
             if(HttpMethod.POST.name().equalsIgnoreCase(method) &&
-                    (contentType.contains(ContentType.JSON.getValue()) || contentType.contains(ContentType.XML.getValue())) ) {
+                    (contentType.contains(ContentType.JSON.getValue()) ||
+                            contentType.contains(ContentType.XML.getValue()) ||
+                            contentType.contains(ContentType.MULTIPART.getValue())
+                    ) ) {
                 attributeMap.putAll(decoderAttribute(request, method, contentType));
             } else {
                 paramsMap.putAll(decoderParams(request, method, contentType));
