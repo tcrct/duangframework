@@ -1,42 +1,87 @@
 package com.duangframework.server.netty.decoder;
 
+import com.duangframework.core.common.dto.upload.FileItem;
 import com.duangframework.core.kit.ToolsKit;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.handler.codec.http.FullHttpRequest;
-import io.netty.handler.codec.http.multipart.HttpPostMultipartRequestDecoder;
-import io.netty.handler.codec.http.multipart.InterfaceHttpData;
-import io.netty.handler.codec.http.multipart.MemoryAttribute;
+import io.netty.handler.codec.http.multipart.*;
 
-import java.util.HashMap;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
 
 /**
  * Created by laotang on 2017/10/31.
  */
-public class MultiPartPostDecoder extends AbstractDecoder<Map<String,String[]>> {
+public class MultiPartPostDecoder extends AbstractDecoder<Map<String,Object>> {
+
+    static {
+        DiskFileUpload.deleteOnExitTemporaryFile = true; // should delete file
+        // on exit (in normal
+        // exit)
+        DiskFileUpload.baseDirectory = null; // system temp directory
+        DiskAttribute.deleteOnExitTemporaryFile = true; // should delete file on
+        // exit (in normal exit)
+        DiskAttribute.baseDirectory = null; // system temp directory
+    }
+
 
     public MultiPartPostDecoder(FullHttpRequest request) {
         super(request);
     }
 
     @Override
-    public Map<String, String[]> decoder() throws Exception {
+    public Map<String, Object> decoder() throws Exception {
         HttpPostMultipartRequestDecoder requestDecoder = new HttpPostMultipartRequestDecoder(HTTP_DATA_FACTORY, request);
         List<InterfaceHttpData> paramsList = requestDecoder.getBodyHttpDatas();
         if (null != paramsList && !paramsList.isEmpty()) {
-            Map<String, List<String>> params = new HashMap<>();
             for (InterfaceHttpData httpData : paramsList) {
-                MemoryAttribute attribute = (MemoryAttribute) httpData;
-                String key = attribute.getName();
-                String value = attribute.getValue();
-                List<String> list = params.get(key);
-                if(ToolsKit.isEmpty(value)) {
-                    continue;
+                InterfaceHttpData.HttpDataType dataType = httpData.getHttpDataType();
+                if(dataType == InterfaceHttpData.HttpDataType.Attribute
+                    || dataType == InterfaceHttpData.HttpDataType.InternalAttribute) {
+                    setValue2ParamMap(httpData);
+                } else if(dataType == InterfaceHttpData.HttpDataType.FileUpload) {
+                    FileUpload fileUpload = (FileUpload) httpData;
+                    if (null != fileUpload && fileUpload.isCompleted()) {
+                        FileItem fileItem = null;
+                        byte[] bytes = null;
+                        if (fileUpload.isInMemory()) {
+                            ByteBuf byteBuf = fileUpload.getByteBuf();
+                            bytes = ByteBufUtil.getBytes(byteBuf);
+                        } else {
+                            bytes = Files.readAllBytes(fileUpload.getFile().toPath());
+                        }
+                        fileItem = new FileItem(fileUpload.getName(), fileUpload.getContentTransferEncoding(), fileUpload.getContentType(),
+                                fileUpload.getFilename(), fileUpload.getFile().length(), bytes);
+                        attributeMap.put(fileItem.getName(), fileItem);
+                    }
                 }
-                parseValue2List(params, key, value);
-                paramsMap.put(key, list.toArray(EMPTY_ARRAYS));
             }
         }
-        return paramsMap;
+        return attributeMap;
+    }
+
+//    private String getUploadFileName(InterfaceHttpData data) {
+//        String content = data.toString();
+//        String temp = content.substring(0, content.indexOf("\n"));
+//        content = temp.substring(temp.lastIndexOf("=") + 2, temp.lastIndexOf("\""));
+//        return content;
+//    }
+//    private String getUploadFileExtName(String fileName) {
+//        if(!fileName.contains(".")) {
+//            throw new IllegalArgumentException("文件扩展名不存在");
+//        }
+//        return fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length()).toLowerCase();
+//    }
+
+
+    private void setValue2ParamMap(InterfaceHttpData httpData) throws Exception {
+        MixedAttribute attribute = (MixedAttribute) httpData;
+        String key = attribute.getName();
+        String value = attribute.getValue();
+        if(ToolsKit.isNotEmpty(value)) {
+            attributeMap.put(key, value);
+        }
     }
 }

@@ -37,7 +37,7 @@ public class CurdCacheService<T extends IdEntity>  {
             keyPrefix = ConfigKit.duang().key("product.code").asString();
         }
         if(ToolsKit.isEmpty(jedis)) {
-            jedis = CacheClientKit.duang().getJedis();
+            jedis = CacheClientKit.duang().getJedisPool().getResource();
         }
     }
 

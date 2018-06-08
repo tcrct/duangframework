@@ -3,6 +3,7 @@ package com.duangframework.core.common.dto.http.response;
 import com.duangframework.core.common.dto.http.request.AsyncContext;
 import com.duangframework.core.kit.ToolsKit;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 
@@ -17,7 +18,8 @@ public class HttpResponse implements IResponse {
     private String charset;
     private String contentType;
     private Object returnObj;
-
+    private int contentLength;
+    private File downloadFile;
 
 
     public HttpResponse(Map<String,String> headers, String charset, String contentType) {
@@ -78,6 +80,15 @@ public class HttpResponse implements IResponse {
     @Override
     public void setContentType(String contentType) {
         this.contentType = contentType;
+    }
+
+    @Override
+    public void setContentLength(int contentLength) {
+        this.contentLength = contentLength;
+    }
+
+    public File getDownloadFile() {
+        return  returnObj instanceof File ? (File)returnObj : null;
     }
 
     @Override

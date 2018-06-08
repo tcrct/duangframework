@@ -11,22 +11,24 @@ import com.duangframework.core.common.dto.http.response.HttpResponse;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.common.dto.result.HeadDto;
 import com.duangframework.core.common.dto.result.ReturnDto;
+import com.duangframework.core.common.dto.upload.DownLoadStream;
+import com.duangframework.core.common.dto.upload.FileItem;
+import com.duangframework.core.common.dto.upload.UploadFile;
+import com.duangframework.core.common.dto.upload.UploadFileHandle;
 import com.duangframework.core.common.enums.IEnums;
 import com.duangframework.core.exceptions.DuangMvcException;
 import com.duangframework.core.exceptions.ServiceException;
-import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ConfigKit;
+import com.duangframework.core.kit.ObjectKit;
 import com.duangframework.core.kit.ToolsKit;
-import com.duangframework.mvc.render.JsonRender;
-import com.duangframework.mvc.render.Render;
-import com.duangframework.mvc.render.TextRender;
-import com.duangframework.mvc.render.XmlRender;
+import com.duangframework.mvc.render.*;
 import com.duangframework.server.common.enums.ContentType;
 import com.duangframework.validation.core.ValidatorFactory;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.*;
 
@@ -603,23 +605,45 @@ public abstract class BaseController{
         returnDto.setData(dto);
         returnJson(returnDto);
     }
+    /**
+     * 下载文件
+     *
+     * @param file
+     *            UploadFile对象
+     * @throws Exception
+     */
+    public void download(File file) throws Exception {
+        render = new FileRender(file);
+    }
 
-//    /**
-//     * 保存记录
-//     */
-//    protected  abstract  void add();
-//    /**
-//     * 删除记录
-//     */
-//    protected  abstract  void delete();
-//    /**
-//     * 更改记录
-//     */
-//    protected  abstract  void update();
-//    /**
-//     * 查找记录
-//     */
-//    protected  abstract  void find();
+    public void download(UploadFile file) throws Exception {
+        render = new FileRender(file);
+    }
 
+    public void download(DownLoadStream downLoadStream) throws Exception {
+        render = new FileRender(downLoadStream);
+    }
+
+    public List<UploadFile> getUploadFiles(String saveDirectory) {
+        return getUploadFiles(saveDirectory, true);
+    }
+
+    public List<UploadFile> getUploadFiles(String saveDirectory,  boolean isUUIDName) {
+        Enumeration<String> enumeration = request.getAttributeNames();
+        List<UploadFile> uploadFileList = new ArrayList<>();
+        while (enumeration.hasMoreElements()) {
+            String key = enumeration.nextElement();
+            Object requestAttribute = request.getAttribute(key);
+            if(requestAttribute instanceof FileItem) {
+                FileItem fileItem = (FileItem) requestAttribute;
+                UploadFileHandle uploadFileRequest = new UploadFileHandle(fileItem, saveDirectory, isUUIDName);
+                UploadFile uploadFile = uploadFileRequest.getUploadFile();
+                if(ToolsKit.isNotEmpty(uploadFile)) {
+                    uploadFileList.add(uploadFile);
+                }
+            }
+        }
+        return uploadFileList;
+    }
 
 }

@@ -1,7 +1,5 @@
 package com.duangframework.core.annotation.mvc;
 
-import com.duangframework.core.annotation.db.Entity;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -33,5 +31,5 @@ public @interface Param {
     Class<?> type() default String.class;
 
     // 对自定义的javabean进行参数说明与验证，该class对象要存在@Vtor注解
-    Class<?> bean() default Entity.class;
+    Class<?> bean() default Object.class;
 }

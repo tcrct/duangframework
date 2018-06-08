@@ -15,12 +15,20 @@ public @interface Validation {
 	 
 	 String desc() default "";				// 设置字段名, 用于发生异常抛出时，中文说明该变量名称
 	 
-	 String value() default "";				// 默认值
+	 String fieldValue() default "";				// 默认值
 	 
 	 String formatDate() default "yyyy-MM-dd HH:mm:ss";		// 格式化日期(24小时制)
 	 
 	 boolean oid() default false;					// 是否是mongodb objectId，主要用于验证id
 
+
+	// 提交参数的名称
+	String fieldName() default "";
+	// 参数类型
+	Class<?> fieldType() default String.class;
+
+	// 对自定义的javabean进行参数说明与验证，该class对象要存在@Vtor注解
+	Class<?> bean() default Object.class;
 }
 
 

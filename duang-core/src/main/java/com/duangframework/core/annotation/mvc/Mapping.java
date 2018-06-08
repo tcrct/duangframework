@@ -4,6 +4,8 @@ package com.duangframework.core.annotation.mvc;
  * Created by laotang on 2017/11/5.
  */
 
+import com.duangframework.core.annotation.validation.Validation;
+
 import java.lang.annotation.*;
 
 /**
@@ -42,5 +44,5 @@ public @interface Mapping {
     int order() default 0;
     long timeout() default 3000L;
     Method[] method() default {};
-    Param[] params() default {};
+    Validation[] vtor() default {};
 }

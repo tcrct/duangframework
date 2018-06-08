@@ -1,5 +1,6 @@
 package com.duangframework.ext.report;
 
+import com.duangframework.core.annotation.mvc.Mapping;
 import com.duangframework.core.annotation.mvc.Service;
 import com.duangframework.core.common.Const;
 import com.duangframework.core.kit.ToolsKit;
@@ -58,6 +59,8 @@ public class ReportService {
                 continue;
             }
             Action action = getActionMapping().get(key);
+//            ActionInfoDto infoDto = new ActionInfoDto();
+//            ReportUtils.conversionDto(action, infoDto);
             String controllerKey = action.getControllerKey();
             if(treeItemMap.containsKey(controllerKey)) {
                 treeItemMap.get(controllerKey).add(action);
@@ -94,10 +97,38 @@ public class ReportService {
         computerInfoMap.put("author", "duangframework");
 
         Map<String, Object> infoMap = new HashMap<>();
-        infoMap.put("info", computerInfoMap);
-        infoMap.put("api", treeActions);
+        infoMap.put("info", computerInfoMap); //服务器信息
+        infoMap.put("api", treeActions);// api接口信息
 
         return infoMap;
     }
 
+
+    /**
+     * 自动生成api文档
+     * 遍历出所有的Action，取出每个method的@Mapping注解，再判断是否存在@Param
+     * 如果有则进行内容生成
+     *    Param注解分自定义类型参数及基础参数，自定义类型的要结合@Vtor的注解一并使用
+     */
+    public void autoCreateApiDocument(){
+        Map<String, Action> actions = actions();
+        if(ToolsKit.isEmpty(actions)) {
+            return;
+        }
+        for (Iterator<Map.Entry<String,Action>> iterator = actions.entrySet().iterator(); iterator.hasNext();) {
+            Map.Entry<String, Action> entry = iterator.next();
+            Action action = entry.getValue();
+            if(ToolsKit.isEmpty(action) || ToolsKit.isEmpty(action.getMethod())) {
+                continue;
+            }
+            Mapping mapping = action.getMethod().getAnnotation(Mapping.class);
+            if(ToolsKit.isEmpty(mapping)) {
+                continue;
+            }
+//            mapping.
+
+
+        }
+
+    }
 }

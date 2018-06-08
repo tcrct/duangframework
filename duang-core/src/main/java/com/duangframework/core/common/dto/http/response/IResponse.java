@@ -2,6 +2,7 @@ package com.duangframework.core.common.dto.http.response;
 
 import com.duangframework.core.common.dto.http.request.AsyncContext;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Map;
 
@@ -83,4 +84,15 @@ public interface IResponse {
      */
     void setAsyncContext(AsyncContext asyncContext);
 
+    /**
+     *
+     * @param contentLength
+     */
+    void setContentLength(int contentLength);
+
+    /**
+     *
+     * @return
+     */
+    File getDownloadFile();
 }
