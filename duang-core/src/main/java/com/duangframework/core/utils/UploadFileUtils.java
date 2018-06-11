@@ -38,6 +38,9 @@ public class UploadFileUtils {
 
         String path =  rootDir+"/" +uploadfilesDir+"/" +saveDir;
         path = checkDirString(path);
+        if(path.endsWith("classes")) {
+            path = path.substring(0, path.length() - 7);
+        }
         logger.debug("upload file on server path : "  +  path);
         return path;
     }
