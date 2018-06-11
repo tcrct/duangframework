@@ -27,20 +27,20 @@ public class UploadFileUtils {
 
 
         String rootDir = PathKit.duang().resource("/").path().getPath();
+        rootDir = checkDirString(rootDir);
+        if(rootDir.endsWith("classes")) {
+            rootDir = rootDir.substring(0, rootDir.length() - 7);
+        }
         String uploadfilesDir = ConfigKit.duang().key(UPLOADFILE_DIRECTORY).defaultValue("uploadfiles").asString();
+        uploadfilesDir = checkDirString(uploadfilesDir);
         if(ToolsKit.isEmpty(saveDir)) {
             String productCode = ConfigKit.duang().key(PRODUCT_CODE).defaultValue("duangframework").asString();
             String currentDate = ToolsKit.formatDate(new Date(), "yyyyMMdd");
             saveDir = productCode+"/"+currentDate;
         }
-
         saveDir = checkDirString(saveDir);
-
         String path =  rootDir+"/" +uploadfilesDir+"/" +saveDir;
         path = checkDirString(path);
-        if(path.endsWith("classes")) {
-            path = path.substring(0, path.length() - 7);
-        }
         logger.debug("upload file on server path : "  +  path);
         return path;
     }
@@ -62,8 +62,10 @@ public class UploadFileUtils {
     }
 
     private static String checkDirString(String dir) {
-        dir = dir.startsWith("/") ? dir.substring(1, dir.length()) : dir;
-        dir = dir.endsWith("/") ? dir.substring(0, dir.length()-1) : dir;
+        if(ToolsKit.isNotEmpty(dir)) {
+            dir = dir.startsWith("/") ? dir.substring(1, dir.length()) : dir;
+            dir = dir.endsWith("/") ? dir.substring(0, dir.length() - 1) : dir;
+        }
         return dir.trim();
     }
 }
