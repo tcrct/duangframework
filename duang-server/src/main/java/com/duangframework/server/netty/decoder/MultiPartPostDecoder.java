@@ -1,6 +1,7 @@
 package com.duangframework.server.netty.decoder;
 
 import com.duangframework.core.common.dto.upload.FileItem;
+import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.kit.ToolsKit;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -43,16 +44,32 @@ public class MultiPartPostDecoder extends AbstractDecoder<Map<String,Object>> {
                     setValue2ParamMap(httpData);
                 } else if(dataType == InterfaceHttpData.HttpDataType.FileUpload) {
                     FileUpload fileUpload = (FileUpload) httpData;
+                    long fileLength = 0L;
                     if (null != fileUpload && fileUpload.isCompleted()) {
                         FileItem fileItem = null;
                         byte[] bytes = null;
                         if (fileUpload.isInMemory()) {
                             ByteBuf byteBuf = fileUpload.getByteBuf();
-                            bytes = ByteBufUtil.getBytes(byteBuf);
-                        } else {
-                            bytes = Files.readAllBytes(fileUpload.getFile().toPath());
+                            if(null == byteBuf) {
+                                bytes = ByteBufUtil.getBytes(byteBuf);
+                                fileLength = fileUpload.getFile().length();
+                            }
                         }
-                        fileItem = new FileItem(fileUpload.getName(), fileUpload.getContentTransferEncoding(), fileUpload.getFilename(), fileUpload.getContentType(), fileUpload.getFile().length(), bytes);
+
+                        if(null == bytes) {
+                            try {
+                                bytes = Files.readAllBytes(fileUpload.getFile().toPath());
+                            } catch (Exception e) {
+                                bytes =fileUpload.get();
+                            }
+                            if(null != bytes) {
+                                fileLength = bytes.length;
+                            }
+                        }
+                        if(null == bytes ) {
+                            throw new EmptyNullException("upload file is fail: file byte is null" );
+                        }
+                        fileItem = new FileItem(fileUpload.getName(), fileUpload.getContentTransferEncoding(), fileUpload.getFilename(), fileUpload.getContentType(), fileLength, bytes);
                         attributeMap.put(fileItem.getName(), fileItem);
                     }
                 }

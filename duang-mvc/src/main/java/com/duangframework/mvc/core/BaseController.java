@@ -624,6 +624,10 @@ public abstract class BaseController{
         render = new FileRender(downLoadStream);
     }
 
+    public List<UploadFile> getUploadFiles() {
+        return getUploadFiles("", true);
+    }
+
     public List<UploadFile> getUploadFiles(String saveDirectory) {
         return getUploadFiles(saveDirectory, true);
     }
