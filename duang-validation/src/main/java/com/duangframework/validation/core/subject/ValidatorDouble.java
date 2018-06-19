@@ -32,7 +32,7 @@ public final class ValidatorDouble{
 
 		try {
 			// 取默认值
-			String valueStr = validator.value();
+			String valueStr = validator.fieldValue();
 			if(ToolsKit.isNotEmpty(valueStr) && number == 0) {
 				number =  Double.parseDouble(valueStr);
 			}

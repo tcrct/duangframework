@@ -21,8 +21,8 @@ public final class ValidatorString {
 			throw new ValidatorException(desc + "不能为空!");
 		}
 
-		if (!"".equals(validator.value()) && paramNull) {
-			ObjectKit.setField(obj, field, validator.value());
+		if (!"".equals(validator.fieldValue()) && paramNull) {
+			ObjectKit.setField(obj, field, validator.fieldValue());
 		}
 
 		if (!paramNull && validator.length() > 0) {

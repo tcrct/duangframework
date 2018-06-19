@@ -31,7 +31,7 @@ public final class ValidatorInteger{
 		}
 		
 		try {
-			String valueStr =validator.value();
+			String valueStr =validator.fieldValue();
 			if(ToolsKit.isNotEmpty(valueStr) && number == 0) {
 				number =  Integer.parseInt(valueStr);
 			}

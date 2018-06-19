@@ -31,7 +31,7 @@ public final class ValidatorFloat{
 		}
 		
 		try {
-			String valueStr = validator.value();
+			String valueStr = validator.fieldValue();
 			if(ToolsKit.isNotEmpty(valueStr) && number == 0) {
 				number =  Float.parseFloat(valueStr);
 			}

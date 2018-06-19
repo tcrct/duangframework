@@ -119,6 +119,7 @@ public class MongoUtils {
 //            return (T)Document.parse(json);
             return (T) EncodeConvetor.convetor(obj);
         } catch (Exception e) {
+//            com.mongodb.util.JSONSerializers.LegacyDateSerializer
             throw new MongodbException("toBson is fail: " + e.getMessage(), e);
         }
     }

@@ -306,7 +306,6 @@ public class MongoQuery<T> {
 
 	public Bson getQueryBson() {
 		logger.debug(" query: " + queryObj.toString());
-//		return new Document(queryObj.toMap());
 		return (BasicDBObject)queryObj;
 	}
 
