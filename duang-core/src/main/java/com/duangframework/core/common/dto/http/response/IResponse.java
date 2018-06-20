@@ -95,4 +95,17 @@ public interface IResponse {
      * @return
      */
     File getDownloadFile();
+
+    /**
+     * 是否删除下载文件
+     * @return
+     */
+    boolean isDeleteDownloadFile();
+
+    /**
+     * 是否删除下载文件
+     * @return
+     */
+    void setDeleteDownloadFile(boolean isDelete);
+
 }

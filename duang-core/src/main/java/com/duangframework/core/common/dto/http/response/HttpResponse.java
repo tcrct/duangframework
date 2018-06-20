@@ -20,6 +20,7 @@ public class HttpResponse implements IResponse {
     private Object returnObj;
     private int contentLength;
     private File downloadFile;
+    private boolean isDelete; //下载完成后是否删除文件
 
 
     public HttpResponse(Map<String,String> headers, String charset, String contentType) {
@@ -87,6 +88,7 @@ public class HttpResponse implements IResponse {
         this.contentLength = contentLength;
     }
 
+    @Override
     public File getDownloadFile() {
         return  returnObj instanceof File ? (File)returnObj : null;
     }
@@ -118,4 +120,13 @@ public class HttpResponse implements IResponse {
         this._asyncContext = asyncContext;
     }
 
+    @Override
+    public boolean isDeleteDownloadFile() {
+        return isDelete;
+    }
+
+    @Override
+    public void setDeleteDownloadFile(boolean isDelete) {
+        this.isDelete = isDelete;
+    }
 }

@@ -21,19 +21,31 @@ public class FileRender extends Render {
 	private File file;
 	private UploadFile uploadFile;
 	private DownLoadStream stream;
+	private boolean isDelete;
 
 	public FileRender(UploadFile file) {
+		this(file, true);
+	}
+	public FileRender(UploadFile file, boolean isDelete) {
 		this.uploadFile = file;
 		this.file = file.getFile();
+		this.isDelete = isDelete;
 	}
 
 
 	public FileRender(File file) {
-		this.file = file;
+		this(file, true);
 	}
-
-    public FileRender(DownLoadStream stream) {
+	public FileRender(File file, boolean isDelete) {
+		this.file = file;
+		this.isDelete = isDelete;
+	}
+	public FileRender(DownLoadStream stream) {
+		this(stream, true);
+	}
+    public FileRender(DownLoadStream stream, boolean isDelete) {
         this.stream = stream;
+        this.isDelete = isDelete;
         byte[] bytes = new byte[8192];
         try {
             IOUtils.write(bytes, stream.getOutputStream());
@@ -68,6 +80,7 @@ public class FileRender extends Render {
 //			response.setContentType(ContentTypeEnums.get(downLoadName));
 //			response.setContentLength((int)file.length());
 			response.write(file);
+			response.setDeleteDownloadFile(isDelete);
 		} catch (Exception e) {
 			throw new DuangMvcException(e.getMessage(), e);
 		}

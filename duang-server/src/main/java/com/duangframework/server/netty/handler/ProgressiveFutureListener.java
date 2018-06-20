@@ -5,6 +5,7 @@ import io.netty.channel.ChannelProgressiveFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.RandomAccessFile;
 
 /**
@@ -16,9 +17,13 @@ public class ProgressiveFutureListener implements ChannelProgressiveFutureListen
     private static Logger logger = LoggerFactory.getLogger(ProgressiveFutureListener.class);
 
     private RandomAccessFile raf;
+    private File file;
+    private boolean isDelete;
 
-    public ProgressiveFutureListener(RandomAccessFile raf) {
+    public ProgressiveFutureListener(RandomAccessFile raf, File file, boolean isDelete) {
         this.raf = raf;
+        this.file = file;
+        this.isDelete = isDelete;
     }
 
     @Override
@@ -30,18 +35,28 @@ public class ProgressiveFutureListener implements ChannelProgressiveFutureListen
         }
     }
 
+    /**
+     * 下载完成
+     * @param future
+     */
     @Override
     public void operationComplete(ChannelProgressiveFuture future) {
         try {
-            raf.close();
-            logger.debug("{} Transfer complete.", future.channel());
+            if(future.isSuccess()) {
+                raf.close();
+                if (isDelete && file.exists()) {
+                    file.delete();
+                    logger.warn("delete download file [" + file.getAbsolutePath() + "] is success!");
+                }
+                logger.debug("{} Transfer complete.", future.channel());
+            }
         } catch (Exception e) {
             logger.error("RandomAccessFile close error", e);
         }
     }
 
-    public static ProgressiveFutureListener build(RandomAccessFile raf) {
-        return new ProgressiveFutureListener(raf);
+    public static ProgressiveFutureListener build(RandomAccessFile raf, File file, boolean isDelete) {
+        return new ProgressiveFutureListener(raf, file, isDelete);
     }
 
 }

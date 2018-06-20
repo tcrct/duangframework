@@ -151,7 +151,7 @@ public abstract class AbstractHttpHandler {
                 e.printStackTrace();
             }
         }
-        sendFileFuture.addListener(ProgressiveFutureListener.build(raf));
+        sendFileFuture.addListener(ProgressiveFutureListener.build(raf, file, response.isDeleteDownloadFile()));
         // Decide whether to close the connection or not.
         if (!keepAlive) {
             lastContentFuture.addListener(ChannelFutureListener.CLOSE);
