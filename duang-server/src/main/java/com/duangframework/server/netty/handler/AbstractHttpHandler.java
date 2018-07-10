@@ -45,8 +45,8 @@ public abstract class AbstractHttpHandler {
             downloadFileHandle(ctx, keepAlive, reuqest, response);
         } else {
             // 构建请求返回对象，并设置返回主体内容结果
-            HttpResponseStatus status = response.getStatus() == 200 ? HttpResponseStatus.OK : HttpResponseStatus.INTERNAL_SERVER_ERROR;
-            FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, status, Unpooled.copiedBuffer(response.toString(), HttpConstants.DEFAULT_CHARSET));
+//            HttpResponseStatus status = response.getStatus() == 200 ? HttpResponseStatus.OK : HttpResponseStatus.INTERNAL_SERVER_ERROR;
+            FullHttpResponse fullHttpResponse = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.OK , Unpooled.copiedBuffer(response.toString(), HttpConstants.DEFAULT_CHARSET));
             builderResponseHeader(fullHttpResponse, reuqest, response);
             HttpHeaders.setKeepAlive(fullHttpResponse, keepAlive);
             ChannelFuture channelFutureListener = ctx.channel().writeAndFlush(fullHttpResponse);

@@ -24,7 +24,6 @@ public class IdEntity implements java.io.Serializable {
 	public static final String STATUS_FIELD_DELETE = "已删除";
 
 	@Id
-	@JSONField(name=ID_FIELD)
 	private String id;
 
 	private Date createtime;			//创建时间
@@ -68,13 +67,22 @@ public class IdEntity implements java.io.Serializable {
     }
 
 	public void setId(String id) {
-		this.id = id;
+		if(ToolsKit.isEmpty(id)) {
+			this.id = id;
+		} else {
+			try {
+				if (ToolsKit.isNotEmpty(id) && id.length() == 24) {
+					this.id = id;
+				} else {
+					this.id = Integer.parseInt(id) + "";
+				}
+			} catch (Exception e) {
+				if (id.length() == 24) {
+					this.id = id;
+				}
+			}
+		}
 	}
-
-    public void setId(int id) {
-        this.id = id+"";
-    }
-
 
 	@Override
 	public String toString() {
@@ -127,6 +135,18 @@ public class IdEntity implements java.io.Serializable {
 
 	public void setSource(String source) {
 		this.source = source;
+	}
+
+	/**
+	 * 如果反序列化得到的json只存在key为_id的，也设置到id这个属性值里
+	 * 如果_id，id两个key同时存在，则以key为id的为准, 一个正常的OBJECTID的长度是24位
+	 * @param id
+	 */
+	@JSONField(name=ID_FIELD, serialize = false, ordinal = 100 )
+	public void setFixId(String id) {
+		if(ToolsKit.isNotEmpty(id) && ToolsKit.isEmpty(this.id) &&  id.length()==24 ) {
+			this.id = id;
+		}
 	}
 
 }

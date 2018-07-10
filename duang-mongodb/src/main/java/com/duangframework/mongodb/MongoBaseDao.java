@@ -5,6 +5,7 @@
  * @see  https://github.com/tcrct/duangframework.git
  */
 package com.duangframework.mongodb;
+
 import com.duangframework.core.common.IdEntity;
 import com.duangframework.core.common.dto.result.PageDto;
 import com.duangframework.core.exceptions.EmptyNullException;
@@ -14,12 +15,15 @@ import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
 import com.duangframework.mongodb.common.MongoQuery;
 import com.duangframework.mongodb.common.MongoUpdate;
-import com.duangframework.mongodb.enums.DataTypeEnum;
+import com.duangframework.mongodb.enums.MongodbDataTypeEnum;
 import com.duangframework.mongodb.kit.MongoClientKit;
 import com.duangframework.mongodb.utils.MongoIndexUtils;
 import com.duangframework.mongodb.utils.MongoUtils;
 import com.mongodb.*;
-import com.mongodb.client.*;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
@@ -31,6 +35,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 /**
  对MongoClient进行封装，以供使用者可以简单使用
@@ -148,12 +154,11 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		if(ToolsKit.isEmpty(mongoQuery)) {
 			throw new MongodbException("Mongodb findOne is Fail: mongoQuery is null");
 		}
-		Bson queryDoc = mongoQuery.getQueryBson();
-		Document document = collection.find(queryDoc).first();
-		if(ToolsKit.isEmpty(document)) {
+		List<T> list = findAll(mongoQuery);
+		if(ToolsKit.isEmpty(list)) {
 			return null;
 		}
-		return MongoUtils.toEntity(document, cls);
+		return list.get(0);
 	}
 
 	/**
@@ -190,30 +195,9 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		if(null == mongoQuery) {
 			throw new EmptyNullException("Mongodb findList is Fail: mongoQuery is null");
 		}
-        Bson queryDoc = mongoQuery.getQueryBson();
-        PageDto<T> page = mongoQuery.getPage();
-        int pageNo = page.getPageNo();
-        int pageSize = page.getPageSize();
+		Bson queryDoc = mongoQuery.getQueryBson();
         FindIterable<Document> documents = collection.find(queryDoc);
-        BasicDBObject fieldDbo = (BasicDBObject)mongoQuery.getDBFields();
-        if(ToolsKit.isNotEmpty(fieldDbo) && !fieldDbo.isEmpty()) {
-            documents.projection(fieldDbo);
-        }
-        BasicDBObject orderDbo = (BasicDBObject)mongoQuery.getDBOrder();
-        if(ToolsKit.isNotEmpty(orderDbo) && !orderDbo.isEmpty()) {
-            documents.sort(orderDbo);
-        }
-        if(pageNo>0 && pageSize>1){
-            documents.skip( (pageNo-1) * pageSize );
-            documents.limit(pageSize);
-        }
-        BasicDBObject hintDbo = (BasicDBObject)mongoQuery.getHintDBObject();
-        if(ToolsKit.isNotEmpty(hintDbo) && !hintDbo.isEmpty()) {
-            documents.hint(hintDbo);
-        }
-		if(ToolsKit.isEmpty(documents)) {
-			return null;
-		}
+		documents = builderQueryDoc(documents, mongoQuery);
         final List<T> resultList = new ArrayList();
    		documents.forEach(new Block<Document>() {
 			@Override
@@ -222,6 +206,32 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 			}
 		});
 		return resultList;
+	}
+
+	private FindIterable<Document> builderQueryDoc(FindIterable<Document> documents, MongoQuery mongoQuery) {
+		PageDto<T> page = mongoQuery.getPage();
+		int pageNo = page.getPageNo();
+		int pageSize = page.getPageSize();
+		BasicDBObject fieldDbo = (BasicDBObject)mongoQuery.getDBFields();
+		if(ToolsKit.isNotEmpty(fieldDbo) && !fieldDbo.isEmpty()) {
+			documents.projection(fieldDbo);
+		}
+		BasicDBObject orderDbo = (BasicDBObject)mongoQuery.getDBOrder();
+		if(ToolsKit.isNotEmpty(orderDbo) && !orderDbo.isEmpty()) {
+			documents.sort(orderDbo);
+		}
+		if(pageNo>0 && pageSize>1){
+			documents.skip( (pageNo-1) * pageSize );
+			documents.limit(pageSize);
+		}
+		BasicDBObject hintDbo = (BasicDBObject)mongoQuery.getHintDBObject();
+		if(ToolsKit.isNotEmpty(hintDbo) && !hintDbo.isEmpty()) {
+			documents.hint(hintDbo);
+		}
+		if(ToolsKit.isEmpty(documents)) {
+			throw new NullPointerException("ducuments is null");
+		}
+		return documents;
 	}
 
 	/**
@@ -283,8 +293,8 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 			throw new MongodbException("index document is fail: id is null");
 		}
 		Document document = MongoUtils.toBson(idEntity);
-		if(ToolsKit.isNotEmpty(document)) {
-			document = MongoUtils.convert2ObjectId(document);
+		if(ToolsKit.isEmpty(document)) {
+			throw new MongodbException("index document is fail: document is null");
 		}
 		try {
 			collection.insertOne(document);
@@ -338,7 +348,7 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 		//查询记录不存在时，不新增记录
 		UpdateOptions options = new UpdateOptions();
 		options.upsert(false);
-		UpdateResult updateResult = collection.updateOne(queryBson, updateBson, options);
+		UpdateResult updateResult = collection.updateMany(queryBson, updateBson, options);
 		return updateResult.isModifiedCountAvailable() ? updateResult.getModifiedCount() : 0L;
 	}
 
@@ -554,22 +564,35 @@ public abstract class MongoBaseDao<T> implements IDao<T> {
 	 * @return  类型字符串
 	 */
 	public String type(final String fieldName) {
-		final DataTypeEnum[] typeEnums = DataTypeEnum.values();
+		final MongodbDataTypeEnum[] typeEnums = MongodbDataTypeEnum.values();
 		StringBuilder typeStr = new StringBuilder();
-		for(final DataTypeEnum typeEnum : typeEnums){
-			typeStr.append(ThreadPoolKit.execute(new Callable<String>() {
-						@Override
-						public String call() throws Exception{
-							DBObject dbo = new BasicDBObject();
-							DBObject typeQuery = new BasicDBObject();
-							typeQuery.put("$type", typeEnum.getNumber());
-							dbo.put(fieldName, typeQuery);
-							long count = coll.count(dbo,coll.getReadPreference());
-							return (count > 0) ? typeEnum.getAlias() : "";
-						}
-					})
-			).append(",");
+		List<FutureTask> futureTaskList = new ArrayList<>();
+		for(final MongodbDataTypeEnum typeEnum : typeEnums){
+			FutureTask<String> futureTask = ThreadPoolKit.execute(new Callable<String>() {
+				  @Override
+				  public String call() throws Exception{
+					  DBObject dbo = new BasicDBObject();
+					  DBObject typeQuery = new BasicDBObject();
+					  typeQuery.put("$type", typeEnum.getNumber());
+					  dbo.put(fieldName, typeQuery);
+					  long count = coll.count(dbo,coll.getReadPreference());
+					  return (count > 0) ? typeEnum.getAlias() : "";
+				  }
+			  });
+			futureTaskList.add(futureTask);
 		}
+
+		try {
+			for (FutureTask futureTask : futureTaskList) {
+				String typeName = (String)futureTask.get(3000, TimeUnit.MILLISECONDS);
+				if(ToolsKit.isNotEmpty(typeName)) {
+					typeStr.append(typeName).append(",");
+				}
+			}
+		} catch (Exception e) {
+			logger.warn(e.getMessage(), e);
+		}
+
 		if(typeStr.length()>0) {
 			typeStr.deleteCharAt(typeStr.length()-1);
 		}

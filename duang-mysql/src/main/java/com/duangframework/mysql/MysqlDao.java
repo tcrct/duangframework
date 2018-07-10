@@ -62,7 +62,7 @@ public class MysqlDao <T> implements IDao<T> {
                 .params(curdSqlModle.getParamValueArray());
         if(isInsert) {
             int idNum =  mysqlKit.sql(curdSqlModle.builderInsertSql()).add();
-            idEntity.setId(idNum);
+            idEntity.setId(idNum+"");
             return idNum > 0 ? true : false;
         } else {
             return mysqlKit.sql(curdSqlModle.builderUpdateSql()).update();

@@ -6,6 +6,7 @@ import com.duangframework.core.exceptions.EmptyNullException;
 import com.duangframework.core.exceptions.MongodbException;
 import com.duangframework.core.kit.ToolsKit;
 import com.duangframework.core.utils.ClassUtils;
+import com.duangframework.core.utils.DataType;
 import com.duangframework.mongodb.MongoDao;
 import com.duangframework.mongodb.common.MongoClientExt;
 import com.duangframework.mongodb.common.MongoDbConnect;
@@ -117,7 +118,7 @@ public class MongoUtils {
 //            Document document = Document.parse(json);
 //            return (T)document;
 //            return (T)Document.parse(json);
-            return (T) EncodeConvetor.convetor(obj);
+            return DataType.isBaseType(obj.getClass()) ? (T)obj : (T) EncodeConvetor.convetor(obj);
         } catch (Exception e) {
 //            com.mongodb.util.JSONSerializers.LegacyDateSerializer
             throw new MongodbException("toBson is fail: " + e.getMessage(), e);
@@ -181,9 +182,9 @@ public class MongoUtils {
         if(ToolsKit.isEmpty(document)) {
             throw  new MongodbException("convert2ObjectId is fail: document is null");
         }
-        String id = document.getString(IdEntity.ENTITY_ID_FIELD);
+        String id = document.getObjectId(IdEntity.ENTITY_ID_FIELD).toString();
         if (ToolsKit.isEmpty(id)) {
-            id = document.getString(IdEntity.ID_FIELD);
+            id = document.getObjectId(IdEntity.ID_FIELD).toString();
         }
         if (ToolsKit.isNotEmpty(id)) {
             document.put(IdEntity.ID_FIELD, MongoUtils.toObjectId(id));

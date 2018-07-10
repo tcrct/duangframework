@@ -74,14 +74,14 @@ public abstract class AbstractAsyncContext implements AsyncContext {
         asyncRequest.setAttribute(Const.DUANG_REQUEST_ID, requestId);
     }
 
-    protected IResponse buildExceptionResponse(String message) {
+    protected IResponse buildExceptionResponse(String message, int code) {
         HttpResponse httpResponse = new HttpResponse(asyncResponse.getHeaders(), asyncResponse.getCharacterEncoding(), asyncRequest.getContentType());
         ReturnDto<String> returnDto = new ReturnDto<>();
         returnDto.setData(null);
         HeadDto headDto = new HeadDto();
         int index = message.indexOf(":");
         headDto.setMsg((index>-1) ? message.substring(index+1, message.length()) : message);
-        headDto.setRet(1);
+        headDto.setRet(code);
         headDto.setUri(asyncRequest.getRequestURI());
         headDto.setTimestamp(System.currentTimeMillis());
         headDto.setRequestId(requestId);
@@ -89,7 +89,7 @@ public abstract class AbstractAsyncContext implements AsyncContext {
         headDto.setMethod(asyncRequest.getMethod());
         returnDto.setHead(headDto);
         httpResponse.write(returnDto);
-        httpResponse.setHeader("status", (headDto.getRet() == 0) ? "200" : "500");
+        httpResponse.setHeader("status", "200");
         return httpResponse;
     }
 

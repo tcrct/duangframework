@@ -49,6 +49,7 @@ public abstract class BaseController{
     public void init(IRequest request, IResponse response) {
         this.request = request;
         this.response = response;
+        this.render = null;
         if(ConfigKit.duang().key("debug").defaultValue(false).asBoolean()) {
             printRequest();
         }
@@ -620,8 +621,20 @@ public abstract class BaseController{
         render = new FileRender(file);
     }
 
+    public void download(File file, boolean isDelete) throws Exception {
+        render = new FileRender(file, isDelete);
+    }
+
+    public void download(UploadFile file, boolean isDelete) throws Exception {
+        render = new FileRender(file, isDelete);
+    }
+
     public void download(DownLoadStream downLoadStream) throws Exception {
         render = new FileRender(downLoadStream);
+    }
+
+    public void download(DownLoadStream downLoadStream, boolean isDelete) throws Exception {
+        render = new FileRender(downLoadStream, isDelete);
     }
 
     public List<UploadFile> getUploadFiles() {

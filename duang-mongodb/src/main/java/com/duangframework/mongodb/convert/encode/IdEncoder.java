@@ -3,6 +3,7 @@ package com.duangframework.mongodb.convert.encode;
 
 import com.duangframework.core.annotation.db.Id;
 import com.duangframework.core.exceptions.ServiceException;
+import com.duangframework.mongodb.Operator;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ public class IdEncoder extends Encoder {
 
 	@Override
 	public String getFieldName() {
-		return field.getName();
+		return Operator.ID;
 	}
 
 

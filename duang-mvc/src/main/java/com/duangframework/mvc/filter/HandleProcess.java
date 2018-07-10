@@ -3,6 +3,7 @@ package com.duangframework.mvc.filter;
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.exceptions.DuangMvcException;
+import com.duangframework.core.exceptions.ServiceException;
 import com.duangframework.mvc.handles.Handles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ public class HandleProcess implements Callable<IResponse> {
         try {
             Handles.execute(target, request, response);
             return response;
+        } catch (ServiceException se) {
+            throw se;
         } catch (DuangMvcException dme) {
             throw dme;
         } catch (InvocationTargetException ite) {

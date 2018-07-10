@@ -4,6 +4,7 @@ import com.duangframework.core.common.Const;
 import com.duangframework.core.common.dto.http.request.IRequest;
 import com.duangframework.core.common.dto.http.response.IResponse;
 import com.duangframework.core.exceptions.DuangMvcException;
+import com.duangframework.core.exceptions.ServiceException;
 import com.duangframework.core.kit.ThreadPoolKit;
 import com.duangframework.core.kit.ToolsKit;
 import org.slf4j.Logger;
@@ -55,21 +56,25 @@ public class AsyncContextThreadImpl extends AbstractAsyncContext {
             }
         } catch (TimeoutException e) {
             // 超时时，会执行该异常
-            response = buildExceptionResponse("request time out");
+            response = buildExceptionResponse("request time out", 1);
             // 中止线程，参数为true时，会中止正在运行的线程，为false时，如果线程未开始，则停止运行
             futureTask.cancel(true);
         }
         catch (DuangMvcException e) {
             logger.warn(e.getMessage(),e);
-            response = buildExceptionResponse(e.getMessage());
+            response = buildExceptionResponse(e.getMessage(), 1);
+        }
+        catch (ServiceException e) {
+            logger.warn(e.getMessage(),e);
+            response = buildExceptionResponse(e.getMessage(), e.getCode());
         }
         catch (RuntimeException  e) {
             logger.warn(e.getMessage(),e);
-            response = buildExceptionResponse(e.getMessage());
+            response = buildExceptionResponse(e.getMessage(), 1);
         }
         catch (Throwable  e) {
             logger.warn(e.getMessage(),e);
-            response = buildExceptionResponse(e.getMessage());
+            response = buildExceptionResponse(e.getMessage(), 1);
         }
         return response;
     }

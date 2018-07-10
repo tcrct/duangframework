@@ -5,7 +5,7 @@ package com.duangframework.mongodb.enums;
  *
  * @author laotang
  */
-public enum DataTypeEnum {
+public enum MongodbDataTypeEnum {
 	DOUBLE(1,"Double"),	 
 	STRING(2, "String"), 
 	OBJECT(3,"Object"),	 
@@ -33,7 +33,7 @@ public enum DataTypeEnum {
 	/**
 	 * Constructor.
 	 */
-	private DataTypeEnum( int number, String alias) {
+	private MongodbDataTypeEnum(int number, String alias) {
 		this.number = number;
 		this.alias = alias;
 	}

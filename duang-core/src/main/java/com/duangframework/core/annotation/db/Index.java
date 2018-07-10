@@ -12,5 +12,4 @@ public @interface Index {
     public String type() default "text";
     public String order() default "asc";
     public boolean unique() default false;
-
 }

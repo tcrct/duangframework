@@ -67,7 +67,7 @@ public class AsyncContextQueueImpl extends AbstractAsyncContext {
             response = RESPONSE_MAP.get(getRequestId()).poll(getTimeout(), TimeUnit.MILLISECONDS);
             // 超时则创建一个异常response
             if(null == response) {
-                response = buildExceptionResponse("request time out");
+                response = buildExceptionResponse("request time out",1);
             }
         } catch (Exception e) {
             logger.warn(e.getMessage(), e);
